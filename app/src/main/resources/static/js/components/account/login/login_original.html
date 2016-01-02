@@ -1,0 +1,33 @@
+<login>
+  <container>
+    <section class="row" if="{ login.status != 200 }">
+      <div class="col-md-offset-4 col-md-3">
+        <div class="alert alert-danger" role="alert">Invalid credentials. Please try again.</div>
+      </div>
+    </section>
+    <section class="row">
+      <div class="col-xs-offset-0 col-sm-offset-0 col-md-offset-4 col-md-3">
+        <form id="login" name="login" novalidate="novalidate" role="form" onsubmit="{ login.submit }">
+          <div class="form-group">
+            <label class="control-label" for="email">Email</label>
+            <input class="form-control" type="email" id="email" name="email" required/>
+            <div class="help-block with-errors"></div>
+          </div>
+          <div class="form-group">
+            <label class="control-label" for="password">Password</label>
+            <input class="form-control" type="password" id="password" name="password"
+                   required/>
+            <div class="help-block with-errors"></div>
+          </div>
+          <div class="checkbox">
+            <label><input type="checkbox" name="rememberMe" /> Remember me</label>
+          </div>
+          <button type="submit" class="btn btn-primary">Sign In</button>
+        </form>
+      </div>
+    </section>
+  </container>
+  <script>
+    this.login = this.tags.container.login = opts;
+  </script>
+</login>

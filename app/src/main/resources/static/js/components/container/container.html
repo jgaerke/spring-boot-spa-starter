@@ -1,0 +1,68 @@
+<container>
+
+  <!-- Following Menu -->
+  <div class="ui large top fixed inverted menu">
+    <div class="ui container">
+
+      <a class="active item" href="/app">Home</a>
+
+      <div class="right menu">
+        <div class="item" if="{ container.account.authenticated }">
+          <div class="ui inline dropdown">
+            <div class="text">
+              Jeremy
+            </div>
+            <i class="dropdown icon"></i>
+            <div class="menu">
+              <a class="item" href="interviews">Interviews</a>
+              <a class="item" href="profile">Profile</a>
+              <div class="divider"></div>
+              <a class="item" onclick="{ container.logout }" href="javascript:void(0);">Log Out</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <yield/>
+
+  <!--<div class="ui inverted vertical footer segment">-->
+  <!--<div class="ui container">-->
+  <!--<div class="ui stackable inverted divided equal height stackable grid">-->
+  <!--<div class="three wide column">-->
+  <!--<h4 class="ui inverted header">About</h4>-->
+
+  <!--<div class="ui inverted link list">-->
+  <!--<a href="#" class="item">Sitemap</a>-->
+  <!--<a href="#" class="item">Contact Us</a>-->
+  <!--<a href="#" class="item">Religious Ceremonies</a>-->
+  <!--<a href="#" class="item">Gazebo Plans</a>-->
+  <!--</div>-->
+  <!--</div>-->
+  <!--<div class="three wide column">-->
+  <!--<h4 class="ui inverted header">Services</h4>-->
+
+  <!--<div class="ui inverted link list">-->
+  <!--<a href="#" class="item">Banana Pre-Order</a>-->
+  <!--<a href="#" class="item">DNA FAQ</a>-->
+  <!--<a href="#" class="item">How To Access</a>-->
+  <!--<a href="#" class="item">Favorite X-Men</a>-->
+  <!--</div>-->
+  <!--</div>-->
+  <!--<div class="seven wide column">-->
+  <!--<h4 class="ui inverted header">Footer Header</h4>-->
+
+  <!--<p>Extra space for a call to action inside the footer that could help re-engage users.</p>-->
+  <!--</div>-->
+  <!--</div>-->
+  <!--</div>-->
+  <!--</div>-->
+
+  <script>
+    var container = this.container = app.resolve('Container');
+    this.on('mount', function () {
+      container.onMount(this);
+    });
+  </script>
+</container>

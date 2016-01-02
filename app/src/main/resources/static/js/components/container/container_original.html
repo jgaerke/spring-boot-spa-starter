@@ -1,0 +1,29 @@
+<container>
+  <nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand">Starter App</a>
+      </div>
+      <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li if="{ !container.account.authenticated }"><a href="./login">Login</a></li>
+          <li if="{ container.account.authenticated }"><a onclick="{ container.logout }" href="javascript:void(0);">Logout</a></li>
+          <li if="{ !container.account.authenticated }"><a href="./register">Create Account</a></li>
+        </ul>
+      </div>
+      <!--/.nav-collapse -->
+    </div>
+  </nav>
+  <div class="container">
+    <yield/>
+  </div>
+  <script>
+    this.container = app.resolve('Container');
+  </script>
+</container>

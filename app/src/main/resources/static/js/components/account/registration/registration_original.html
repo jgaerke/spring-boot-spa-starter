@@ -1,0 +1,53 @@
+<registration>
+  <container>
+    <section class="row" if="{ registration.status.toString().indexOf('4') === 0 }">
+      <div class="col-md-offset-4 col-md-3">
+        <div class="alert alert-danger" role="alert"  if="{ registration.status == 409 }">Email taken</div>
+        <div class="alert alert-danger" role="alert"  if="{ registration.status == 400 }">Invalid account info</div>
+      </div>
+    </section>
+    <section class="row">
+      <div class="col-xs-offset-0 col-sm-offset-0 col-md-offset-4 col-md-3">
+        <form id="registration" name="registration" novalidate="novalidate" role="form"
+              onsubmit="{ registration.submit }">
+          <div class="form-group">
+            <label class="control-label" for="email">Email</label>
+            <input class="form-control" type="email" id="email" name="email" required/>
+            <div class="help-block with-errors"></div>
+          </div>
+          <div class="form-group">
+            <label class="control-label" for="first">First</label>
+            <input class="form-control" type="text" id="first" name="first" required available="true"/>
+            <div class="help-block with-errors"></div>
+          </div>
+          <div class="form-group">
+            <label class="control-label" for="last">Last</label>
+            <input class="form-control" type="text" id="last" name="last" required
+                   available="true"/>
+            <div class="help-block with-errors"></div>
+          </div>
+          <div class="form-group">
+            <label class="control-label" for="password">Password</label>
+            <input class="form-control" type="password" id="password" name="password"
+                   required/>
+            <div class="help-block with-errors"></div>
+          </div>
+          <div class="form-group">
+            <label class="control-label" for="passwordConfirm">Confirm your password</label>
+            <input class="form-control" type="password" id="passwordConfirm" name="passwordConfirm"
+                   data-match="#password" data-match-error="Whoops, your passwords don't match"/>
+            <div class="help-block with-errors"></div>
+          </div>
+          <div class="checkbox">
+            <label><input type="checkbox" name="rememberMe" checked/> Remember
+              me</label>
+          </div>
+          <button type="submit" class="btn btn-primary">Create Account</button>
+        </form>
+      </div>
+    </section>
+  </container>
+  <script>
+    this.registration = this.tags.container.registration = opts;
+  </script>
+</registration>
