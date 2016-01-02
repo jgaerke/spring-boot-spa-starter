@@ -37,7 +37,7 @@ public class AccountController {
     this.userDetailsService = userDetailsService;
   }
 
-  @RequestMapping(value = "/password/change", method = POST)
+  @RequestMapping(method = POST)
   @ResponseStatus(OK)
   public void create(@Valid @RequestBody RegistrationRequest registrationRequest) {
     setAuthToken(accountService.create(registrationRequest));

@@ -53,7 +53,7 @@ describe('RecoverPassword', function () {
     done();
   });
 
-  it('should route to /app on success', function (done) {
+  it('should route to PasswordResetInstructionsSent on success', function (done) {
     //given
     recoverPassword.router = {
       go: sinon.spy()
@@ -63,7 +63,7 @@ describe('RecoverPassword', function () {
     recoverPassword.onSuccess();
 
     //then
-    expect(recoverPassword.router.go).to.have.been.calledWith('/app');
+    expect(recoverPassword.router.go).to.have.been.calledWith('PasswordResetInstructionsSent');
 
     done();
   });

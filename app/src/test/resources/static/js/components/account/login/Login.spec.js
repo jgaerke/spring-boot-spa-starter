@@ -56,7 +56,7 @@ describe('Login', function () {
     done();
   });
 
-  it('should route to /app on success', function (done) {
+  it('should route to Home on success', function (done) {
     //given
     login.router = {
       go: sinon.spy()
@@ -66,7 +66,7 @@ describe('Login', function () {
     login.onSuccess();
 
     //then
-    expect(login.router.go).to.have.been.calledWith('/app');
+    expect(login.router.go).to.have.been.calledWith('Home');
 
     done();
   });

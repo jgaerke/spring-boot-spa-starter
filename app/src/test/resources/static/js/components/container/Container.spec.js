@@ -58,7 +58,7 @@ describe('Container', function () {
     container.onLogoutSuccess();
 
     //then
-    expect(container.router.go).to.have.been.calledWith('/app');
+    expect(container.router.go).to.have.been.calledWith('Login');
 
     done();
   });
@@ -72,7 +72,7 @@ describe('Container', function () {
     container.onLogoutFailure(jqXHR);
 
     //then
-    expect(container.router.go).to.have.been.calledWith('/app/logout-error');
+    expect(container.router.go).to.have.been.calledWith('LogoutError');
 
     done();
   });

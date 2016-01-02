@@ -258,7 +258,7 @@ describe('ComponentLoader', function () {
     });
 
     //when
-    onMountLoadedCb = componentLoader.onMountComplete('#viewport', 'component', ctx, cb);
+    onMountLoadedCb = componentLoader.onMountComplete('#viewport', 'component', 'component', ctx, cb);
     onMountLoadedCb();
 
     //then

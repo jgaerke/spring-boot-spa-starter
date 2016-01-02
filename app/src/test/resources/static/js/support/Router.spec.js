@@ -36,7 +36,7 @@ describe('Router', function () {
     //then
     expect(router.app.resolve).to.have.been.calledWith('foo');
     expect(ctrl.ctx).to.eq(ctx);
-    expect(router.componentLoader.mount).to.have.been.calledWith('#foo', 'foo', ctrl);
+    expect(router.componentLoader.mount).to.have.been.calledWith('#foo', 'foo', 'foo', ctrl);
 
     done();
   });
@@ -45,7 +45,7 @@ describe('Router', function () {
     //given
     var route;
     route = {
-      name: 'foo',
+      component: 'foo',
       path: '/foo'
     };
 
@@ -65,15 +65,21 @@ describe('Router', function () {
 
   it('should register routes', function (done) {
     //given
+    var expectedSpy = sinon.spy();
     var routes = {
-      forEach: sinon.spy()
+      forEach: sinon.spy(),
+      sort: sinon.spy(function() {
+        return {
+          forEach: expectedSpy
+        };
+      })
     };
 
     //when
     router.register(routes);
 
     //then
-    expect(routes.forEach).to.have.been.calledWith(router.onRegisterRoute);
+    expect(expectedSpy).to.have.been.calledWith(router.onRegisterRoute);
 
     done();
   });

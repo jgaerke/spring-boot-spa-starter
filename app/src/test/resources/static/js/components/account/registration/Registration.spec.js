@@ -60,7 +60,7 @@ describe('Registration', function () {
     done();
   });
 
-  it('should route to /app on success', function (done) {
+  it('should route to Home on success', function (done) {
     //given
     registration.router = {
       go: sinon.spy()
@@ -70,7 +70,7 @@ describe('Registration', function () {
     registration.onSuccess();
 
     //then
-    expect(registration.router.go).to.have.been.calledWith('/app');
+    expect(registration.router.go).to.have.been.calledWith('Home');
 
     done();
   });
