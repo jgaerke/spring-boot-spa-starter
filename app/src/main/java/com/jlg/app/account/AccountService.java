@@ -106,8 +106,8 @@ public class AccountService {
     accountRepository.save(account.get().withPasswordResetToken(passwordResetToken));
 
     Call<Void> messageCall = messageService.send(
-        "mg.warminterview.com",
-        "no-reply@mg.warminterview.com",
+        domain,
+        "no-reply@" + domain,
         email,
         "Password Reset",
         format(

@@ -6,14 +6,6 @@
       this.errorHandler = errorHandler;
       this.router = router;
       this.account = account;
-      this.data = {};
-      this.status = 200;
-
-      this.onMount = this.onMount.bind(this);
-      this.onError = this.onError.bind(this);
-      this.onSuccess = this.onSuccess.bind(this);
-      this.submit = this.submit.bind(this);
-
     },
 
     onMount: function (tag) {
@@ -31,34 +23,19 @@
       return {
         email: form.email.value,
         password: form.password.value,
-        //rememberMe: form.rememberMe.checked
         rememberMe: true
       }
     },
 
     onSuccess: function (data, status) {
-      this.router.go('/app');
+      this.router.go('Home');
       this.tag.update();
     },
 
     onError: function (jqXHR, textStatus, errorThrown) {
-      if (jqXHR.status.toString().indexOf('5') === 0) {
-        this.errorHandler.handle({
-          source: 'Login',
-          event: 'Login',
-          message: 'Login failed',
-          severity: 'CRITICAL',
-          context: {
-            jqXHR: jqXHR,
-            textStatus: textStatus,
-            errorThrown: errorThrown
-          }
-        });
-      }
-      if(jqXHR.status == 401) {
-        this.form.form('add errors', ['Email address or password invalid.']);
-      }
-      this.status = jqXHR.status;
+      this.errorHandler.handle(jqXHR.status, {
+        401: { form: this.form, text: 'Email address or password invalid.' }
+      });
       this.tag.update();
     },
 
@@ -81,7 +58,6 @@
   );
 
   app.routes.push({
-    name: 'LOGIN',
     path: '/login',
     component: 'Login',
     tag: 'login'

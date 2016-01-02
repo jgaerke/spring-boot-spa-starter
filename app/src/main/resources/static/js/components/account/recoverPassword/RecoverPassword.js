@@ -6,13 +6,6 @@
       this.errorHandler = errorHandler;
       this.router = router;
       this.account = account;
-      this.status = 200;
-
-      this.onMount = this.onMount.bind(this);
-      this.onError = this.onError.bind(this);
-      this.onSuccess = this.onSuccess.bind(this);
-      this.submit = this.submit.bind(this);
-
     },
 
     onMount: function (tag) {
@@ -32,31 +25,15 @@
     },
 
     onSuccess: function () {
-      this.router.go('/app');
+      this.router.go('PasswordResetInstructionsSent');
       this.tag.update();
     },
 
     onError: function (jqXHR, textStatus, errorThrown) {
-      if (jqXHR.status.toString().indexOf('5') === 0) {
-        this.errorHandler.handle({
-          source: 'RecoverPassword',
-          event: 'RecoverPassword',
-          message: 'RecoverPassword failed',
-          severity: 'CRITICAL',
-          context: {
-            jqXHR: jqXHR,
-            textStatus: textStatus,
-            errorThrown: errorThrown
-          }
-        });
-      }
-      if(jqXHR.status == 400) {
-        this.form.form('add errors', ['Invalid request.']);
-      }
-      if(jqXHR.status == 404) {
-        this.form.form('add errors', ['Email address not found.']);
-      }
-      this.status = jqXHR.status;
+      this.errorHandler.handle(jqXHR.status, {
+        400: { form: this.form, text: 'Invalid request' },
+        404: { form: this.form, text: 'Email address not found' }
+      });
       this.tag.update();
     },
 
@@ -79,7 +56,6 @@
   );
 
   app.routes.push({
-    name: 'RECOVERPASSWORD',
     path: '/recover-password',
     component: 'RecoverPassword',
     tag: 'recover-password'

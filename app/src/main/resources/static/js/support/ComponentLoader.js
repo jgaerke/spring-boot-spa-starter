@@ -8,16 +8,6 @@
       this.http = http;
       this.compiled = {};
       this.mounted = [];
-
-      this.parseComponentReferences = this.parseComponentReferences.bind(this);
-      this.onFetchSuccess = this.onFetchSuccess.bind(this);
-      this.fetch = this.fetch.bind(this);
-      this.compile = this.compile.bind(this);
-      this.onLoadComplete = this.onLoadComplete.bind(this);
-      this.load = this.load.bind(this);
-      this.unmountPrevious = this.unmountPrevious.bind(this);
-      this.onMountComplete = this.onMountComplete.bind(this);
-      this.mount = this.mount.bind(this);
     },
 
     parseComponentReferences: function (parentComponent, content) {
@@ -58,7 +48,6 @@
       if (!components.length) {
         return cb([]);
       }
-
       return self.http.get('/components/content?names=' + components.join()).done(this.onFetchSuccess(cb));
     },
 
@@ -92,21 +81,21 @@
       });
     },
 
-    onMountComplete: function (viewport, component, ctx, cb) {
+    onMountComplete: function (viewport, component, tag, ctx, cb) {
       var self = this;
       return function () {
         self.unmountPrevious();
-        self.$(viewport).html('<' + component + '></' + component + '>');
-        self.mounted = self.riot.mount(component, ctx);
+        self.$(viewport).html('<' + tag + '></' + tag + '>');
+        self.mounted = self.riot.mount(tag, ctx);
         if (cb) {
           cb();
         }
       }
     },
 
-    mount: function (viewport, component, ctx, cb) {
+    mount: function (viewport, component, tag, ctx, cb) {
       component = component.toLowerCase();
-      this.load(component, this.onMountComplete(viewport, component, ctx ,cb));
+      this.load(component, this.onMountComplete(viewport, component, tag, ctx ,cb));
     }
   });
 

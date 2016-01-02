@@ -4,7 +4,7 @@ describe('Registration', function () {
   beforeEach(function (done) {
     var Registration = app.getType('Registration');
     $ = {};
-    errorHandler = {};
+    errorHandler = { handle: sinon.spy() };
     router = {};
     account = {};
 
@@ -16,11 +16,9 @@ describe('Registration', function () {
 
     form = {
       email: {value: 'some-email@gmail.com'},
-      first: {value: 'jeremy'},
-      last: {value: 'gaerke'},
       password: {value: 'password'},
-      passwordConfirm: {value: 'password'},
-      rememberMe: {checked: true}
+      passwordConfirm: {value: 'password'}
+      //rememberMe: {checked: true}
     };
     formResult = {
       email: 'some-email@gmail.com',
@@ -31,7 +29,7 @@ describe('Registration', function () {
     done();
   });
 
-  it('should wire up a validation upon mount', function(done) {
+  it('should wire up form validation upon mount', function(done) {
     //given
     var formSpy = sinon.spy();
     registration.$ = sinon.spy(function() {
@@ -77,7 +75,7 @@ describe('Registration', function () {
     done();
   });
 
-  it('should set status  and call tag update on 400 series error', function (done) {
+  it('should handle error', function (done) {
     //given
     var jqXHR = {status: 400};
 
@@ -85,70 +83,40 @@ describe('Registration', function () {
     registration.onError(jqXHR);
 
     //then
-    expect(registration.status).to.eq(400);
-    expect(registration.tag.update).to.have.been.called;
-
-    done();
-  });
-
-  it('should add form error and update tag on 409 series error', function (done) {
-    //given
-    var jqXHR = {status: 409};
-    registration.form = {
-      form: sinon.spy()
-    };
-
-    //when
-    registration.onError(jqXHR);
-
-    //then
-    expect(registration.status).to.eq(409);
-    expect(registration.form.form).to.have.been.calledWith('add errors', ['Email address taken.']);
-    expect(registration.tag.update).to.have.been.called;
-
-    done();
-  });
-
-
-  it('should delegate to error handler and exit on 500 series error', function (done) {
-    //given
-    var jqXHR = {status: 500};
-    registration.errorHandler.handle = sinon.spy();
-
-    //when
-    registration.onError(jqXHR);
-
-    //then
     expect(registration.errorHandler.handle).to.have.been.called;
+    expect(registration.tag.update).to.have.been.called;
+
+    done();
+  });
+
+  it('should short circuit submit to server if input is in invalid state', function(done) {
+    //given
+    var e;
+    e = { target: form, result: false };
+    registration.account.create = sinon.spy();
+
+    //when
+    registration.submit(e);
+
+    //then
+    expect(registration.account.create).to.not.have.been.called;
 
     done();
   });
 
   it('should submit account info to server for registration and wire handlers accordingly', function (done) {
     //given
-    var e, account, onDone, onFail;
-    e = { target: form };
-    onFail = sinon.spy();
-    onDone = sinon.spy(function() {
-      return {
-        fail: onFail
-      }
-    });
-    account = {
-      create: sinon.spy(function () {
-        return {
-          done: onDone
-        }
-      })
-    };
-    registration.account = account;
+    var e, callbacks;
+    e = { target: form, result: true };
+    callbacks = spyOnFuncAndCallbacks(registration.account, 'create');
 
     //when
     registration.submit(e);
 
     //then
-    expect(account.onSuccess);
-    expect(onFail).to.have.been.calledWith(registration.onError);
+    expect(registration.account.create).to.have.been.calledWithExactly(formResult);
+    expect(callbacks.successHandler).to.have.been.calledWith(registration.onSuccess);
+    expect(callbacks.errorHandler).to.have.been.calledWith(registration.onError);
 
     done();
   });

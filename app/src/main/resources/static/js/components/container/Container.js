@@ -1,12 +1,9 @@
 (function () {
   var Container = Module.extend({
-    init: function (errorHandler, account, router, $) {
-      this.errorHandler = errorHandler;
+    init: function (account, router, $) {
       this.account = account;
       this.router = router;
       this.$ = $;
-      this.onMount = this.onMount.bind(this);
-      this.logout = this.logout.bind(this);
     },
 
     onMount: function(tag) {
@@ -14,21 +11,11 @@
     },
 
     onLogoutSuccess: function () {
-      this.router.go('/app');
+      this.router.go('Home');
     },
 
     onLogoutFailure: function (jqXHR, textStatus, errorThrown) {
-      this.errorHandler.handle({
-        source: 'Container',
-        event: 'Logout',
-        message: 'Logout failed',
-        severity: 'CRITICAL',
-        context: {
-          jqXHR: jqXHR,
-          textStatus: textStatus,
-          errorThrown: errorThrown,
-        }
-      });
+      this.router.go('LogoutError');
     },
 
     logout: function () {
@@ -40,7 +27,6 @@
       'Container',
       Container,
       [
-        'ErrorHandler',
         'Account',
         'Router',
           '$'

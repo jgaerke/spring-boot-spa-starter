@@ -17,7 +17,6 @@
   );
 
   app.routes.push({
-    name: 'HOME',
     path: '/',
     component: 'Home',
     tag: 'home',

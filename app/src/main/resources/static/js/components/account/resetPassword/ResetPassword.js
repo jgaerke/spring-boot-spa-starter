@@ -6,13 +6,6 @@
       this.errorHandler = errorHandler;
       this.router = router;
       this.account = account;
-      this.status = 200;
-
-      this.onMount = this.onMount.bind(this);
-      this.onError = this.onError.bind(this);
-      this.onSuccess = this.onSuccess.bind(this);
-      this.submit = this.submit.bind(this);
-
     },
 
     onMount: function (tag) {
@@ -34,31 +27,15 @@
     },
 
     onSuccess: function () {
-      this.router.go('/app');
+      this.router.go('Home');
       this.tag.update();
     },
 
     onError: function (jqXHR, textStatus, errorThrown) {
-      if (jqXHR.status.toString().indexOf('5') === 0) {
-        this.errorHandler.handle({
-          source: 'ResetPassword',
-          event: 'ResetPassword',
-          message: 'ResetPassword failed',
-          severity: 'CRITICAL',
-          context: {
-            jqXHR: jqXHR,
-            textStatus: textStatus,
-            errorThrown: errorThrown
-          }
-        });
-      }
-      if(jqXHR.status == 400) {
-        this.form.form('add errors', ['Invalid request.']);
-      }
-      if(jqXHR.status == 404) {
-        this.form.form('add errors', ['Email address not found.']);
-      }
-      this.status = jqXHR.status;
+      this.errorHandler.handle(jqXHR.status, {
+        400: { form: this.form, text: 'Invalid request' },
+        404: { route: 'ResetPasswordTokenNotFound' }
+      });
       this.tag.update();
     },
 
@@ -85,7 +62,6 @@
   );
 
   app.routes.push({
-    name: 'CHANGEPASSWORD',
     path: '/reset-password/:token',
     component: 'ResetPassword',
     tag: 'reset-password'

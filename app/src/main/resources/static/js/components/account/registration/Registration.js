@@ -6,14 +6,6 @@
       this.errorHandler = errorHandler;
       this.router = router;
       this.account = account;
-      this.data = {};
-      this.status = 200;
-
-      this.onMount = this.onMount.bind(this);
-      this.getInputs = this.getInputs.bind(this);
-      this.submit = this.submit.bind(this);
-      this.onSuccess = this.onSuccess.bind(this);
-      this.onError = this.onError.bind(this);
     },
 
     onMount: function (tag) {
@@ -44,30 +36,14 @@
     },
 
     onSuccess: function () {
-      this.router.go('/app');
+      this.router.go('Home');
     },
 
     onError: function (jqXHR, textStatus, errorThrown) {
-      if (jqXHR.status.toString().indexOf('5') === 0) {
-        this.errorHandler.handle({
-          source: 'Registration',
-          event: 'Registration',
-          message: 'Registration failed',
-          severity: 'CRITICAL',
-          context: {
-            jqXHR: jqXHR,
-            textStatus: textStatus,
-            errorThrown: errorThrown
-          }
-        });
-      }
-      if(jqXHR.status == 400) {
-        this.form.form('add errors', ['Invalid request.']);
-      }
-      if(jqXHR.status == 409) {
-         this.form.form('add errors', ['Email address taken.']);
-      }
-      this.status = jqXHR.status;
+      this.errorHandler.handle(jqXHR.status, {
+        400: { form: this.form, text: 'Invalid request' },
+        409: { form: this.form, text: 'Email address taken' }
+      });
       this.tag.update();
     }
   });
@@ -84,7 +60,6 @@
   );
 
   app.routes.push({
-    name: 'REGISTRATION',
     path: '/register',
     component: 'Registration',
     tag: 'registration'

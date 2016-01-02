@@ -24580,7 +24580,7 @@ var Class = (function() {
       if ( !initializing && this.init ) {
         var self = this;
         $.each(this.__proto__, function(key, member) {
-          if($.isFunction(member) && key.toLowerCase().indexOf('on') === 0) {
+          if($.isFunction(member)/*&& key.toLowerCase().indexOf('on') === 0*/) {
             self[key] = member.bind(self);
           }
         });
@@ -24823,7 +24823,7 @@ var app = (function () {
 
     resetPassword: function(token, password) {
       return this.http.post('/api/accounts/password/reset', {
-        token: token,
+        passwordResetToken: token,
         password: password
       });
     }
@@ -24848,16 +24848,6 @@ var app = (function () {
       this.http = http;
       this.compiled = {};
       this.mounted = [];
-
-      this.parseComponentReferences = this.parseComponentReferences.bind(this);
-      this.onFetchSuccess = this.onFetchSuccess.bind(this);
-      this.fetch = this.fetch.bind(this);
-      this.compile = this.compile.bind(this);
-      this.onLoadComplete = this.onLoadComplete.bind(this);
-      this.load = this.load.bind(this);
-      this.unmountPrevious = this.unmountPrevious.bind(this);
-      this.onMountComplete = this.onMountComplete.bind(this);
-      this.mount = this.mount.bind(this);
     },
 
     parseComponentReferences: function (parentComponent, content) {
@@ -24898,7 +24888,6 @@ var app = (function () {
       if (!components.length) {
         return cb([]);
       }
-
       return self.http.get('/components/content?names=' + components.join()).done(this.onFetchSuccess(cb));
     },
 
@@ -24932,21 +24921,21 @@ var app = (function () {
       });
     },
 
-    onMountComplete: function (viewport, component, ctx, cb) {
+    onMountComplete: function (viewport, component, tag, ctx, cb) {
       var self = this;
       return function () {
         self.unmountPrevious();
-        self.$(viewport).html('<' + component + '></' + component + '>');
-        self.mounted = self.riot.mount(component, ctx);
+        self.$(viewport).html('<' + tag + '></' + tag + '>');
+        self.mounted = self.riot.mount(tag, ctx);
         if (cb) {
           cb();
         }
       }
     },
 
-    mount: function (viewport, component, ctx, cb) {
+    mount: function (viewport, component, tag, ctx, cb) {
       component = component.toLowerCase();
-      this.load(component, this.onMountComplete(viewport, component, ctx ,cb));
+      this.load(component, this.onMountComplete(viewport, component, tag, ctx ,cb));
     }
   });
 
@@ -24963,12 +24952,36 @@ var app = (function () {
 })();
 (function () {
   var ErrorHandler = Module.extend({
-    init: function ($) {
-      this.$ = $;
+    init: function (router) {
+      this.router = router;
     },
 
-    handle: function (error) {
-      console.log(error);
+    handle: function (status, possibleErrors, useDefault) {
+      var handled, self;
+      handled = false;
+      self = this;
+      useDefault = useDefault || true;
+
+      possibleErrors.forEach(function(possibleError) {
+        if(!handled && possibleError.status.length == 1 && status.toString().indexOf(possibleError)
+           || possibleError.status == status) {
+          if(possibleError.form) {
+            handled = true;
+            return possibleError.form.form('add errors', possibleError.text);
+          }
+          if(possibleError.route) {
+            handled = true;
+            return self.router.go(possibleError.route);
+          }
+          throw new Error('All error handlers should either bind to a form or a route.');
+        }
+      });
+
+      if(useDefault) {
+        form.form('add errors', 'Unexpected error. Please try again');
+      }
+
+      return handled;
     }
   });
 
@@ -24976,7 +24989,7 @@ var app = (function () {
       'ErrorHandler',
       ErrorHandler,
       [
-        '$'
+          'Router'
       ]
   );
 })();
@@ -24985,12 +24998,12 @@ var app = (function () {
     init: function ($) {
       this.$ = $;
 
-      this.dispatch = this.dispatch.bind(this);
-      this.get = this.get.bind(this);
-      this.post = this.post.bind(this);
-      this.put = this.put.bind(this);
-      this.patch = this.patch.bind(this);
-      this.delete = this.delete.bind(this);
+      //this.dispatch = this.dispatch.bind(this);
+      //this.get = this.get.bind(this);
+      //this.post = this.post.bind(this);
+      //this.put = this.put.bind(this);
+      //this.patch = this.patch.bind(this);
+      //this.delete = this.delete.bind(this);
     },
 
     dispatch: function (options) {
@@ -25073,45 +25086,40 @@ var app = (function () {
       this.app = app;
       this.componentLoader = componentLoader;
       this.routes = {};
-
-      this.onRouteChange = this.onRouteChange.bind(this);
-      this.onRegisterRoute = this.onRegisterRoute.bind(this);
-      this.register = this.register.bind(this);
-      this.start = this.start.bind(this);
-      this.getPath = this.getPath.bind(this);
-      this.go = this.go.bind(this);
     },
 
     onRouteChange: function (route) {
       var self = this;
       return function (ctx) {
-        console.log(ctx);
         var shortCircuited = false;
 
         if (route.authenticate && !self.app.resolve('authenticated')) {
           return self.page.redirect('/login');
         }
 
-        route.interceptors = (route.interceptors || []).map(function(interceptor) {
+        route.interceptors = (route.interceptors || []).map(function (interceptor) {
           return self.app.resolve(interceptor);
         });
 
-        route.interceptors.forEach(function(interceptor) {
-          if(!shortCircuited && interceptor.preHandle) {
+        route.interceptors.forEach(function (interceptor) {
+          if (!shortCircuited && interceptor.preHandle) {
             shortCircuited = !interceptor.preHandle.call(this, route, self.page);
           }
         });
 
-        if(shortCircuited) {
+        if (shortCircuited) {
           return;
         }
 
-        var ctrl = self.app.resolve(route.component);
+        var ctrl = {};
+        if (route.component) {
+          ctrl = self.app.resolve(route.component);
+        }
         ctrl.ctx = ctx;
-        self.componentLoader.mount(route.viewport || '#viewport', route.tag, ctrl);
+        self.componentLoader.mount(route.viewport || '#viewport', route.component || route.templateName, route.tag, ctrl);
 
-        route.interceptors.forEach(function(interceptor) {
-          if(!shortCircuited && interceptor.postHandle) {
+        route.interceptors.forEach(function (interceptor) {
+          if (!shortCircuited && interceptor.postHandle) {
             shortCircuited = !interceptor.postHandle.call(this, route, self.page);
           }
         });
@@ -25119,12 +25127,23 @@ var app = (function () {
     },
 
     onRegisterRoute: function (route) {
-      this.routes[route.name] = route;
+      this.routes[route.component] = route;
       this.page(route.path, this.onRouteChange(route));
     },
 
     register: function (routes) {
-      routes.forEach(this.onRegisterRoute);
+      var sorted = routes.sort(function(a, b){
+        a.index = a.index || 0;
+        b.index = b.index || 0;
+        if (a.index > b.index) {
+          return 1;
+        }
+        if (a.index < b.index) {
+          return -1;
+        }
+      });
+      console.log(sorted);
+      sorted.forEach(this.onRegisterRoute);
       return this;
     },
 
@@ -25179,19 +25198,11 @@ var app = (function () {
       this.errorHandler = errorHandler;
       this.router = router;
       this.account = account;
-      this.data = {};
-      this.status = 200;
-
-      this.onMount = this.onMount.bind(this);
-      this.onError = this.onError.bind(this);
-      this.onSuccess = this.onSuccess.bind(this);
-      this.submit = this.submit.bind(this);
-
     },
 
     onMount: function (tag) {
       this.tag = tag;
-      this.$('form', tag.root).form({
+      this.form = this.$('form', tag.root).form({
         inline: false,
         fields: {
           email: ['email', 'empty'],
@@ -25204,35 +25215,24 @@ var app = (function () {
       return {
         email: form.email.value,
         password: form.password.value,
-        //rememberMe: form.rememberMe.checked
         rememberMe: true
       }
     },
 
     onSuccess: function (data, status) {
-      this.router.go('/app');
+      this.router.go('Home');
       this.tag.update();
     },
 
     onError: function (jqXHR, textStatus, errorThrown) {
-      if (jqXHR.status.toString().indexOf('5') === 0) {
-        this.errorHandler.handle({
-          source: 'Login',
-          event: 'Login',
-          message: 'Login failed',
-          severity: 'CRITICAL',
-          context: {
-            jqXHR: jqXHR,
-            textStatus: textStatus,
-            errorThrown: errorThrown
-          }
-        });
-      }
-      this.status = jqXHR.status;
+      this.errorHandler.handle(jqXHR.status, {
+        401: { form: this.form, text: 'Email address or password invalid.' }
+      });
       this.tag.update();
     },
 
     submit: function (e) {
+      if(!e.result) return;
       this.account.login(this.getInputs(e.target)).done(this.onSuccess).fail(this.onError);
     }
   });
@@ -25250,7 +25250,6 @@ var app = (function () {
   );
 
   app.routes.push({
-    name: 'LOGIN',
     path: '/login',
     component: 'Login',
     tag: 'login'
@@ -25266,13 +25265,6 @@ var app = (function () {
       this.errorHandler = errorHandler;
       this.router = router;
       this.account = account;
-      this.status = 200;
-
-      this.onMount = this.onMount.bind(this);
-      this.onError = this.onError.bind(this);
-      this.onSuccess = this.onSuccess.bind(this);
-      this.submit = this.submit.bind(this);
-
     },
 
     onMount: function (tag) {
@@ -25292,35 +25284,20 @@ var app = (function () {
     },
 
     onSuccess: function () {
-      this.router.go('reset-password');
+      this.router.go('PasswordResetInstructionsSent');
       this.tag.update();
     },
 
     onError: function (jqXHR, textStatus, errorThrown) {
-      if (jqXHR.status.toString().indexOf('5') === 0) {
-        this.errorHandler.handle({
-          source: 'RecoverPassword',
-          event: 'RecoverPassword',
-          message: 'RecoverPassword failed',
-          severity: 'CRITICAL',
-          context: {
-            jqXHR: jqXHR,
-            textStatus: textStatus,
-            errorThrown: errorThrown
-          }
-        });
-      }
-      if(jqXHR.status == 400) {
-        this.form.form('add errors', ['Invalid request.']);
-      }
-      if(jqXHR.status == 404) {
-        this.form.form('add errors', ['Email address not found.']);
-      }
-      this.status = jqXHR.status;
+      this.errorHandler.handle(jqXHR.status, {
+        400: { form: this.form, text: 'Invalid request' },
+        404: { form: this.form, text: 'Email address not found' }
+      });
       this.tag.update();
     },
 
     submit: function (e) {
+      if(!e.result) return;
       this.account.recoverPassword(this.getInputs(e.target).email).done(this.onSuccess).fail(this.onError);
     }
   });
@@ -25338,7 +25315,6 @@ var app = (function () {
   );
 
   app.routes.push({
-    name: 'RECOVERPASSWORD',
     path: '/recover-password',
     component: 'RecoverPassword',
     tag: 'recover-password'
@@ -25354,14 +25330,6 @@ var app = (function () {
       this.errorHandler = errorHandler;
       this.router = router;
       this.account = account;
-      this.data = {};
-      this.status = 200;
-
-      this.onMount = this.onMount.bind(this);
-      this.getInputs = this.getInputs.bind(this);
-      this.submit = this.submit.bind(this);
-      this.onSuccess = this.onSuccess.bind(this);
-      this.onError = this.onError.bind(this);
     },
 
     onMount: function (tag) {
@@ -25384,6 +25352,7 @@ var app = (function () {
     },
 
     submit: function (e) {
+      if(!e.result) return;
       this.account
           .create(this.getInputs(e.target))
           .done(this.onSuccess)
@@ -25391,30 +25360,14 @@ var app = (function () {
     },
 
     onSuccess: function () {
-      this.router.go('/app');
+      this.router.go('Home');
     },
 
     onError: function (jqXHR, textStatus, errorThrown) {
-      if (jqXHR.status.toString().indexOf('5') === 0) {
-        this.errorHandler.handle({
-          source: 'Registration',
-          event: 'Registration',
-          message: 'Registration failed',
-          severity: 'CRITICAL',
-          context: {
-            jqXHR: jqXHR,
-            textStatus: textStatus,
-            errorThrown: errorThrown
-          }
-        });
-      }
-      if(jqXHR.status == 400) {
-        this.form.form('add errors', ['Invalid request.']);
-      }
-      if(jqXHR.status == 409) {
-         this.form.form('add errors', ['Email address taken.']);
-      }
-      this.status = jqXHR.status;
+      this.errorHandler.handle(jqXHR.status, {
+        400: { form: this.form, text: 'Invalid request' },
+        409: { form: this.form, text: 'Email address taken' }
+      });
       this.tag.update();
     }
   });
@@ -25431,7 +25384,6 @@ var app = (function () {
   );
 
   app.routes.push({
-    name: 'REGISTRATION',
     path: '/register',
     component: 'Registration',
     tag: 'registration'
@@ -25447,13 +25399,6 @@ var app = (function () {
       this.errorHandler = errorHandler;
       this.router = router;
       this.account = account;
-      this.status = 200;
-
-      this.onMount = this.onMount.bind(this);
-      this.onError = this.onError.bind(this);
-      this.onSuccess = this.onSuccess.bind(this);
-      this.submit = this.submit.bind(this);
-
     },
 
     onMount: function (tag) {
@@ -25461,9 +25406,8 @@ var app = (function () {
       this.form = this.$('form', tag.root).form({
         inline: false,
         fields: {
-          oldPassword: ['empty'],
-          newPassword: ['empty'],
-          newPasswordConfirmation: ['empty']
+          password: ['empty'],
+          passwordConfirmation: ['empty']
         }
       });
     },
@@ -25476,40 +25420,25 @@ var app = (function () {
     },
 
     onSuccess: function () {
-      this.router.go('reset-password');
+      this.router.go('Home');
       this.tag.update();
     },
 
     onError: function (jqXHR, textStatus, errorThrown) {
-      if (jqXHR.status.toString().indexOf('5') === 0) {
-        this.errorHandler.handle({
-          source: 'ResetPassword',
-          event: 'ResetPassword',
-          message: 'ResetPassword failed',
-          severity: 'CRITICAL',
-          context: {
-            jqXHR: jqXHR,
-            textStatus: textStatus,
-            errorThrown: errorThrown
-          }
-        });
-      }
-      if(jqXHR.status == 400) {
-        this.form.form('add errors', ['Invalid request.']);
-      }
-      if(jqXHR.status == 404) {
-        this.form.form('add errors', ['Email address not found.']);
-      }
-      this.status = jqXHR.status;
+      this.errorHandler.handle(jqXHR.status, {
+        400: { form: this.form, text: 'Invalid request' },
+        404: { route: 'ResetPasswordTokenNotFound' }
+      });
       this.tag.update();
     },
 
     submit: function (e) {
+      if(!e.result) return;
       var inputs = this.getInputs(e.target);
-      if(inputs.newPassword != inputs.newPasswordConfirmation) {
+      if(inputs.password != inputs.passwordConfirmation) {
         return this.form.form('add errors', ['Password must match.']);
       }
-      this.account.changePassword(this.ctx.params.token, inputs.passwordConfirmation).done(this.onSuccess).fail(this.onError);
+      this.account.resetPassword(this.ctx.params.token, inputs.passwordConfirmation).done(this.onSuccess).fail(this.onError);
     }
   });
 
@@ -25526,8 +25455,7 @@ var app = (function () {
   );
 
   app.routes.push({
-    name: 'CHANGEPASSWORD',
-    path: '/reset-password',
+    path: '/reset-password/:token',
     component: 'ResetPassword',
     tag: 'reset-password'
   });
@@ -25536,13 +25464,10 @@ var app = (function () {
 
 (function () {
   var Container = Module.extend({
-    init: function (errorHandler, account, router, $) {
-      this.errorHandler = errorHandler;
+    init: function (account, router, $) {
       this.account = account;
       this.router = router;
       this.$ = $;
-      this.onMount = this.onMount.bind(this);
-      this.logout = this.logout.bind(this);
     },
 
     onMount: function(tag) {
@@ -25550,21 +25475,11 @@ var app = (function () {
     },
 
     onLogoutSuccess: function () {
-      this.router.go('/app');
+      this.router.go('Home');
     },
 
     onLogoutFailure: function (jqXHR, textStatus, errorThrown) {
-      this.errorHandler.handle({
-        source: 'Container',
-        event: 'Logout',
-        message: 'Logout failed',
-        severity: 'CRITICAL',
-        context: {
-          jqXHR: jqXHR,
-          textStatus: textStatus,
-          errorThrown: errorThrown,
-        }
-      });
+      this.router.go('LogoutError');
     },
 
     logout: function () {
@@ -25576,13 +25491,17 @@ var app = (function () {
       'Container',
       Container,
       [
-        'ErrorHandler',
         'Account',
         'Router',
           '$'
       ]
   );
 
+})();
+
+(function () {
+  app.routes.push({ path: '/reset-password-token-not-found', templateName: 'ResetPasswordTokenNotFound', tag: 'reset-password-token-not-found'});
+  app.routes.push({ path: '*', templateName: 'NotFound', tag: 'notfound', index: 10000 });
 })();
 
 (function () {
@@ -25604,7 +25523,6 @@ var app = (function () {
   );
 
   app.routes.push({
-    name: 'HOME',
     path: '/',
     component: 'Home',
     tag: 'home',
@@ -25612,23 +25530,6 @@ var app = (function () {
   });
 })();
 
-
 (function () {
-  var NotFound = Module.extend({
-    init: function() {
-    }
-  });
-
-  app.component(
-      'NotFound',
-      NotFound,
-      []
-  );
-
-  app.routes.push({
-    name: 'NOTFOUND',
-    path: '*',
-    component: 'NotFound',
-    tag: 'notfound'
-  });
+  app.routes.push({ path: '/', templateName: 'PasswordResetInstructionSent', tag: 'password-reset-instructions-sent'});
 })();

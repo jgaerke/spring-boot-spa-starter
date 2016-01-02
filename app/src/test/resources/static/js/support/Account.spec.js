@@ -20,7 +20,7 @@ describe('Account', function () {
     encodedCredentials = account.getEncodedCredentials(credentials);
 
     //then
-    expect(encodedCredentials).to.eq('email=jgaerke%40gmail.com&password=password');
+    expect(encodedCredentials).to.eq('email=some-email%40gmail.com&password=password');
 
     done();
   });
@@ -131,7 +131,7 @@ describe('Account', function () {
   it('should reset password', function (done) {
     //given
     var expectedBody = {
-      token: '123',
+      passwordResetToken: '123',
       password: 'password'
     };
     account.http.post = sinon.spy();

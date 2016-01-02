@@ -1,12 +1,27 @@
 describe('Container', function () {
-  var Container, container, errorHandler, account, router;
+  var Container, container, account, router, $, tag, dropDownSpy;
 
   beforeEach(function (done) {
     Container = app.getType('Container');
-    errorHandler = {};
     account = {};
     router = {};
-    container = new Container(errorHandler, account, router);
+    dropDownSpy = sinon.spy();
+    $ = sinon.spy(function() {
+      return { dropdown: dropDownSpy };
+    });
+    tag = { root: {} };
+    container = new Container(account, router, $);
+    done();
+  });
+
+  it('should wire ui dropdown on mount', function(done) {
+    //when
+    container.onMount(tag);
+
+    //then
+    expect(container.$).to.have.been.calledWith('.ui.dropdown', tag.root);
+    expect(dropDownSpy).to.have.been.called;
+
     done();
   });
 
@@ -48,31 +63,18 @@ describe('Container', function () {
     done();
   });
 
-  it('should delegate to error handler and exit on 400 series errors', function(done) {
+  it('should handle error', function(done) {
     //given
     var jqXHR = { status: 400 };
-    container.errorHandler.handle = sinon.spy();
+    container.router.go = sinon.spy();
 
     //when
     container.onLogoutFailure(jqXHR);
 
     //then
-    expect(container.errorHandler.handle).to.have.been.called;
+    expect(container.router.go).to.have.been.calledWith('/app/logout-error');
 
     done();
   });
 
-  it('should delegate to error handler and exit on 500 series errors', function(done) {
-    //given
-    var jqXHR = { status: 500 };
-    container.errorHandler.handle = sinon.spy();
-
-    //when
-    container.onLogoutFailure(jqXHR);
-
-    //then
-    expect(container.errorHandler.handle).to.have.been.called;
-
-    done();
-  });
 });

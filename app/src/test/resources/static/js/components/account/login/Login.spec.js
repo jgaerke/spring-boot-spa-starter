@@ -4,7 +4,7 @@ describe('Login', function () {
   beforeEach(function (done) {
     var Login = app.getType('Login');
     $ = {};
-    errorHandler = {};
+    errorHandler = { handle: sinon.spy() };
     router = {};
     account = {};
     login = new Login($, errorHandler, router, account);
@@ -14,8 +14,7 @@ describe('Login', function () {
     };
     form = {
       email: {value: 'some-email@gmail.com'},
-      password: {value: 'password'},
-      rememberMe: {checked: true }
+      password: {value: 'password'}
     };
     formResult = {
       email: 'some-email@gmail.com',
@@ -26,7 +25,7 @@ describe('Login', function () {
     done();
   });
 
-  it('should wire up a validation upon mount', function(done) {
+  it('should wire up form validation upon mount', function(done) {
     //given
     var formSpy = sinon.spy();
     login.$ = sinon.spy(function() {
@@ -72,7 +71,7 @@ describe('Login', function () {
     done();
   });
 
-  it('should set status and reset password on 400 series error', function (done) {
+  it('should handle error', function (done) {
     //given
     var jqXHR = {status: 400};
     login.errorHandler.handle = sinon.spy();
@@ -81,51 +80,40 @@ describe('Login', function () {
     login.onError(jqXHR, "textStatus", {});
 
     //then
-    expect(login.status).to.eq(400);
+    expect(login.errorHandler.handle).to.have.been.called;
+    expect(login.tag.update).to.have.been.called;
 
     done();
   });
 
-  it('should delegate to error handler and exit on 500 series error', function (done) {
+  it('should short circuit submit to server if input is in invalid state', function(done) {
     //given
-    var jqXHR = {status: 500};
-    login.errorHandler.handle = sinon.spy();
+    var e;
+    e = { target: form, result: false };
+    login.account.create = sinon.spy();
 
     //when
-    login.onError(jqXHR, "textStatus", {});
+    login.submit(e);
 
     //then
-    expect(login.errorHandler.handle).to.be.called;
+    expect(login.account.create).to.not.have.been.called;
 
     done();
   });
 
   it('should submit credentials to server for login and wire handlers accordingly', function (done) {
     //given
-    var e, account, onDone, onFail;
-    e = { target: form };
-    onFail = sinon.spy();
-    onDone = sinon.spy(function() {
-      return {
-        fail: onFail
-      }
-    });
-    account = {
-      login: sinon.spy(function () {
-        return {
-          done: onDone
-        }
-      })
-    };
-    login.account = account;
+    var e, callbacks;
+    e = { target: form, result: true };
+    callbacks = spyOnFuncAndCallbacks(login.account, 'login');
 
     //when
     login.submit(e);
 
     //then
-    expect(account.login).to.have.been.calledWithExactly(formResult);
-    expect(onDone).to.have.been.calledWith(login.onSuccess);
-    expect(onFail).to.have.been.calledWith(login.onError);
+    expect(login.account.login).to.have.been.calledWithExactly(formResult);
+    expect(callbacks.successHandler).to.have.been.calledWith(login.onSuccess);
+    expect(callbacks.errorHandler).to.have.been.calledWith(login.onError);
 
     done();
   });

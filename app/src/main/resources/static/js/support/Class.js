@@ -49,7 +49,7 @@ var Class = (function() {
       if ( !initializing && this.init ) {
         var self = this;
         $.each(this.__proto__, function(key, member) {
-          if($.isFunction(member) && key.toLowerCase().indexOf('on') === 0) {
+          if($.isFunction(member)/*&& key.toLowerCase().indexOf('on') === 0*/) {
             self[key] = member.bind(self);
           }
         });
