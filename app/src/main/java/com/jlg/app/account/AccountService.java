@@ -95,7 +95,7 @@ public class AccountService {
 
   public boolean sendPasswordResetInstructions(String email) {
     String domain = environment.getProperty("mailgun.domain");
-
+    String from = environment.getProperty("mailgun.from.account");
     Optional<Account> account = accountRepository.findOneByEmail(email);
     if (!account.isPresent()) {
       throw new EmailNotFoundException();
@@ -107,7 +107,7 @@ public class AccountService {
 
     Call<Void> messageCall = messageService.send(
         domain,
-        "no-reply@" + domain,
+        from,
         email,
         "Password Reset",
         format(

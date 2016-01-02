@@ -23,6 +23,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.PATCH;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
+@RequestMapping(value = "/api/accounts")
 public class AccountController {
 
   private final AccountService accountService;
@@ -36,26 +37,26 @@ public class AccountController {
     this.userDetailsService = userDetailsService;
   }
 
-  @RequestMapping(value = "/api/accounts/password/change", method = POST)
+  @RequestMapping(value = "/password/change", method = POST)
   @ResponseStatus(OK)
   public void create(@Valid @RequestBody RegistrationRequest registrationRequest) {
     setAuthToken(accountService.create(registrationRequest));
   }
 
-  @RequestMapping(value = "/api/accounts/password/change", method = PATCH)
+  @RequestMapping(value = "/password/change", method = PATCH)
   @ResponseStatus(OK)
   public void changePassword(
       @Valid @RequestBody PasswordChangeRequest passwordChangeRequest, HttpServletRequest request) {
-    setAuthToken(accountService.changePassword(passwordChangeRequest, request.getUserPrincipal().getName()));
+    accountService.changePassword(passwordChangeRequest, request.getUserPrincipal().getName());
   }
 
-  @RequestMapping(value = "/api/accounts/password/reset", method = POST)
+  @RequestMapping(value = "/password/reset", method = POST)
   @ResponseStatus(OK)
   public void resetPassword(@Valid @RequestBody PasswordResetRequest passwordResetRequest) {
-    setAuthToken(accountService.resetPassword(passwordResetRequest));
+    accountService.resetPassword(passwordResetRequest);
   }
 
-  @RequestMapping(value = "/api/accounts/password/recover", method = POST)
+  @RequestMapping(value = "/password/recover", method = POST)
   @ResponseStatus(OK)
   public void recoverPassword(@Valid @RequestBody PasswordRecoveryRequest passwordRecoveryRequest) {
     accountService.sendPasswordResetInstructions(passwordRecoveryRequest.getEmail());

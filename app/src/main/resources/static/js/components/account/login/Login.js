@@ -28,7 +28,7 @@
     },
 
     onSuccess: function (data, status) {
-      this.router.go('Home');
+      this.router.go('Home', null, true);
       this.tag.update();
     },
 

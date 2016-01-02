@@ -27,7 +27,7 @@
     },
 
     onSuccess: function () {
-      this.router.go('Home');
+      this.router.go('Login');
       this.tag.update();
     },
 

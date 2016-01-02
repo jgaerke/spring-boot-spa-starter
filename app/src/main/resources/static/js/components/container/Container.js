@@ -11,7 +11,7 @@
     },
 
     onLogoutSuccess: function () {
-      this.router.go('Home');
+      this.router.go('Login', null, true);
     },
 
     onLogoutFailure: function (jqXHR, textStatus, errorThrown) {

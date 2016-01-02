@@ -70,6 +70,7 @@
 
     start: function (base) {
       //this.history.redirect(null, base);
+      this.base = base || '/';
       this.page.base(base);
       this.page.start();
     },
@@ -85,9 +86,12 @@
       return path;
     },
 
-    go: function (name, params) {
+    go: function (name, params, reload) {
       if (name.indexOf('http') == 0 || name.indexOf('/') == 0) {
         return this.window.location.href = name;
+      }
+      if(reload) {
+        return this.window.location.href = this.base + this.routes[name].path;
       }
       if (!this.routes[name]) {
         throw new Error("The route: '" + name + "' is not registered");

@@ -24956,29 +24956,27 @@ var app = (function () {
       this.router = router;
     },
 
-    handle: function (status, possibleErrors, useDefault) {
+    handle: function (status, possibleErrors) {
       var handled, self;
       handled = false;
       self = this;
-      useDefault = useDefault || true;
 
-      possibleErrors.forEach(function(possibleError) {
-        if(!handled && possibleError.status.length == 1 && status.toString().indexOf(possibleError)
-           || possibleError.status == status) {
-          if(possibleError.form) {
-            handled = true;
-            return possibleError.form.form('add errors', possibleError.text);
+      for (statusKey in possibleErrors) {
+        if(possibleErrors.hasOwnProperty(statusKey)) {
+          var possibleError = possibleErrors[statusKey];
+          if(!handled && statusKey.toString().length == 1 && status.toString().indexOf(statusKey.toString())
+              || statusKey == status) {
+            if(possibleError.form) {
+              handled = true;
+              return possibleError.form.form('add errors', possibleError.text);
+            }
+            if(possibleError.route) {
+              handled = true;
+              return self.router.go(possibleError.route);
+            }
+            throw new Error('All error handlers should either bind to a form or a route.');
           }
-          if(possibleError.route) {
-            handled = true;
-            return self.router.go(possibleError.route);
-          }
-          throw new Error('All error handlers should either bind to a form or a route.');
         }
-      });
-
-      if(useDefault) {
-        form.form('add errors', 'Unexpected error. Please try again');
       }
 
       return handled;
@@ -25127,7 +25125,7 @@ var app = (function () {
     },
 
     onRegisterRoute: function (route) {
-      this.routes[route.component] = route;
+      this.routes[route.component || route.templateName] = route;
       this.page(route.path, this.onRouteChange(route));
     },
 
@@ -25142,7 +25140,6 @@ var app = (function () {
           return -1;
         }
       });
-      console.log(sorted);
       sorted.forEach(this.onRegisterRoute);
       return this;
     },
@@ -25420,7 +25417,7 @@ var app = (function () {
     },
 
     onSuccess: function () {
-      this.router.go('Home');
+      this.router.go('PasswordResetInstructionsSent');
       this.tag.update();
     },
 
@@ -25500,8 +25497,17 @@ var app = (function () {
 })();
 
 (function () {
-  app.routes.push({ path: '/reset-password-token-not-found', templateName: 'ResetPasswordTokenNotFound', tag: 'reset-password-token-not-found'});
-  app.routes.push({ path: '*', templateName: 'NotFound', tag: 'notfound', index: 10000 });
+  app.routes.push({
+    path: '/reset-password-token-not-found',
+    templateName: 'ResetPasswordTokenNotFound',
+    tag: 'reset-password-token-not-found'
+  });
+  app.routes.push({
+    path: '*',
+    templateName: 'NotFound',
+    tag: 'notfound',
+    index: 10000
+  });
 })();
 
 (function () {
@@ -25531,5 +25537,9 @@ var app = (function () {
 })();
 
 (function () {
-  app.routes.push({ path: '/', templateName: 'PasswordResetInstructionSent', tag: 'password-reset-instructions-sent'});
+  app.routes.push({
+    path: '/password-reset-successful',
+    templateName: 'PasswordResetSuccessful',
+    tag: 'password-reset-successful'
+  });
 })();
