@@ -5,6 +5,11 @@
     tag: 'reset-password-token-not-found'
   });
   app.routes.push({
+    path: '/logout-error',
+    templateName: 'LogoutError',
+    tag: 'logout-error'
+  });
+  app.routes.push({
     path: '*',
     templateName: 'NotFound',
     tag: 'notfound',

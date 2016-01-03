@@ -1,4 +1,3 @@
-//apply plugins
 [
         'java',
         'spring-boot'
@@ -8,7 +7,7 @@ group = 'com.jlg'
 version = '1.0.0'
 
 jar {
-    baseName = 'starter-app'
+    baseName = 'spring-boot-spa-starter'
 }
 
 sourceSets {
@@ -62,6 +61,15 @@ def repoName = "starter-app";
 def dbServerName = "${activeConfig}-db";
 def rpServername = "${activeConfig}-rp";
 def backupFileName = "...";
+
+
+
+task(gulp, type: Exec) {
+    commandLine "gulp"
+    args 'test'
+}
+
+build.dependsOn gulp
 
 task(createEnv, type: Exec) {
     commandLine "java"

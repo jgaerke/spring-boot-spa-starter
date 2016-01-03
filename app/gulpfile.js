@@ -13,7 +13,7 @@ var _ = require('lodash'),
     argv = require('yargs').argv,
     assets = require('./assets')
 
-gulp.task('default', ['css', 'js', 'link'], function () {
+gulp.task('default', ['css', 'js', 'link', 'test'], function () {
   // place code for your default task here
 });
 

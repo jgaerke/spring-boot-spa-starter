@@ -19,7 +19,7 @@
   app.routes.push({
     path: '/',
     component: 'Home',
-    tag: 'home',
+    tag: 'static.js.components.confirmation.home.home',
     authenticate: true
   });
 })();

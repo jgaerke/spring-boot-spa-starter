@@ -16,7 +16,6 @@ var resourcesDir = 'src/main/resources',
       staticDir + '/js/components/**/*.js',
       '!' + staticDir + '/js/application.js',
       '!' + staticDir + '/js/application.min.js'
-
     ],
     testFiles = [
         testDir + '/libs/**/*.js',
