@@ -82,16 +82,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     http.authorizeRequests()
         .antMatchers(
             "/",
-            "/assets/**/*",
+            "/assets/**",
             "/components/content",
             "/app",
             "/app/",
-            "/app/login",
+            "/app/login/**",
             "/app/register",
             "/app/recover-password",
             "/app/reset-password/**",
-            "/api/**",
-            "/api/**/*"
+            "/api/**"
         )
         .permitAll()
         .anyRequest()

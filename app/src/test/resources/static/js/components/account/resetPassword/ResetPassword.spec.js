@@ -55,7 +55,7 @@ describe('ResetPassword', function () {
     done();
   });
 
-  it('should route to Login on success', function (done) {
+  it('should route to LoginAfterPasswordReset on success', function (done) {
     //given
     resetPassword.router = {
       go: sinon.spy()
@@ -65,7 +65,7 @@ describe('ResetPassword', function () {
     resetPassword.onSuccess();
 
     //then
-    expect(resetPassword.router.go).to.have.been.calledWith('Login');
+    expect(resetPassword.router.go).to.have.been.calledWith('LoginAfterPasswordReset');
 
     done();
   });

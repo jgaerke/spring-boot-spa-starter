@@ -6,9 +6,11 @@
       this.errorHandler = errorHandler;
       this.router = router;
       this.account = account;
+      this.message = {};
     },
 
     onMount: function (tag) {
+      this.message.displayPasswordResetSuccess = this.router.isCurrent('LoginAfterPasswordReset');
       this.tag = tag;
       this.form = this.$('form', tag.root).form({
         inline: false,
@@ -17,6 +19,7 @@
           password: ['empty']
         }
       });
+      this.tag.update();
     },
 
     getInputs: function (form) {
@@ -59,6 +62,13 @@
 
   app.routes.push({
     path: '/login',
+    component: 'Login',
+    tag: 'login'
+  });
+
+  app.routes.push({
+    name: 'LoginAfterPasswordReset',
+    path: '/login/password-reset-success',
     component: 'Login',
     tag: 'login'
   });

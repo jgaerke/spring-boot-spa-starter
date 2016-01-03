@@ -11,6 +11,11 @@
     </style>
     <div class="ui aligned center aligned grid" id="login">
       <div class="column">
+        <div class="ui success message" if="{ login.message.displayPasswordResetSuccess }">
+          <div class="header">
+            Your password has been reset.
+          </div>
+        </div>
         <h2 class="ui teal image header">
           <div class="content">
             Log-in to your account

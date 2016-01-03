@@ -5,7 +5,7 @@ describe('Login', function () {
     var Login = app.getType('Login');
     $ = {};
     errorHandler = { handle: sinon.spy() };
-    router = {};
+    router = { isCurrent: sinon.spy() };
     account = {};
     login = new Login($, errorHandler, router, account);
     login.tag = {
@@ -33,13 +33,13 @@ describe('Login', function () {
         form: formSpy
       }
     });
-    var tag = { root: {} };
 
     //when
-    login.onMount(tag);
+    login.onMount(login.tag);
 
     //then
-    expect(login.$).to.have.been.calledWith('form', tag.root);
+    expect(login.$).to.have.been.calledWith('form', login.tag.root);
+    expect(login.router.isCurrent).to.have.been.calledWith('LoginAfterPasswordReset');
     expect(formSpy).to.have.been.called;
 
     done();

@@ -32,7 +32,6 @@
         if (shortCircuited) {
           return;
         }
-
         var ctrl = {};
         if (route.component) {
           ctrl = self.app.resolve(route.component);
@@ -49,7 +48,7 @@
     },
 
     onRegisterRoute: function (route) {
-      this.routes[route.component || route.templateName] = route;
+      this.routes[route.name || route.component || route.templateName] = route;
       this.page(route.path, this.onRouteChange(route));
     },
 
@@ -73,6 +72,14 @@
       this.base = base || '/';
       this.page.base(base);
       this.page.start();
+    },
+
+    isCurrent: function(name) {
+      if (!this.routes[name]) {
+        throw new Error("The route: '" + name + "' is not registered");
+      }
+      var path = this.getPath(this.routes[name]);
+      return this.window.location.href.indexOf(path) > -1;
     },
 
     getPath: function (route, params) {

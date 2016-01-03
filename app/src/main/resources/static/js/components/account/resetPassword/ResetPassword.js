@@ -27,7 +27,7 @@
     },
 
     onSuccess: function () {
-      this.router.go('Login');
+      this.router.go('LoginAfterPasswordReset');
       this.tag.update();
     },
 
