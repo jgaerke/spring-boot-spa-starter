@@ -184,4 +184,18 @@ describe('Router', function () {
     done();
   });
 
+  it('should tell if given name is current route', function(done) {
+    //given
+    router.routes['foo'] = { path: '/foo'};
+    router.window = { location: { href: '/foo' }};
+
+    //when
+    var result = router.isCurrent('foo');
+
+    //then
+    expect(result).to.be.true;
+
+    done();
+  });
+
 });

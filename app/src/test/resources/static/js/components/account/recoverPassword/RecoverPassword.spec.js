@@ -87,13 +87,13 @@ describe('RecoverPassword', function () {
     //given
     var e;
     e = { target: form, result: false };
-    recoverPassword.account.create = sinon.spy();
+    recoverPassword.account.recoverPassword = sinon.spy();
 
     //when
     recoverPassword.submit(e);
 
     //then
-    expect(recoverPassword.account.create).to.not.have.been.called;
+    expect(recoverPassword.account.recoverPassword).to.not.have.been.called;
 
     done();
   });

@@ -25108,7 +25108,6 @@ var app = (function () {
         if (shortCircuited) {
           return;
         }
-
         var ctrl = {};
         if (route.component) {
           ctrl = self.app.resolve(route.component);
@@ -25125,7 +25124,7 @@ var app = (function () {
     },
 
     onRegisterRoute: function (route) {
-      this.routes[route.component || route.templateName] = route;
+      this.routes[route.name || route.component || route.templateName] = route;
       this.page(route.path, this.onRouteChange(route));
     },
 
@@ -25149,6 +25148,14 @@ var app = (function () {
       this.base = base || '/';
       this.page.base(base);
       this.page.start();
+    },
+
+    isCurrent: function(name) {
+      if (!this.routes[name]) {
+        throw new Error("The route: '" + name + "' is not registered");
+      }
+      var path = this.getPath(this.routes[name]);
+      return this.window.location.href.indexOf(path) > -1;
     },
 
     getPath: function (route, params) {
@@ -25199,9 +25206,11 @@ var app = (function () {
       this.errorHandler = errorHandler;
       this.router = router;
       this.account = account;
+      this.message = {};
     },
 
     onMount: function (tag) {
+      this.message.displayPasswordResetSuccess = this.router.isCurrent('LoginAfterPasswordReset');
       this.tag = tag;
       this.form = this.$('form', tag.root).form({
         inline: false,
@@ -25210,6 +25219,7 @@ var app = (function () {
           password: ['empty']
         }
       });
+      this.tag.update();
     },
 
     getInputs: function (form) {
@@ -25254,6 +25264,119 @@ var app = (function () {
     path: '/login',
     component: 'Login',
     tag: 'login'
+  });
+
+  app.routes.push({
+    name: 'LoginAfterPasswordReset',
+    path: '/login/password-reset-success',
+    component: 'Login',
+    tag: 'login'
+  });
+
+})();
+
+(function () {
+  var Profile = Module.extend({
+
+    init: function ($, errorHandler, router, account) {
+      this.$ = $;
+      this.errorHandler = errorHandler;
+      this.router = router;
+      this.account = account;
+    },
+
+    onMount: function (tag) {
+      this.tag = tag;
+    }
+  });
+
+
+  app.component(
+      'Profile',
+      Profile,
+      [
+        '$',
+        'ErrorHandler',
+        'Router',
+        'Account'
+      ]
+  );
+
+  app.routes.push({
+    path: '/profile',
+    component: 'Profile',
+    tag: 'profile'
+  });
+
+  app.routes.push({
+    path: '/profile/edit',
+    component: 'Profile',
+    tag: 'profile-edit'
+  });
+
+})();
+
+(function () {
+  var RecoverPassword = Module.extend({
+
+    init: function ($, errorHandler, router, account) {
+      this.$ = $;
+      this.errorHandler = errorHandler;
+      this.router = router;
+      this.account = account;
+    },
+
+    onMount: function (tag) {
+      this.tag = tag;
+      this.form = this.$('form', tag.root).form({
+        inline: false,
+        fields: {
+          email: ['email', 'empty']
+        }
+      });
+    },
+
+    getInputs: function (form) {
+      return {
+        email: form.email.value
+      }
+    },
+
+    onSuccess: function () {
+      this.router.go('PasswordResetInstructionsSent');
+      this.tag.update();
+    },
+
+    onError: function (jqXHR, textStatus, errorThrown) {
+      this.errorHandler.handle(jqXHR.status, {
+        400: { form: this.form, text: 'Invalid request' },
+        404: { form: this.form, text: 'Email address not found' }
+      });
+      this.tag.update();
+    },
+
+    submit: function (e) {
+      if(!e.result) return;
+      this.account.recoverPassword(this.getInputs(e.target).email).done(this.onSuccess).fail(this.onError);
+    }
+  });
+
+
+  app.component(
+      'RecoverPassword',
+      RecoverPassword,
+      [
+        '$',
+        'ErrorHandler',
+        'Router',
+        'Account'
+      ]
+  );
+
+  app.routes.push({
+    path: '/recover-password',
+    component: 'RecoverPassword',
+    tag: 'recover-password'
   });
 
 })();
@@ -25328,71 +25451,6 @@ var app = (function () {
 })()
 
 (function () {
-  var RecoverPassword = Module.extend({
-
-    init: function ($, errorHandler, router, account) {
-      this.$ = $;
-      this.errorHandler = errorHandler;
-      this.router = router;
-      this.account = account;
-    },
-
-    onMount: function (tag) {
-      this.tag = tag;
-      this.form = this.$('form', tag.root).form({
-        inline: false,
-        fields: {
-          email: ['email', 'empty']
-        }
-      });
-    },
-
-    getInputs: function (form) {
-      return {
-        email: form.email.value
-      }
-    },
-
-    onSuccess: function () {
-      this.router.go('PasswordResetInstructionsSent');
-      this.tag.update();
-    },
-
-    onError: function (jqXHR, textStatus, errorThrown) {
-      this.errorHandler.handle(jqXHR.status, {
-        400: { form: this.form, text: 'Invalid request' },
-        404: { form: this.form, text: 'Email address not found' }
-      });
-      this.tag.update();
-    },
-
-    submit: function (e) {
-      if(!e.result) return;
-      this.account.recoverPassword(this.getInputs(e.target).email).done(this.onSuccess).fail(this.onError);
-    }
-  });
-
-
-  app.component(
-      'RecoverPassword',
-      RecoverPassword,
-      [
-        '$',
-        'ErrorHandler',
-        'Router',
-        'Account'
-      ]
-  );
-
-  app.routes.push({
-    path: '/recover-password',
-    component: 'RecoverPassword',
-    tag: 'recover-password'
-  });
-
-})();
-
-(function () {
   var ResetPassword = Module.extend({
 
     init: function ($, errorHandler, router, account) {
@@ -25421,7 +25479,7 @@ var app = (function () {
     },
 
     onSuccess: function () {
-      this.router.go('Login');
+      this.router.go('LoginAfterPasswordReset');
       this.tag.update();
     },
 
@@ -25548,7 +25606,7 @@ var app = (function () {
   app.routes.push({
     path: '/',
     component: 'Home',
-    tag: 'static.js.components.confirmation.home.home',
+    tag: 'home',
     authenticate: true
   });
 })();

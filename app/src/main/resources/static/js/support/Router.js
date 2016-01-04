@@ -37,7 +37,7 @@
           ctrl = self.app.resolve(route.component);
         }
         ctrl.ctx = ctx;
-        self.componentLoader.mount(route.viewport || '#viewport', route.component || route.templateName, route.tag, ctrl);
+        self.componentLoader.mount(route.viewport || '#viewport', route.templateName || route.component, route.tag, ctrl);
 
         route.interceptors.forEach(function (interceptor) {
           if (!shortCircuited && interceptor.postHandle) {

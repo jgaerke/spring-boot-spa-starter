@@ -63,7 +63,7 @@ describe('Container', function () {
     done();
   });
 
-  it('should handle error', function(done) {
+  it('should handle logout error', function(done) {
     //given
     var jqXHR = { status: 400 };
     container.router.go = sinon.spy();

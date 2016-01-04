@@ -1,0 +1,13 @@
+<profile-edit>
+  <container>
+   <div>
+     Profile edit
+   </div>
+  </container>
+  <script>
+    var profile = this.profile = this.tags.container.profile = opts;
+    this.on('mount', function () {
+      profile.onMount(this);
+    });
+  </script>
+</profile-edit>
