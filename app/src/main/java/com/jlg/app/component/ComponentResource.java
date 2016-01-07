@@ -17,7 +17,7 @@ public class ComponentResource {
   private Resource resource;
 
   public String getName() throws IOException {
-    return resource.getFile().getName().replace(".html", "").toLowerCase();
+    return resource.getFilename().replace(".html", "").toLowerCase();
   }
 
   public String getContent() throws IOException {

@@ -55,9 +55,9 @@ bootRun {
 def cliJAR = "${projectDir}/lib/cloud-env-cli-spring-boot-spa-starter-1.0.0.jar"
 def activeConfig = "default";
 def jarDir = "app/build/libs";
-def jarName = "starter-app-1.0.0.jar";
-def repoUrl = "https://github.com/jgaerke/starter-app.git";
-def repoName = "starter-app";
+def jarName = "spring-boot-spa-starter-1.0.0.jar";
+def repoUrl = "https://github.com/jgaerke/spring-boot-spa-starter.git";
+def repoName = "spring-boot-spa-starter";
 def dbServerName = "${activeConfig}-db";
 def rpServername = "${activeConfig}-rp";
 def backupFileName = "...";
@@ -99,15 +99,7 @@ task(deactivateEnv, type: Exec) {
 
 task(deployApp, dependsOn: [':app:assemble'], type: Exec) {
     commandLine "java"
-    args '-jar',
-            cliJAR,
-            'deploy-app',
-            '-f', "${projectDir}/config/${activeConfig}.json",
-            '-t', 'app',
-            '-rn', "${repoName}",
-            '-ru', "${repoUrl}",
-            '-jd', "${jarDir}",
-            '-j', "${jarName}"
+    args '-jar', cliJAR, 'deploy-app', '-f', "${projectDir}/config/${activeConfig}.json", '-t', 'app', '-rn', "${repoName}", '-ru', "${repoUrl}", '-jd', "${jarDir}", '-j', "${jarName}"
 }
 
 task(backupDB, type: Exec) {
