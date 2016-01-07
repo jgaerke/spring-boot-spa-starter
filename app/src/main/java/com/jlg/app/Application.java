@@ -1,9 +1,16 @@
 package com.jlg.app;
 
 import com.google.common.collect.Lists;
+import com.jlg.app.support.config.MailConfigProperties;
+import com.jlg.app.support.config.MongoConfigProperties;
+import com.jlg.app.support.security.SecurityConfigProperties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.mongo.MongoProperties;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -28,16 +35,17 @@ public class Application {
     if(!isEnvironmentConfigured()) {
       return;
     }
+    ConfigurableApplicationContext applicationContext = SpringApplication.run(Application.class, args);
     printEnvironmentVars();
-    SpringApplication.run(Application.class, args);
+    printApplicationProperties(applicationContext);
   }
 
 
   private static boolean isEnvironmentConfigured() {
     List<String> missingProperties = getMissingEnvironment();
     if (!missingProperties.isEmpty()) {
-      System.err.println("The following are required properties and must be set:");
-      missingProperties.forEach(System.err::println);
+      System.out.println("The following are required properties and must be set:");
+      missingProperties.forEach(System.out::println);
       return false;
     }
     return true;
@@ -70,7 +78,37 @@ public class Application {
     List<String> requiredVars = getRequiredVars();
     System.out.println("ENVIRONMENT:");
     requiredVars.forEach(rv -> {
-      System.out.println("KEY: " + rv + " VALUE: " + environment.get(rv));
+      System.out.println(rv + "=" + environment.get(rv));
     });
   }
+
+  private static void printApplicationProperties(ApplicationContext applicationContext) {
+    System.out.println("APPLICATION PROPERTIES:");
+
+    MongoConfigProperties mongoProperties = applicationContext.getBean(MongoConfigProperties.class);
+    print("mongo.host", mongoProperties.getHost());
+    print("mongo.port", mongoProperties.getPort());
+    print("mongo.database", mongoProperties.getDatabase());
+    print("mongo.user", mongoProperties.getUser());
+    print("mongo.password", mongoProperties.getPassword());
+
+    MailConfigProperties mailConfigProperties = applicationContext.getBean(MailConfigProperties.class);
+    print("mail.api.base.url", mailConfigProperties.getApiBaseUrl());
+    print("mail.api.token", mailConfigProperties.getApiToken());
+    print("mail.domain", mailConfigProperties.getDomain());
+    print("mail.from.account", mailConfigProperties.getFromAccount());
+
+    SecurityConfigProperties securityConfigProperties = applicationContext.getBean(SecurityConfigProperties.class);
+    print("security.persistent.login.key", securityConfigProperties.getPersistentLoginKey());
+
+    Environment environment = applicationContext.getBean(Environment.class);
+    print("spring.resources.chain.cache", environment.getProperty("spring.resources.chain.cache=false"));
+    print("spring.jackson.serialization.indent_output", environment.getProperty("spring.jackson.serialization.indent_output"));
+    print("spring.jackson.serialization-inclusion", environment.getProperty("spring.jackson.serialization-inclusion"));
+  }
+
+  private static void print(String property, Object value) {
+    System.out.println(property + "=" + value);
+  }
+
 }
