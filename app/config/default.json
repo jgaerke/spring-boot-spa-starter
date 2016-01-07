@@ -40,7 +40,6 @@
       "ipAddress": "159.203.82.59",
       "status": "provisioned",
       "environment": [
-        "server.db.ip.address",
         "security.persistent.login.key",
         "db.name",
         "db.port",
