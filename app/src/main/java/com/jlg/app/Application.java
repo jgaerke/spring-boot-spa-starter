@@ -44,18 +44,11 @@ public class Application {
   private static List<String> getMissingEnvironment() {
     Map<String, String> environment = System.getenv();
     List<String> requiredVars = Lists.newArrayList(
-        "AWS_ACCESS_KEY_ID",
-        "AWS_SECRET_ACCESS_KEY",
-        "AWS_S3_DB_BACKUP_BUCKET_NAME",
         "DB_NAME",
         "DB_ADMIN_USER_NAME",
         "DB_ADMIN_USER_PASSWORD",
         "DB_USER_NAME",
         "DB_USER_PASSWORD",
-        "DIGITAL_OCEAN_API_BASE_URL",
-        "DIGITAL_OCEAN_API_TOKEN",
-        "DIGITAL_OCEAN_DROPLET_CREATION_WAIT_TIME_IN_SECONDS",
-        "DIGITAL_OCEAN_SSH_KEY",
         "MAILGUN_API_TOKEN",
         "MAILGUN_API_BASE_URL",
         "MAILGUN_DOMAIN",
