@@ -38,9 +38,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   LoginFailureHandler loginFailureHandler;
   @Autowired
   HttpLogoutSuccessHandler logoutSuccessHandler;
-
-  @Value("${security.persistent.login.key:'app'}")
-  private String persistentLoginKey;
+  @Autowired
+  SecurityConfigProperties securityConfigProperties;
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -75,7 +74,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .logoutRequestMatcher(new AntPathRequestMatcher("/api/accounts/logout", DELETE.name()))
         .logoutSuccessHandler(logoutSuccessHandler)
         .invalidateHttpSession(true);
-    http.rememberMe().key(persistentLoginKey);
+    http.rememberMe().key(securityConfigProperties.getPersistentLoginKey());
 
 
     //authorization

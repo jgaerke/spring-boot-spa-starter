@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +28,7 @@ public class Application {
     if(!isEnvironmentConfigured()) {
       return;
     }
+    printEnvironmentVars();
     SpringApplication.run(Application.class, args);
   }
 
@@ -43,8 +45,16 @@ public class Application {
 
   private static List<String> getMissingEnvironment() {
     Map<String, String> environment = System.getenv();
-    List<String> requiredVars = Lists.newArrayList(
-        "SERVER_DB_IP_ADDRESS",
+    List<String> requiredVars = getRequiredVars();
+    return requiredVars.stream()
+        .filter(v -> !environment.containsKey(v) || isNullOrEmpty(environment.get(v)))
+        .collect(toList());
+  }
+
+  private static List<String> getRequiredVars() {
+    return Lists.newArrayList(
+        "ENVIRONMENT_NAME",
+        "SECURITY_PERSISTENT_LOGIN_KEY",
         "DB_NAME",
         "DB_USER_NAME",
         "DB_USER_PASSWORD",
@@ -53,8 +63,14 @@ public class Application {
         "MAILGUN_DOMAIN",
         "MAILGUN_FROM_ACCOUNT"
     );
-    return requiredVars.stream()
-        .filter(v -> !environment.containsKey(v) || isNullOrEmpty(environment.get(v)))
-        .collect(toList());
+  }
+
+  private static void printEnvironmentVars() {
+    Map<String, String> environment = System.getenv();
+    List<String> requiredVars = getRequiredVars();
+    System.out.println("ENVIRONMENT:");
+    requiredVars.forEach(rv -> {
+      System.out.println("KEY: " + rv + " VALUE: " + environment.get(rv));
+    });
   }
 }

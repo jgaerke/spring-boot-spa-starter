@@ -18,21 +18,24 @@ import static org.junit.Assert.assertEquals;
 @RunWith(MockitoJUnitRunner.class)
 public class MongoConfigTest {
   MongoConfig mongoConfig;
+  MongoConfigProperties mongoConfigProperties;
 
   @Before
   public void setup() {
     mongoConfig = new MongoConfig();
-    mongoConfig.host = "localhost";
-    mongoConfig.database = "db";
-    mongoConfig.port = 27017;
-    mongoConfig.user = "user";
-    mongoConfig.password = "password";
+
+    mongoConfigProperties = new MongoConfigProperties();
+    mongoConfigProperties.setHost("localhost");
+    mongoConfigProperties.setDatabase("db");
+    mongoConfigProperties.setPort("27017");
+    mongoConfigProperties.setUser("user");
+    mongoConfigProperties.setPassword("password");
   }
 
   @Test
   public void mongo_client_should_be_configured_properly() throws Exception {
     //when
-    MongoClient mongoClient = mongoConfig.mongoClient();
+    MongoClient mongoClient = mongoConfig.mongoClient(mongoConfigProperties);
     ServerAddress address = mongoClient.getAddress();
     List<MongoCredential> credentialsList = mongoClient.getCredentialsList();
 
@@ -47,7 +50,7 @@ public class MongoConfigTest {
   @Test
   public void mongo_db_factory_should_return_expected_db() throws Exception {
     //when
-    SimpleMongoDbFactory mongoDbFactory = (SimpleMongoDbFactory) mongoConfig.mongoDbFactory();
+    SimpleMongoDbFactory mongoDbFactory = (SimpleMongoDbFactory) mongoConfig.mongoDbFactory(mongoConfigProperties);
     DB db = mongoDbFactory.getDb();
 
     //then
@@ -57,7 +60,7 @@ public class MongoConfigTest {
   @Test
   public void mongo_template_should_return_expected_db() throws Exception {
     //when
-    MongoTemplate mongoTemplate = mongoConfig.mongoTemplate();
+    MongoTemplate mongoTemplate = mongoConfig.mongoTemplate(mongoConfigProperties);
     DB db = mongoTemplate.getDb();
 
     //then

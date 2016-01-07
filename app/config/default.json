@@ -8,14 +8,14 @@
   },
   "servers": [
     {
-      "id": "9966523",
+      "id": "9967625",
       "name": "default-db",
       "type": "db",
       "image": "mongodb",
       "size": "1gb",
       "region": "nyc3",
       "privatelyNetworked": false,
-      "ipAddress": "45.55.166.17",
+      "ipAddress": "104.236.91.130",
       "status": "provisioned",
       "environment": [
         "aws.access.key.id",
@@ -30,16 +30,18 @@
       ]
     },
     {
-      "id": "9966524",
+      "id": "9967627",
       "name": "default-app-1",
       "type": "app",
       "image": "ubuntu-15-04-x64",
       "size": "1gb",
       "region": "nyc3",
       "privatelyNetworked": false,
-      "ipAddress": "104.131.67.105",
+      "ipAddress": "159.203.82.59",
       "status": "provisioned",
       "environment": [
+        "server.db.ip.address",
+        "security.persistent.login.key",
         "db.name",
         "db.port",
         "db.user.name",

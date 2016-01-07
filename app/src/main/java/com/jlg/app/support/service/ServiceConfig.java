@@ -1,10 +1,10 @@
 package com.jlg.app.support.service;
 
+import com.jlg.app.support.config.MailConfigProperties;
 import com.squareup.okhttp.OkHttpClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import retrofit.JacksonConverterFactory;
 import retrofit.Retrofit;
 
 
@@ -18,13 +18,11 @@ public class ServiceConfig {
     return okHttpClient;
   }
 
-  @Value("${mailgun.api.base.url}")
-  String mailgunApiBaseUrl;
 
   @Bean
-  public MessageService messageService(OkHttpClient mailGunOkHttpClient) {
+  public MessageService messageService(OkHttpClient mailGunOkHttpClient, MailConfigProperties mailConfigProperties) {
     Retrofit retrofit = new Retrofit.Builder()
-        .baseUrl(mailgunApiBaseUrl)
+        .baseUrl(mailConfigProperties.getApiBaseUrl())
         .client(mailGunOkHttpClient)
 //        .addConverterFactory(JacksonConverterFactory.create())
         .build();

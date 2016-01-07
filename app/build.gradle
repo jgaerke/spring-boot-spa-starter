@@ -63,7 +63,6 @@ def rpServername = "${activeConfig}-rp";
 def backupFileName = "...";
 
 
-
 task(gulp, type: Exec) {
     commandLine "gulp"
     args 'test'
