@@ -44,9 +44,8 @@ public class Application {
   private static List<String> getMissingEnvironment() {
     Map<String, String> environment = System.getenv();
     List<String> requiredVars = Lists.newArrayList(
+        "SERVER_DB_IP_ADDRESS",
         "DB_NAME",
-        "DB_ADMIN_USER_NAME",
-        "DB_ADMIN_USER_PASSWORD",
         "DB_USER_NAME",
         "DB_USER_PASSWORD",
         "MAILGUN_API_TOKEN",
