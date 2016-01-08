@@ -76,14 +76,20 @@ public class Application {
   private static void printEnvironmentVars() {
     Map<String, String> environment = System.getenv();
     List<String> requiredVars = getRequiredVars();
+    System.out.println();
     System.out.println("ENVIRONMENT:");
+    System.out.println();
+    System.out.println();
     requiredVars.forEach(rv -> {
       System.out.println(rv + "=" + environment.get(rv));
     });
   }
 
   private static void printApplicationProperties(ApplicationContext applicationContext) {
+    System.out.println();
+    System.out.println();
     System.out.println("APPLICATION PROPERTIES:");
+    System.out.println();
 
     MongoConfigProperties mongoProperties = applicationContext.getBean(MongoConfigProperties.class);
     print("mongo.host", mongoProperties.getHost());
