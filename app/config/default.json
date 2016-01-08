@@ -1,32 +1,91 @@
 {
-  "name" : "default",
-  "status" : "created",
-  "domain" : {
-    "name" : "warminterview.com",
-    "ipAddress" : "45.55.99.148",
-    "server" : null
+  "name": "default",
+  "status": "destroyed",
+  "domain": {
+    "name": "somedomain.com",
+    "ipAddress": "45.55.99.148",
+    "server": "default-rp"
   },
-  "servers" : [ {
-    "id" : "9984414",
-    "name" : "default-db",
-    "type" : "db",
-    "image" : "mongodb",
-    "size" : "1gb",
-    "region" : "nyc3",
-    "privatelyNetworked" : false,
-    "ipAddress" : "159.203.123.133",
-    "status" : "provisioned",
-    "environment" : [ "aws.access.key.id", "aws.secret.access.key", "aws.s3.db.backup.bucket.name", "db.name", "db.port", "db.admin.user.name", "db.admin.user.password", "db.user.name", "db.user.password" ]
-  }, {
-    "id" : "9984413",
-    "name" : "default-app-1",
-    "type" : "app",
-    "image" : "ubuntu-15-04-x64",
-    "size" : "1gb",
-    "region" : "nyc3",
-    "privatelyNetworked" : false,
-    "ipAddress" : "104.131.37.230",
-    "status" : "provisioned",
-    "environment" : [ "environment.name", "security.persistent.login.key", "db.name", "db.port", "db.user.name", "db.user.password", "mailgun.api.token", "mailgun.api.base.url", "mailgun.domain", "mailgun.from.account" ]
-  } ]
+  "servers": [
+    {
+      "id": null,
+      "name": "default-db",
+      "type": "db",
+      "image": "mongodb",
+      "size": "1gb",
+      "region": "nyc3",
+      "privatelyNetworked": false,
+      "ipAddress": null,
+      "status": "destroyed",
+      "environment": [
+        "aws.access.key.id",
+        "aws.secret.access.key",
+        "aws.s3.db.backup.bucket.name",
+        "db.name",
+        "db.port",
+        "db.admin.user.name",
+        "db.admin.user.password",
+        "db.user.name",
+        "db.user.password"
+      ]
+    },
+    {
+      "id": null,
+      "name": "default-app-1",
+      "type": "app",
+      "image": "ubuntu-15-04-x64",
+      "size": "1gb",
+      "region": "nyc3",
+      "privatelyNetworked": false,
+      "ipAddress": null,
+      "status": "destroyed",
+      "environment": [
+        "environment.name",
+        "security.persistent.login.key",
+        "db.name",
+        "db.port",
+        "db.user.name",
+        "db.user.password",
+        "mailgun.api.token",
+        "mailgun.api.base.url",
+        "mailgun.domain",
+        "mailgun.from.account"
+      ]
+    },
+    {
+      "id": null,
+      "name": "default-app-2",
+      "type": "app",
+      "image": "ubuntu-15-04-x64",
+      "size": "1gb",
+      "region": "nyc3",
+      "privatelyNetworked": false,
+      "ipAddress": null,
+      "status": "destroyed",
+      "environment": [
+        "environment.name",
+        "security.persistent.login.key",
+        "db.name",
+        "db.port",
+        "db.user.name",
+        "db.user.password",
+        "mailgun.api.token",
+        "mailgun.api.base.url",
+        "mailgun.domain",
+        "mailgun.from.account"
+      ]
+    },
+    {
+      "id": null,
+      "name": "default-rp",
+      "type": "rp",
+      "image": "ubuntu-15-04-x64",
+      "size": "512mb",
+      "region": "nyc3",
+      "privatelyNetworked": false,
+      "ipAddress": null,
+      "status": "destroyed",
+      "environment": []
+    }
+  ]
 }
