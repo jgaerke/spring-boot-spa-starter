@@ -34,7 +34,6 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
     if (!asList(environment.getActiveProfiles()).contains("production")) {
-      System.out.println("here");
       try {
         String resourceDirectory = "file://" + new File(".").getCanonicalPath() +
             "/app/src/main/resources/static/";

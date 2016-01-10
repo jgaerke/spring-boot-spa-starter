@@ -89,6 +89,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/app/register",
             "/app/recover-password",
             "/app/reset-password/**",
+            "/app/billing/**",
             "/api/**"
         )
         .permitAll()
