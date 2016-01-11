@@ -27,7 +27,7 @@ public class MongoConfigTest {
     mongoConfigProperties = new MongoConfigProperties();
     mongoConfigProperties.setHost("localhost");
     mongoConfigProperties.setDatabase("db");
-    mongoConfigProperties.setPort("27017");
+    mongoConfigProperties.setPort("10001");
     mongoConfigProperties.setUser("user");
     mongoConfigProperties.setPassword("password");
   }
@@ -41,7 +41,7 @@ public class MongoConfigTest {
 
     //then
     assertEquals("Should use specified host", "localhost", address.getHost());
-    assertEquals("Should use specified port", 27017, address.getPort());
+    assertEquals("Should use specified port", 10001, address.getPort());
     assertEquals("Should use specified db", "db", credentialsList.get(0).getSource());
     assertEquals("Should use specified user name", "user", credentialsList.get(0).getUserName());
     assertEquals("Should use specified user name", "password", new String(credentialsList.get(0).getPassword()));

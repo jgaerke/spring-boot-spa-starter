@@ -25113,7 +25113,7 @@ var app = (function () {
           ctrl = self.app.resolve(route.component);
         }
         ctrl.ctx = ctx;
-        self.componentLoader.mount(route.viewport || '#viewport', route.component || route.templateName, route.tag, ctrl);
+        self.componentLoader.mount(route.viewport || '#viewport', route.templateName || route.component, route.tag, ctrl);
 
         route.interceptors.forEach(function (interceptor) {
           if (!shortCircuited && interceptor.postHandle) {
@@ -25198,6 +25198,31 @@ var app = (function () {
   );
 
 })();
+(function () {
+  var AccountContainer = Module.extend({
+    init: function (account, router, $) {
+      this.account = account;
+      this.router = router;
+      this.$ = $;
+    },
+
+    onMount: function(tag) {
+
+    }
+  });
+
+  app.component(
+      'AccountContainer',
+      AccountContainer,
+      [
+        'Account',
+        'Router',
+          '$'
+      ]
+  );
+
+})();
+
 (function () {
   var Login = Module.extend({
 
@@ -25305,13 +25330,16 @@ var app = (function () {
   app.routes.push({
     path: '/profile',
     component: 'Profile',
-    tag: 'profile'
+    tag: 'profile',
+    authenticate: true
   });
 
   app.routes.push({
+    templateName: 'profileEdit',
     path: '/profile/edit',
     component: 'Profile',
-    tag: 'profile-edit'
+    tag: 'profile-edit',
+    authenticate: true
   });
 
 })();

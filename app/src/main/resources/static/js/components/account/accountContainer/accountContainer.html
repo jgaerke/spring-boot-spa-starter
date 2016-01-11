@@ -1,0 +1,25 @@
+<account-container>
+  <h1 class="ui header">Account Info</h1>
+  <div class="ui pointing menu">
+    <a class="active item">
+      Profile
+    </a>
+    <a class="item">
+      Billing
+    </a>
+    <a class="item">
+      Team
+    </a>
+  </div>
+  <div class="ui segment">
+    <p></p>
+  </div>
+
+  <yield/>
+  <script>
+    var accountContainer = this.accountContainer = app.resolve('AccountContainer');
+    this.on('mount', function () {
+      accountContainer.onMount(this);
+    });
+  </script>
+</account-container>

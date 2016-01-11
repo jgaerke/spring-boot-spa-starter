@@ -74,7 +74,7 @@ public class Application {
     System.out.println();
     System.out.println();
     System.out.println("APPLICATION PROPERTIES:");
-    System.out.println();
+    System.out.println("------------------------------------------------------------------");
 
     MongoConfigProperties mongoProperties = applicationContext.getBean(MongoConfigProperties.class);
     print("mongo.host", mongoProperties.getHost());
@@ -99,6 +99,7 @@ public class Application {
     print("spring.jackson.serialization-inclusion", environment.getProperty("spring.jackson.serialization-inclusion"));
     String activeProfiles = join(environment.getActiveProfiles());
     print("spring.profiles.active", !isNullOrEmpty(activeProfiles) ? activeProfiles : "default");
+    System.out.println("------------------------------------------------------------------");
   }
 
   private static void print(String property, Object value) {

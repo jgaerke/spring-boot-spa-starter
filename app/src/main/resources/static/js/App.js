@@ -23,10 +23,10 @@ var app = (function () {
       typeRegistry[name] = type;
     },
 
-    component: function (name, type, dependencies) {
+    component: function (name, type, dependencies, tag) {
       type.dependencies = dependencies || [];
       typeRegistry[name] = type;
-      this.components.push(name.toLowerCase());
+      this.components.push(tag || name);
     },
 
     checkForCircularDependency: function (typeName, dependencyName) {

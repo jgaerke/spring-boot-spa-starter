@@ -1,11 +1,13 @@
 <profile>
   <container>
-   <div>
-     Profile!
-   </div>
+    <account-container>
+      <div>
+        Profile!
+      </div>
+    </account-container>
   </container>
   <script>
-    var profile = this.profile = this.tags.container.profile = opts;
+    var profile = this.profile = opts;
     this.on('mount', function () {
       profile.onMount(this);
     });
