@@ -1,17 +1,17 @@
-<profile>
+<organization>
   <container>
     <account-container>
       <div>
         <div class="ui segment">
-          Profile!
+          Billing!
         </div>
       </div>
     </account-container>
   </container>
   <script>
-    var profile = this.profile = this.tags.container.tags['account-container'].profile = opts;
+    var organization = this.organization = this.tags.container.tags['account-container'].organization = opts;
     this.on('mount', function () {
-      profile.onMount(this);
+      organization.onMount(this);
     });
   </script>
-</profile>
+</organization>

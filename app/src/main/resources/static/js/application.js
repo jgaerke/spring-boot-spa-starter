@@ -24715,10 +24715,10 @@ var app = (function () {
       typeRegistry[name] = type;
     },
 
-    component: function (name, type, dependencies) {
+    component: function (name, type, dependencies, tag) {
       type.dependencies = dependencies || [];
       typeRegistry[name] = type;
-      this.components.push(name.toLowerCase());
+      this.components.push(tag || name);
     },
 
     checkForCircularDependency: function (typeName, dependencyName) {
@@ -25124,7 +25124,7 @@ var app = (function () {
     },
 
     onRegisterRoute: function (route) {
-      this.routes[route.name || route.component || route.templateName] = route;
+      this.routes[route.name || route.templateName || route.component] = route;
       this.page(route.path, this.onRouteChange(route));
     },
 
@@ -25207,7 +25207,11 @@ var app = (function () {
     },
 
     onMount: function(tag) {
-
+      this.tag = tag;
+      this.isProfileTabActive = this.router.isCurrent('Profile');
+      this.isBillingTabActive = this.router.isCurrent('Billing');
+      //this.isOrganizationActive = this.router.isCurrent('Organization');
+      this.tag.update();
     }
   });
 
@@ -25218,8 +25222,53 @@ var app = (function () {
         'Account',
         'Router',
           '$'
+      ],
+      'account-container'
+  );
+
+})();
+
+(function () {
+  var Billing = Module.extend({
+
+    init: function ($, errorHandler, router, account) {
+      this.$ = $;
+      this.errorHandler = errorHandler;
+      this.router = router;
+      this.account = account;
+    },
+
+    onMount: function (tag) {
+      this.tag = tag;
+    }
+  });
+
+
+  app.component(
+      'Billing',
+      Billing,
+      [
+        '$',
+        'ErrorHandler',
+        'Router',
+        'Account'
       ]
   );
+
+  app.routes.push({
+    path: '/billing',
+    component: 'Billing',
+    tag: 'billing',
+    authenticate: true
+  });
+
+  app.routes.push({
+    templateName: 'billingEdit',
+    path: '/billing/edit',
+    component: 'Billing',
+    tag: 'billing-edit',
+    authenticate: true
+  });
 
 })();
 
@@ -25296,6 +25345,50 @@ var app = (function () {
     path: '/login/password-reset-success',
     component: 'Login',
     tag: 'login'
+  });
+
+})();
+
+(function () {
+  var Organization = Module.extend({
+
+    init: function ($, errorHandler, router, account) {
+      this.$ = $;
+      this.errorHandler = errorHandler;
+      this.router = router;
+      this.account = account;
+    },
+
+    onMount: function (tag) {
+      this.tag = tag;
+    }
+  });
+
+
+  app.component(
+      'Organization',
+      Organization,
+      [
+        '$',
+        'ErrorHandler',
+        'Router',
+        'Account'
+      ]
+  );
+
+  app.routes.push({
+    path: '/organization',
+    component: 'Organization',
+    tag: 'organization',
+    authenticate: true
+  });
+
+  app.routes.push({
+    templateName: 'organizationEdit',
+    path: '/organization/edit',
+    component: 'Organization',
+    tag: 'organization-edit',
+    authenticate: true
   });
 
 })();

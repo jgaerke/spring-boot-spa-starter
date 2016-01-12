@@ -48,7 +48,7 @@
     },
 
     onRegisterRoute: function (route) {
-      this.routes[route.name || route.component || route.templateName] = route;
+      this.routes[route.name || route.templateName || route.component] = route;
       this.page(route.path, this.onRouteChange(route));
     },
 

@@ -1,18 +1,15 @@
 <account-container>
   <h1 class="ui header">Account Info</h1>
   <div class="ui pointing menu">
-    <a class="active item">
+    <a class="{ 'active': accountContainer.isProfileTabActive, 'item': true }" href="profile">
       Profile
     </a>
-    <a class="item">
+    <a class="{ 'active': accountContainer.isBillingTabActive, 'item': true }" href="billing">
       Billing
     </a>
-    <a class="item">
-      Team
+    <a class="{ 'active': accountContainer.isOrganizationTabActive, 'item': true }" href="organization">
+      Organization
     </a>
-  </div>
-  <div class="ui segment">
-    <p></p>
   </div>
 
   <yield/>

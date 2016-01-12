@@ -1,0 +1,13 @@
+<organization-edit>
+  <container>
+   <div>
+     Organization edit
+   </div>
+  </container>
+  <script>
+    var organization = this.organization = this.tags.container.tags['account-container'].organization  = opts;
+    this.on('mount', function () {
+      organization.onMount(this);
+    });
+  </script>
+</organization-edit>
