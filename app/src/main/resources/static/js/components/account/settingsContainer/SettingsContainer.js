@@ -1,9 +1,12 @@
 (function () {
-  var AccountContainer = Module.extend({
+  var SettingsContainer = Module.extend({
     init: function (account, router, $) {
       this.account = account;
       this.router = router;
       this.$ = $;
+      this.isProfileTabActive = true;
+      this.isBillingTabActive = false;
+      this.isOrganizationTabActive = false;
     },
 
     onMount: function(tag) {
@@ -16,14 +19,14 @@
   });
 
   app.component(
-      'AccountContainer',
-      AccountContainer,
+      'SettingsContainer',
+      SettingsContainer,
       [
         'Account',
         'Router',
           '$'
       ],
-      'account-container'
+      'settings-container'
   );
 
 })();

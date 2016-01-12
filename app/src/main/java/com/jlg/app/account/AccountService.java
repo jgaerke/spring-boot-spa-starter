@@ -4,10 +4,7 @@ import com.jlg.app.account.exception.AccountEmailConflictException;
 import com.jlg.app.account.exception.AccountPrincipalMismatchException;
 import com.jlg.app.account.exception.EmailNotFoundException;
 import com.jlg.app.account.exception.PasswordResetTokenNotFoundException;
-import com.jlg.app.account.request.PasswordChangeRequest;
-import com.jlg.app.account.request.PasswordRecoveryRequest;
-import com.jlg.app.account.request.PasswordResetRequest;
-import com.jlg.app.account.request.RegistrationRequest;
+import com.jlg.app.account.request.*;
 import com.jlg.app.support.exception.MessageSendException;
 import com.jlg.app.support.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +61,15 @@ public class AccountService {
             passwordEncoder.encode(registrationRequest.getPassword())
         ).toAccount()
     );
+  }
+
+  public Account update(String existingEmail, AccountUpdateRequest accountUpdateRequest) {
+    Optional<Account> existing = accountRepository.findOneByEmail(existingEmail);
+    if (!existing.isPresent()) {
+      throw new EmailNotFoundException();
+    }
+
+    return accountRepository.save(accountUpdateRequest.copyToAccount(existing.get()));
   }
 
   public Account changePassword(PasswordChangeRequest passwordChangeRequest, String email) {
@@ -134,5 +140,9 @@ public class AccountService {
     }
 
     return true;
+  }
+
+  public Optional<Account> getByEmail(String email) {
+    return accountRepository.findOneByEmail(email);
   }
 }

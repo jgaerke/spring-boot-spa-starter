@@ -1,15 +1,15 @@
 <organization>
   <container>
-    <account-container>
+    <settings-container>
       <div>
         <div class="ui segment">
-          Billing!
+          Organization!
         </div>
       </div>
-    </account-container>
+    </settings-container>
   </container>
   <script>
-    var organization = this.organization = this.tags.container.tags['account-container'].organization = opts;
+    var organization = this.organization = this.tags.container.tags['settings-container'].organization = opts;
     this.on('mount', function () {
       organization.onMount(this);
     });

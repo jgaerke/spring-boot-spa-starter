@@ -1,9 +1,8 @@
 package com.jlg.app.account;
 
-import com.jlg.app.account.request.PasswordChangeRequest;
-import com.jlg.app.account.request.PasswordRecoveryRequest;
-import com.jlg.app.account.request.PasswordResetRequest;
-import com.jlg.app.account.request.RegistrationRequest;
+import com.jlg.app.account.exception.EmailNotFoundException;
+import com.jlg.app.account.request.*;
+import com.jlg.app.account.response.AccountResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,11 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.security.Principal;
+import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.PATCH;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
 @RequestMapping(value = "/api/accounts")
@@ -60,6 +59,24 @@ public class AccountController {
   @ResponseStatus(OK)
   public void recoverPassword(@Valid @RequestBody PasswordRecoveryRequest passwordRecoveryRequest) {
     accountService.sendPasswordResetInstructions(passwordRecoveryRequest.getEmail());
+  }
+
+  @RequestMapping(value = "/current", method = GET)
+  @ResponseStatus(OK)
+  public AccountResponse getCurrent(HttpServletRequest request) {
+    Optional<Account> current = accountService.getByEmail(request.getUserPrincipal().getName());
+    if (!current.isPresent()) {
+      throw new EmailNotFoundException();
+    }
+    Account account = current.get();
+    return AccountResponse.of(account.getEmail(), account.getFirst(), account.getLast());
+  }
+
+  @RequestMapping(method = PATCH)
+  @ResponseStatus(OK)
+  public void update(@Valid @RequestBody AccountUpdateRequest accountUpdateRequest, HttpServletRequest request) {
+    Account updated = accountService.update(request.getUserPrincipal().getName(), accountUpdateRequest);
+    setAuthToken(updated);
   }
 
   private void setAuthToken(Account account) {

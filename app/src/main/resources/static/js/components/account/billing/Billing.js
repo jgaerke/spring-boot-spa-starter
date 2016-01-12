@@ -26,7 +26,7 @@
   );
 
   app.routes.push({
-    path: '/billing',
+    path: '/settings/billing',
     component: 'Billing',
     tag: 'billing',
     authenticate: true
@@ -34,7 +34,7 @@
 
   app.routes.push({
     templateName: 'billingEdit',
-    path: '/billing/edit',
+    path: '/settings/billing/edit',
     component: 'Billing',
     tag: 'billing-edit',
     authenticate: true

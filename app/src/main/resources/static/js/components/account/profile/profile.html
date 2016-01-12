@@ -1,17 +1,56 @@
 <profile>
   <container>
-    <account-container>
-      <div>
-        <div class="ui segment">
-          Profile!
+    <settings-container>
+      <div class="ui grid">
+        <div class="five wide column">
+          <div class="ui segment">
+            <h3 class="ui header">Manage your profile</h3>
+            <form class="ui form" novalidate="novalidate" role="form" onsubmit="{ profile.submit }">
+              <div class="field">
+                <div class="ui toggle checkbox">
+                  <input type="checkbox" name="toggle" onchange="{ profile.toggle }" checked="{ profile.editing }">
+                  <label if="{ !profile.editing }">Toggle to edit</label>
+                  <label if="{ profile.editing }">Toggle to cancel</label>
+                </div>
+              </div>
+              <div class="field">
+                <label>Email</label>
+                <div class="{ui: true, transparent: !profile.editing, input: true}">
+                  <input type="text" placeholder="n/a" value="{ profile.data.email }">
+                </div>
+              </div>
+              <div class="field">
+                <label>First Name</label>
+                <div class="{ui: true, transparent: !profile.editing, input: true}">
+                  <input type="text" placeholder="n/a" value="{ profile.data.first }">
+                </div>
+              </div>
+              <div class="field">
+                <label>Last Name</label>
+
+                <div class="{ui: true, transparent: !profile.editing, input: true}">
+                  <input type="text" placeholder="n/a" value="{ profile.data.last }">
+                </div>
+              </div>
+              <div class="ui fluid large teal submit button" if="{ profile.editing }">Save</div>
+            </form>
+          </div>
+          <div class="ui segment">
+            <h3 class="ui header">Deactivate your account</h3>
+            <p>This will delete all of your data</p>
+            <button class="ui red basic button">Deactivate</button>
+          </div>
         </div>
       </div>
-    </account-container>
+    </settings-container>
   </container>
   <script>
-    var profile = this.profile = this.tags.container.tags['account-container'].profile = opts;
+    var profile = this.profile = this.tags.container.tags['settings-container'].profile = opts;
     this.on('mount', function () {
       profile.onMount(this);
+    });
+    this.on('unmount', function () {
+      profile.onUnMount();
     });
   </script>
 </profile>

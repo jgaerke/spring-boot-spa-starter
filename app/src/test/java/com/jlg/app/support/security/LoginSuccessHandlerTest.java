@@ -14,7 +14,7 @@ import static org.mockito.Mockito.verify;
 public class LoginSuccessHandlerTest {
 
   @Test
-  public void testOnAuthenticationSuccess() throws Exception {
+  public void should_handle_login_success() throws Exception {
     //given
     LoginSuccessHandler loginSuccessHandler = new LoginSuccessHandler();
     HttpServletResponse response = mock(HttpServletResponse.class);

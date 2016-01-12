@@ -24755,7 +24755,7 @@ var app = (function () {
     },
 
     run: function(authenticated) {
-      this.value('authenticated', authenticated || false);
+      this.value('authenticated', authenticated);
       this.value('window', window);
       this.value('$', $);
       this.value('riot', riot);
@@ -24763,7 +24763,6 @@ var app = (function () {
       this.value('components', app.components);
       this.value('app', app);
       this.value('console', console);
-
       var router = app.resolve('Router');
       router.register(this.routes).start('/app');
     }
@@ -24826,7 +24825,16 @@ var app = (function () {
         passwordResetToken: token,
         password: password
       });
+    },
+
+    getCurrent: function() {
+      return this.http.get('/api/accounts/current');
+    },
+
+    update: function(account) {
+      return this.http.patch('/api/accounts', account);
     }
+
   });
 
   app.service(
@@ -25082,6 +25090,7 @@ var app = (function () {
       this.page = page;
       this.riot = riot;
       this.app = app;
+      this.current = null;
       this.componentLoader = componentLoader;
       this.routes = {};
     },
@@ -25090,6 +25099,8 @@ var app = (function () {
       var self = this;
       return function (ctx) {
         var shortCircuited = false;
+
+        self.current = ctx;
 
         if (route.authenticate && !self.app.resolve('authenticated')) {
           return self.page.redirect('/login');
@@ -25101,23 +25112,25 @@ var app = (function () {
 
         route.interceptors.forEach(function (interceptor) {
           if (!shortCircuited && interceptor.preHandle) {
-            shortCircuited = !interceptor.preHandle.call(this, route, self.page);
+            shortCircuited = !interceptor.preHandle.call(self, route, self.page);
           }
         });
 
         if (shortCircuited) {
           return;
         }
+
         var ctrl = {};
         if (route.component) {
           ctrl = self.app.resolve(route.component);
         }
+
         ctrl.ctx = ctx;
         self.componentLoader.mount(route.viewport || '#viewport', route.templateName || route.component, route.tag, ctrl);
 
         route.interceptors.forEach(function (interceptor) {
           if (!shortCircuited && interceptor.postHandle) {
-            shortCircuited = !interceptor.postHandle.call(this, route, self.page);
+            shortCircuited = !interceptor.postHandle.call(self, route, self.page);
           }
         });
       }
@@ -25154,8 +25167,7 @@ var app = (function () {
       if (!this.routes[name]) {
         throw new Error("The route: '" + name + "' is not registered");
       }
-      var path = this.getPath(this.routes[name]);
-      return this.window.location.href.indexOf(path) > -1;
+      return this.current.path.toLowerCase() == this.getPath(this.routes[name]).toLowerCase();
     },
 
     getPath: function (route, params) {
@@ -25198,36 +25210,6 @@ var app = (function () {
   );
 
 })();
-(function () {
-  var AccountContainer = Module.extend({
-    init: function (account, router, $) {
-      this.account = account;
-      this.router = router;
-      this.$ = $;
-    },
-
-    onMount: function(tag) {
-      this.tag = tag;
-      this.isProfileTabActive = this.router.isCurrent('Profile');
-      this.isBillingTabActive = this.router.isCurrent('Billing');
-      //this.isOrganizationActive = this.router.isCurrent('Organization');
-      this.tag.update();
-    }
-  });
-
-  app.component(
-      'AccountContainer',
-      AccountContainer,
-      [
-        'Account',
-        'Router',
-          '$'
-      ],
-      'account-container'
-  );
-
-})();
-
 (function () {
   var Billing = Module.extend({
 
@@ -25401,10 +25383,66 @@ var app = (function () {
       this.errorHandler = errorHandler;
       this.router = router;
       this.account = account;
+      this.data = {};
+      this.editing = false;
     },
 
     onMount: function (tag) {
       this.tag = tag;
+      this.form = this.$('form', tag.root).form({
+        inline: false,
+        fields: {
+          email: ['email', 'empty']
+        }
+      });
+
+      this.account.getCurrent().done(this.onGetCurrentSuccess).fail(this.onGetCurrentError);
+    },
+
+    onGetCurrentSuccess: function (profile, status) {
+      this.data = profile;
+      this.tag.update();
+    },
+
+    onGetCurrentError: function (jqXHR, textStatus, errorThrown) {
+      //this.errorHandler.handle(jqXHR.status, {
+      //  401: { form: this.form, text: 'Email address or password invalid.' }
+      //});
+      //this.tag.update();
+      console.log(jqXHR);
+      this.tag.update();
+    },
+
+    onUpdateAccountSuccess: function (data, status) {
+      console.log('success');
+      this.editing = false;
+      this.tag.update();
+    },
+
+    onUpdateAccountError: function (jqXHR, textStatus, errorThrown) {
+      //this.errorHandler.handle(jqXHR.status, {
+      //  401: { form: this.form, text: 'Email address or password invalid.' }
+      //});
+      //this.tag.update();
+      console.log(jqXHR);
+      this.tag.update();
+    },
+
+    toggle: function(e) {
+      this.editing = e.target.checked;
+      this.tag.update();
+    },
+
+    getInputs: function (form) {
+      return {
+        email: form.email.value,
+        first: form.first.value,
+        last: form.last.value
+      }
+    },
+
+    submit: function(e) {
+      this.account.update(this.getInputs(e.target)).done(this.onUpdateAccountSuccess).fail(this.onUpdateAccountError);
     }
   });
 
@@ -25540,7 +25578,7 @@ var app = (function () {
     },
 
     onSuccess: function () {
-      this.router.go('Home');
+      this.router.go('Home', null, true);
     },
 
     onError: function (jqXHR, textStatus, errorThrown) {
@@ -25639,6 +25677,39 @@ var app = (function () {
     component: 'ResetPassword',
     tag: 'reset-password'
   });
+
+})();
+
+(function () {
+  var SettingsContainer = Module.extend({
+    init: function (account, router, $) {
+      this.account = account;
+      this.router = router;
+      this.$ = $;
+      this.isProfileTabActive = true;
+      this.isBillingTabActive = false;
+      this.isOrganizationTabActive = false;
+    },
+
+    onMount: function(tag) {
+      this.tag = tag;
+      this.isProfileTabActive = this.router.isCurrent('Profile');
+      this.isBillingTabActive = this.router.isCurrent('Billing');
+      this.isOrganizationTabActive = this.router.isCurrent('Organization');
+      this.tag.update();
+    }
+  });
+
+  app.component(
+      'SettingsContainer',
+      SettingsContainer,
+      [
+        'Account',
+        'Router',
+          '$'
+      ],
+      'settings-container'
+  );
 
 })();
 

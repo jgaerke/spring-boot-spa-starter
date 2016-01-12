@@ -26,7 +26,7 @@
   );
 
   app.routes.push({
-    path: '/organization',
+    path: '/settings/organization',
     component: 'Organization',
     tag: 'organization',
     authenticate: true
@@ -34,7 +34,7 @@
 
   app.routes.push({
     templateName: 'organizationEdit',
-    path: '/organization/edit',
+    path: '/settings/organization/edit',
     component: 'Organization',
     tag: 'organization-edit',
     authenticate: true

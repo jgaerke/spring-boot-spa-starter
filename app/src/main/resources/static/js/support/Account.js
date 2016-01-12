@@ -53,7 +53,16 @@
         passwordResetToken: token,
         password: password
       });
+    },
+
+    getCurrent: function() {
+      return this.http.get('/api/accounts/current');
+    },
+
+    update: function(account) {
+      return this.http.patch('/api/accounts', account);
     }
+
   });
 
   app.service(

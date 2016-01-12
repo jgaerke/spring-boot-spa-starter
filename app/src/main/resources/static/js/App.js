@@ -63,7 +63,7 @@ var app = (function () {
     },
 
     run: function(authenticated) {
-      this.value('authenticated', authenticated || false);
+      this.value('authenticated', authenticated);
       this.value('window', window);
       this.value('$', $);
       this.value('riot', riot);
@@ -71,7 +71,6 @@ var app = (function () {
       this.value('components', app.components);
       this.value('app', app);
       this.value('console', console);
-
       var router = app.resolve('Router');
       router.register(this.routes).start('/app');
     }

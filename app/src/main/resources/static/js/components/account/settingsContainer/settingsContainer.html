@@ -1,0 +1,22 @@
+<settings-container>
+  <h1 class="ui header">Settings</h1>
+  <div class="ui pointing menu">
+    <a class="{ 'active': settingsContainer.isProfileTabActive, 'item': true }" href="settings/profile">
+      Profile
+    </a>
+    <a class="{ 'active': settingsContainer.isBillingTabActive, 'item': true }" href="settings/billing">
+      Billing
+    </a>
+    <a class="{ 'active': settingsContainer.isOrganizationTabActive, 'item': true }" href="settings/organization">
+      Organization
+    </a>
+  </div>
+
+  <yield/>
+  <script>
+    var settingsContainer = this.settingsContainer = app.resolve('SettingsContainer');
+    this.on('mount', function () {
+      settingsContainer.onMount(this);
+    });
+  </script>
+</settings-container>

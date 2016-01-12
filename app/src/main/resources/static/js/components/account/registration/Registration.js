@@ -36,7 +36,7 @@
     },
 
     onSuccess: function () {
-      this.router.go('Home');
+      this.router.go('Home', null, true);
     },
 
     onError: function (jqXHR, textStatus, errorThrown) {

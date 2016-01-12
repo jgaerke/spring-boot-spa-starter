@@ -6,6 +6,7 @@
       this.page = page;
       this.riot = riot;
       this.app = app;
+      this.current = null;
       this.componentLoader = componentLoader;
       this.routes = {};
     },
@@ -14,6 +15,8 @@
       var self = this;
       return function (ctx) {
         var shortCircuited = false;
+
+        self.current = ctx;
 
         if (route.authenticate && !self.app.resolve('authenticated')) {
           return self.page.redirect('/login');
@@ -25,23 +28,25 @@
 
         route.interceptors.forEach(function (interceptor) {
           if (!shortCircuited && interceptor.preHandle) {
-            shortCircuited = !interceptor.preHandle.call(this, route, self.page);
+            shortCircuited = !interceptor.preHandle.call(self, route, self.page);
           }
         });
 
         if (shortCircuited) {
           return;
         }
+
         var ctrl = {};
         if (route.component) {
           ctrl = self.app.resolve(route.component);
         }
+
         ctrl.ctx = ctx;
         self.componentLoader.mount(route.viewport || '#viewport', route.templateName || route.component, route.tag, ctrl);
 
         route.interceptors.forEach(function (interceptor) {
           if (!shortCircuited && interceptor.postHandle) {
-            shortCircuited = !interceptor.postHandle.call(this, route, self.page);
+            shortCircuited = !interceptor.postHandle.call(self, route, self.page);
           }
         });
       }
@@ -78,8 +83,7 @@
       if (!this.routes[name]) {
         throw new Error("The route: '" + name + "' is not registered");
       }
-      var path = this.getPath(this.routes[name]);
-      return this.window.location.href.indexOf(path) > -1;
+      return this.current.path.toLowerCase() == this.getPath(this.routes[name]).toLowerCase();
     },
 
     getPath: function (route, params) {
