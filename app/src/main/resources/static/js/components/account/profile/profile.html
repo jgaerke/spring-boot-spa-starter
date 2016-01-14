@@ -1,9 +1,11 @@
 <profile>
   <container>
     <settings-container>
-      <div class="ui grid">
-        <div class="column">
-          <div class="ui segment">
+
+      <div class="ui segment">
+
+        <div class="ui grid">
+          <div class="five wide column">
             <h3 class="ui header">Manage your profile</h3>
             <form class="ui form" novalidate="novalidate" role="form" onsubmit="{ profile.submit }">
               <div class="field">
@@ -27,20 +29,21 @@
               </div>
               <div class="field">
                 <label>Last Name</label>
-
                 <div class="{ui: true, transparent: !profile.editing, input: true}">
                   <input type="text" placeholder="n/a" value="{ profile.data.last }">
                 </div>
               </div>
               <div class="ui fluid large teal submit button" if="{ profile.editing }">Save</div>
+              <div class="ui error message"></div>
             </form>
           </div>
-          <div class="ui segment">
-            <h3 class="ui header">Deactivate your account</h3>
-            <p>This will delete all of your data</p>
-            <button class="ui red basic button">Deactivate</button>
-          </div>
         </div>
+
+      </div>
+      <div class="ui segment">
+        <h3 class="ui header">Deactivate your account</h3>
+        <p>This will delete all of your data</p>
+        <button class="ui red basic button">Deactivate</button>
       </div>
     </settings-container>
   </container>

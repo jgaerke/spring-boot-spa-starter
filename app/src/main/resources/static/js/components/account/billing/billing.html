@@ -3,7 +3,106 @@
     <settings-container>
       <div>
         <div class="ui segment">
-          Billing!
+          <div class="ui grid">
+            <div class="10 wide column tablet computer only">
+
+
+            </div>
+          </div>
+          <table class="ui very basic celled striped large table">
+            <tbody>
+            <tr>
+              <td class="ui center aligned four wide">
+                <h1 class="ui header">Basic</h1>
+                <h2 class="ui teal header">49.99</h2>
+                <p>/per month</p>
+              </td>
+              <td class="ui center aligned four wide">
+                <h1 class="ui header">Pro</h1>
+                <h2 class="ui teal header">99.99</h2>
+                <p>/per month</p>
+              </td>
+              <td class="ui center aligned four wide">
+                <h1 class="ui header">Premium</h1>
+                <h2 class="ui teal header">149.99</h2>
+                <p>/per month</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <i class="circular checkmark teal inverted icon"></i>
+              </td>
+              <td>
+                <i class="circular remove grey inverted icon"></i>
+              </td>
+              <td>Cell</td>
+            </tr>
+            <tr>
+              <td>Cell</td>
+              <td>Cell</td>
+              <td>Cell</td>
+            </tr>
+            <tr>
+              <td>Cell</td>
+              <td>Cell</td>
+              <td>Cell</td>
+            </tr>
+            </tbody>
+            <tfoot>
+            <tr>
+              <td class="ui center aligned">
+                <button class="ui teal button">
+                  <i class="add to cart icon"></i>
+                  Subscribe
+                </button>
+              </td>
+              <td class="ui center aligned">
+                <button class="ui teal button">
+                  <i class="add to cart icon"></i>
+                  Subscribe
+                </button>
+              </td>
+              <td class="ui center aligned">
+                <button class="ui teal button">
+                  <i class="add to cart icon"></i>
+                  Subscribe
+                </button>
+              </td>
+            </tr>
+            </tfoot>
+          </table>
+
+
+          <div class="ui grid">
+            <div class="five wide column">
+
+              <form action="" method="POST" id="payment-form" class="ui form" novalidate="novalidate" role="form">
+                <div class="field">
+                  <label>Card Number</label>
+
+                  <div class="{ui: true, transparent: false, input: true}">
+                    <input type="tel" class="card-number" size="20" placeholder="•••• •••• •••• ••••" pattern="\d*"/>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>CVC</label>
+
+                  <div class="{ui: true, transparent: false, input: true}">
+                    <input type="text" class="card-cvc" size="4" data-stripe="cvc"/>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Expiration (MM/YYYY)</label>
+
+                  <div class="{ui: true, transparent: false, input: true}">
+                    <input type="text" class="card-exp" size="4" data-stripe="exp-year"/>
+                  </div>
+                </div>
+                <button type="submit" class="ui fluid large teal submit button">Add Card</button>
+                <div class="ui error message"></div>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     </settings-container>
