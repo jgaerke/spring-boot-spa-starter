@@ -1,13 +1,14 @@
 (function () {
-  var Router = Module.extend({
+  var Router = Class.extend({
 
-    init: function (window, page, riot, app, componentLoader) {
+    init: function (window, page, riot, app, componentLoader, $) {
       this.window = window;
       this.page = page;
       this.riot = riot;
       this.app = app;
       this.current = null;
       this.componentLoader = componentLoader;
+      this.$ = $;
       this.routes = {};
     },
 
@@ -42,7 +43,10 @@
         }
 
         ctrl.ctx = ctx;
-        self.componentLoader.mount(route.viewport || '#viewport', route.templateName || route.component, route.tag, ctrl);
+        var viewport = route.viewport || '#viewport';
+        self.componentLoader.mount(viewport, route.templateName || route.component, route.tag, ctrl, function() {
+          self.window.scrollTo(0, 0);
+        });
 
         route.interceptors.forEach(function (interceptor) {
           if (!shortCircuited && interceptor.postHandle) {
@@ -58,7 +62,7 @@
     },
 
     register: function (routes) {
-      var sorted = routes.sort(function(a, b){
+      var sorted = routes.sort(function (a, b) {
         a.index = a.index || 0;
         b.index = b.index || 0;
         if (a.index > b.index) {
@@ -79,7 +83,7 @@
       this.page.start();
     },
 
-    isCurrent: function(name) {
+    isCurrent: function (name) {
       if (!this.routes[name]) {
         throw new Error("The route: '" + name + "' is not registered");
       }
@@ -101,7 +105,7 @@
       if (name.indexOf('http') == 0 || name.indexOf('/') == 0) {
         return this.window.location.href = name;
       }
-      if(reload) {
+      if (reload) {
         return this.window.location.href = this.base + this.routes[name].path;
       }
       if (!this.routes[name]) {
@@ -121,7 +125,8 @@
         'page',
         'riot',
         'app',
-        'ComponentLoader'
+        'ComponentLoader',
+        '$'
       ]
   );
 

@@ -59,10 +59,13 @@ var app = (function () {
       }
       var dependencies = this.getDependencyInstances(name, typeRegistry[name]);
       dependencies.splice(0, 0, null);
-      return instanceRegistry[name] = new (Function.prototype.bind.apply(typeRegistry[name], dependencies));
+      var instance = instanceRegistry[name] = new (Function.prototype.bind.apply(typeRegistry[name], dependencies));
+      this.riot.observable(instance);
+      return instance;
     },
 
     run: function(authenticated) {
+      this.riot = riot;
       this.value('authenticated', authenticated);
       this.value('window', window);
       this.value('$', $);

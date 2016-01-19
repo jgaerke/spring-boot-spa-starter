@@ -1,5 +1,5 @@
 (function () {
-  var Organization = Module.extend({
+  var Organization = Component.extend({
 
     init: function ($, errorHandler, router, account) {
       this.$ = $;
@@ -7,10 +7,6 @@
       this.router = router;
       this.account = account;
     },
-
-    onMount: function (tag) {
-      this.tag = tag;
-    }
   });
 
 
@@ -29,14 +25,6 @@
     path: '/settings/organization',
     component: 'Organization',
     tag: 'organization',
-    authenticate: true
-  });
-
-  app.routes.push({
-    templateName: 'organizationEdit',
-    path: '/settings/organization/edit',
-    component: 'Organization',
-    tag: 'organization-edit',
     authenticate: true
   });
 

@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.security.Principal;
 import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.OK;
@@ -69,7 +68,13 @@ public class AccountController {
       throw new EmailNotFoundException();
     }
     Account account = current.get();
-    return AccountResponse.of(account.getEmail(), account.getFirst(), account.getLast());
+    return AccountResponse.builder()
+        .email(account.getEmail())
+        .first(account.getFirst())
+        .last(account.getLast())
+        .plan(account.getPlan())
+        .trialExpirationDate(account.getTrialExpirationDate())
+        .build();
   }
 
   @RequestMapping(method = PATCH)

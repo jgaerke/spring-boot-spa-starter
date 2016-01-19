@@ -18,19 +18,19 @@
               <div class="field">
                 <label>Email</label>
                 <div class="{ui: true, transparent: !profile.editing, input: true}">
-                  <input type="text" placeholder="n/a" value="{ profile.data.email }">
+                  <input type="text" placeholder="n/a" value="{ profile.profile.email }">
                 </div>
               </div>
               <div class="field">
                 <label>First Name</label>
                 <div class="{ui: true, transparent: !profile.editing, input: true}">
-                  <input type="text" placeholder="n/a" value="{ profile.data.first }">
+                  <input type="text" placeholder="n/a" value="{ profile.profile.first }">
                 </div>
               </div>
               <div class="field">
                 <label>Last Name</label>
                 <div class="{ui: true, transparent: !profile.editing, input: true}">
-                  <input type="text" placeholder="n/a" value="{ profile.data.last }">
+                  <input type="text" placeholder="n/a" value="{ profile.profile.last }">
                 </div>
               </div>
               <div class="ui fluid large teal submit button" if="{ profile.editing }">Save</div>
@@ -48,12 +48,6 @@
     </settings-container>
   </container>
   <script>
-    var profile = this.profile = this.tags.container.tags['settings-container'].profile = opts;
-    this.on('mount', function () {
-      profile.onMount(this);
-    });
-    this.on('unmount', function () {
-      profile.onUnMount();
-    });
+    this.profile = (this.tags.container.tags['settings-container'].profile = opts).wire(this);
   </script>
 </profile>

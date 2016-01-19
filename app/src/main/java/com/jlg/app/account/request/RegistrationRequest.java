@@ -9,8 +9,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.Size;
 
-import static com.google.common.collect.Lists.newArrayList;
-
 @Getter
 @Wither
 public class RegistrationRequest {
@@ -31,19 +29,7 @@ public class RegistrationRequest {
   }
 
   public Account toAccount() {
-    return new Account(
-        null,
-        this.email,
-        this.password,
-        null,
-        null,
-        null,
-        false,
-        false,
-        false,
-        false,
-        newArrayList()
-    );
+    return Account.builder().email(email).password(password).build();
   }
 }
 

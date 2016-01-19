@@ -1,18 +1,17 @@
 (function () {
-  var Profile = Module.extend({
+  var Profile = Component.extend({
 
     init: function ($, errorHandler, router, account) {
       this.$ = $;
       this.errorHandler = errorHandler;
       this.router = router;
       this.account = account;
-      this.data = {};
+      this.profile = {};
       this.editing = false;
     },
 
-    onMount: function (tag) {
-      this.tag = tag;
-      this.form = this.$('form', tag.root).form({
+    onAfterMount: function () {
+      this.form = this.$('form', this.tag.root).form({
         inline: false,
         fields: {
           email: ['email', 'empty']
@@ -22,12 +21,12 @@
       this.account.getCurrent().done(this.onGetCurrentSuccess).fail(this.onGetCurrentError);
     },
 
-    onUnMount: function () {
+    onAfterUnMount: function () {
       this.reset();
     },
 
     onGetCurrentSuccess: function (profile, status) {
-      this.data = profile;
+      this.profile = profile;
       this.tag.update();
     },
 
@@ -40,7 +39,7 @@
       this.tag.update();
     },
 
-    onUpdateAccountSuccess: function (data, status) {
+    onUpdateAccountSuccess: function (profile, status) {
       console.log('success');
       this.editing = false;
       this.tag.update();
@@ -57,16 +56,16 @@
     toggle: function (e) {
       this.editing = e.target.checked;
       if(this.editing) {
-        this.original = this.$.extend({}, this.data);
+        this.originalProfile = this.$.extend({}, this.profile);
       } else {
-        this.data = this.$.extend(this.data, this.getInputs(e.target.form));
+        this.profile = this.$.extend(this.profile, this.getInputs(e.target.form));
         this.tag.update();
       }
     },
 
     reset: function() {
       this.editing = false;
-      this.data = this.original || this.data;
+      this.profile = this.originalProfile || this.profile;
       this.tag.update();
     },
 

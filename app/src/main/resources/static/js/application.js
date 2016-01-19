@@ -25253,86 +25253,32 @@ var Class = (function() {
   return Class;
 
 })();
-var Module = (function() {
+var Component = (function() {
   return Class.extend({
-
-    ensureLocals: function () {
-      if (this.ensured) return;
-      this.callbacks = {};
-      this._id = 0;
-      this.ensured = true;
-    },
-
-    on: function (events, fn) {
-      var self = this;
-      this.ensureLocals();
-      if (typeof fn == 'function') {
-        fn._id = typeof fn._id == 'undefined' ? this._id++ : fn._id
-
-        events.replace(/\S+/g, function (name, pos) {
-          (self.callbacks[name] = self.callbacks[name] || []).push(fn)
-          fn.typed = pos > 0
-        })
-      }
+    wire: function(tag) {
+      this.tag = tag;
+      if(this.onBeforeMount) this.tag.on('before-mount', this.onBeforeMount);
+      if(this.onAfterMount) this.tag.on('mount', this.onAfterMount);
+      if(this.onBeforeUpdate) this.tag.on('update', this.onBeforeUpdate);
+      if(this.onAfterUpdate) this.tag.on('updated', this.onAfterUpdate);
+      if(this.onBeforeUnMount) this.tag.on('before-unmount', this.onBeforeUnMount);
+      if(this.onAfterUnMount) this.tag.on('unmount', this.onAfterUnMount);
+      this.tag.on('unmount', this.unwire);
       return this;
     },
 
-    off: function (events, fn) {
-      var self = this;
-      this.ensureLocals();
-      if (events == '*') this.callbacks = {}
-      else {
-        events.replace(/\S+/g, function (name) {
-          if (fn) {
-            var arr = self.callbacks[name]
-            for (var i = 0, cb; (cb = arr && arr[i]); ++i) {
-              if (cb._id == fn._id) {
-                arr.splice(i, 1);
-                i--
-              }
-            }
-          } else {
-            self.callbacks[name] = []
-          }
-        })
-      }
+    unwire: function() {
+      if(this.onBeforeMount) this.tag.off('before-mount', this.onBeforeMount);
+      if(this.onAfterMount) this.tag.off('mount', this.onAfterMount);
+      if(this.onBeforeUpdate) this.tag.off('update', this.onBeforeUpdate);
+      if(this.onAfterUpdate) this.tag.off('updated', this.onAfterUpdate);
+      if(this.onBeforeUnMount) this.tag.off('before-unmount', this.onBeforeUnMount);
+      if(this.onAfterUnMount) this.tag.off('unmount', this.onAfterUnMount);
+      this.tag.off('mount', this.unwire);
+      delete this.tag;
       return this;
-    },
-
-    one: function (name, fn) {
-      this.ensureLocals();
-      function on() {
-        this.off(name, on)
-        fn.apply(this, arguments)
-      }
-
-      return this.on(name, on)
-    },
-
-    trigger: function (name) {
-      this.ensureLocals();
-      var args = [].slice.call(arguments, 1),
-          fns = this.callbacks[name] || []
-
-      for (var i = 0, fn; (fn = fns[i]); ++i) {
-        if (!fn.busy) {
-          fn.busy = 1
-          fn.apply(this, fn.typed ? [name].concat(args) : args)
-          if (fns[i] !== fn) {
-            i--
-          }
-          fn.busy = 0
-        }
-      }
-
-      if (this.callbacks.all && name != 'all') {
-        this.trigger.apply(this, ['all', name].concat(args))
-      }
-
-      return this
     }
   });
-
 })();
 
 
@@ -25398,10 +25344,13 @@ var app = (function () {
       }
       var dependencies = this.getDependencyInstances(name, typeRegistry[name]);
       dependencies.splice(0, 0, null);
-      return instanceRegistry[name] = new (Function.prototype.bind.apply(typeRegistry[name], dependencies));
+      var instance = instanceRegistry[name] = new (Function.prototype.bind.apply(typeRegistry[name], dependencies));
+      this.riot.observable(instance);
+      return instance;
     },
 
     run: function(authenticated) {
+      this.riot = riot;
       this.value('authenticated', authenticated);
       this.value('window', window);
       this.value('$', $);
@@ -25418,7 +25367,7 @@ var app = (function () {
   return app;
 })();
 (function () {
-  var Account = Module.extend({
+  var Account = Class.extend({
     init: function (http, authenticated) {
       this.http = http;
       this.authenticated = authenticated;
@@ -25494,7 +25443,7 @@ var app = (function () {
   );
 })();
 (function () {
-  var ComponentLoader = Module.extend({
+  var ComponentLoader = Class.extend({
 
     init: function ($, riot, app, http) {
       this.$ = $;
@@ -25576,21 +25525,21 @@ var app = (function () {
       });
     },
 
-    onMountComplete: function (viewport, component, tag, ctx, cb) {
+    onMountComplete: function (viewport, component, tag, ctrl, cb) {
       var self = this;
       return function () {
         self.unmountPrevious();
         self.$(viewport).html('<' + tag + '></' + tag + '>');
-        self.mounted = self.riot.mount(tag, ctx);
+        self.mounted = self.riot.mount(tag, ctrl);
         if (cb) {
           cb();
         }
       }
     },
 
-    mount: function (viewport, component, tag, ctx, cb) {
+    mount: function (viewport, component, tag, ctrl, cb) {
       component = component.toLowerCase();
-      this.load(component, this.onMountComplete(viewport, component, tag, ctx ,cb));
+      this.load(component, this.onMountComplete(viewport, component, tag, ctrl ,cb));
     }
   });
 
@@ -25606,7 +25555,7 @@ var app = (function () {
   );
 })();
 (function () {
-  var ErrorHandler = Module.extend({
+  var ErrorHandler = Class.extend({
     init: function (router) {
       this.router = router;
     },
@@ -25647,7 +25596,7 @@ var app = (function () {
   );
 })();
 (function () {
-  var Http = Module.extend({
+  var Http = Class.extend({
     init: function ($) {
       this.$ = $;
 
@@ -25730,15 +25679,16 @@ var app = (function () {
 
 })();
 (function () {
-  var Router = Module.extend({
+  var Router = Class.extend({
 
-    init: function (window, page, riot, app, componentLoader) {
+    init: function (window, page, riot, app, componentLoader, $) {
       this.window = window;
       this.page = page;
       this.riot = riot;
       this.app = app;
       this.current = null;
       this.componentLoader = componentLoader;
+      this.$ = $;
       this.routes = {};
     },
 
@@ -25773,7 +25723,12 @@ var app = (function () {
         }
 
         ctrl.ctx = ctx;
-        self.componentLoader.mount(route.viewport || '#viewport', route.templateName || route.component, route.tag, ctrl);
+        var viewport = route.viewport || '#viewport';
+        self.$(viewport).hide();
+        self.componentLoader.mount(viewport, route.templateName || route.component, route.tag, ctrl, function() {
+          self.window.scrollTo(0, 0);
+          self.$(viewport).show();
+        });
 
         route.interceptors.forEach(function (interceptor) {
           if (!shortCircuited && interceptor.postHandle) {
@@ -25789,7 +25744,7 @@ var app = (function () {
     },
 
     register: function (routes) {
-      var sorted = routes.sort(function(a, b){
+      var sorted = routes.sort(function (a, b) {
         a.index = a.index || 0;
         b.index = b.index || 0;
         if (a.index > b.index) {
@@ -25810,7 +25765,7 @@ var app = (function () {
       this.page.start();
     },
 
-    isCurrent: function(name) {
+    isCurrent: function (name) {
       if (!this.routes[name]) {
         throw new Error("The route: '" + name + "' is not registered");
       }
@@ -25832,7 +25787,7 @@ var app = (function () {
       if (name.indexOf('http') == 0 || name.indexOf('/') == 0) {
         return this.window.location.href = name;
       }
-      if(reload) {
+      if (reload) {
         return this.window.location.href = this.base + this.routes[name].path;
       }
       if (!this.routes[name]) {
@@ -25852,54 +25807,183 @@ var app = (function () {
         'page',
         'riot',
         'app',
-        'ComponentLoader'
+        'ComponentLoader',
+        '$'
       ]
   );
 
 })();
 (function () {
-  var Billing = Module.extend({
+  var Billing = Component.extend({
 
-    init: function ($, errorHandler, router, account) {
+    init: function ($, errorHandler, router, account, plans) {
       this.$ = $;
       this.errorHandler = errorHandler;
       this.router = router;
       this.account = account;
+      this.profile = {};
+      this.isEditingPlan = false;
+      this.plans = plans;
     },
 
     onMount: function (tag) {
       this.tag = tag;
-      this.form = this.$('form', tag.root).form({
-        inline: false//,
-        //fields: {
-        //  email: ['email', 'empty']
+      this.plans.on('select', this.selectPlan);
+      this.account.getCurrent().done(this.onGetCurrentSuccess).fail(this.onGetCurrentError);
+
+
+      //this.form = this.$('form', tag.root).form({
+      //  inline: false//,
+      //  //fields: {
+      //  //  email: ['email', 'empty']
+      //  //}
+      //});
+
+      $('input.card-number').payment('formatCardNumber');
+      $('input.card-exp').payment('formatCardExpiry');
+      $('input.card-cvc').payment('formatCardCVC');
+
+      $('#payment-form').submit(function (event) {
+        var $form = $(this);
+
+        // Disable the submit button to prevent repeated clicks
+        $form.find('button').prop('disabled', true);
+
+        //Stripe.card.createToken($form, stripeResponseHandler);
+        alert(JSON.stringify($('input.card-exp').payment('cardExpiryVal')));
+
+        $form.find('button').prop('disabled', false);
+
+
+        //Stripe.card.createToken({
+        //  number: $('.card-number').val(),
+        //  cvc: $('.card-cvc').val(),
+        //  exp_month: $('.card-expiry-month').val(),
+        //  exp_year: $('.card-expiry-year').val()
+        //}, stripeResponseHandler);
+
+        //{
+        //  id: "tok_u5dg20Gra", // String of token identifier,
+        //      card: {...}, // Dictionary of the card used to create the token
+        //  created: 1452731840, // Integer of date token was created
+        //      currency: "usd", // String currency that the token was created in
+        //    livemode: true, // Boolean of whether this token was created with a live or test API key
+        //    object: "token", // String identifier of the type of object, always "token"
+        //    used: false // Boolean of whether this token has been used
         //}
+
+        //function stripeResponseHandler(status, response) {
+        //  var $form = $('#payment-form');
+        //
+        //  if (response.error) {
+        //    // Show the errors on the form
+        //    $form.find('.payment-errors').text(response.error.message);
+        //    $form.find('button').prop('disabled', false);
+        //  } else {
+        //    // response contains id and card, which contains additional card details
+        //    var token = response.id;
+        //    // Insert the token into the form so it gets submitted to the server
+        //    $form.append($('<input type="hidden" name="stripeToken" />').val(token));
+        //    // and submit
+        //    $form.get(0).submit();
+        //  }
+        //}
+
+        // Prevent the form from submitting with the default action
+        // Prevent the form from submitting with the default action
+        return false;
       });
-      this.$(this.tag.root).ready(function() {
-        //var s = document.createElement("script");
-        //s.type = "text/javascript";
-        //s.src = "https://js.stripe.com/v2/"
-        //$("body").append(s);
 
+      //this.$(this.tag.root).ready(function() {
+      //  //var s = document.createElement("script");
+      //  //s.type = "text/javascript";
+      //  //s.src = "https://js.stripe.com/v2/"
+      //  //$("body").append(s);
+      //
+      //
+      //  $.getScript("https://js.stripe.com/v2/", function(){
+      //
+      //
 
-        $.getScript("https://js.stripe.com/v2/", function(){
-          $('#payment-form').submit(function(event) {
-            var $form = $(this);
+      //  });
+      //
+      //});
+    },
 
-            // Disable the submit button to prevent repeated clicks
-            $form.find('button').prop('disabled', true);
+    onUnMount: function () {
+      this.plans.off('subscribe', this.subscribe);
+      this.isEditingPlan = false;
+    },
 
-            //Stripe.card.createToken($form, stripeResponseHandler);
-            alert($form);
+    onGetCurrentSuccess: function (profile, status) {
+      this.profile = profile;
+      this.setVisiblePlans(profile);
+      this.tag.update();
+    },
 
-            $form.find('button').prop('disabled', false);
-            // Prevent the form from submitting with the default action
-            return false;
-          });
-        });
+    onGetCurrentError: function (jqXHR, textStatus, errorThrown) {
+      //this.errorHandler.handle(jqXHR.status, {
+      //  401: { form: this.form, text: 'Email address or password invalid.' }
+      //});
+      //this.tag.update();
+      console.log(jqXHR);
+      this.tag.update();
+    },
 
-      });
+    setVisiblePlans: function (profile) {
+      this.plans.isBasicVisible = false;
+      this.plans.isProVisible = false;
+      this.plans.isPremiumVisible = false;
+      this.plans.isReadOnly = true;
+
+      if (this.isEditingPlan || !this.profile.plan) {
+        this.plans.isBasicVisible = true;
+        this.plans.isProVisible = true;
+        this.plans.isPremiumVisible = true;
+        this.plans.isReadOnly = false;
+        return;
+      }
+      if (profile.plan == 'basic') {
+        return this.plans.isBasicVisible = true;
+      }
+      if (profile.plan == 'pro') {
+        return this.plans.isProVisible = true;
+      }
+      if (profile.plan == 'premium') {
+        return this.plans.isPremiumVisible = true;
+      }
+    },
+
+    onUpdateAccountSuccess: function (profile, status) {
+      console.log('success');
+      this.isEditingPlan = false;
+      this.setVisiblePlans(this.profile);
+      this.tag.update();
+    },
+
+    onUpdateAccountError: function (jqXHR, textStatus, errorThrown) {
+      //this.errorHandler.handle(jqXHR.status, {
+      //  401: { form: this.form, text: 'Email address or password invalid.' }
+      //});
+      //this.tag.update();
+      this.tag.update();
+    },
+
+    selectPlan: function (data) {
+      this.profile.plan = data.plan;
+      this.account.update(this.profile).done(this.onUpdateAccountSuccess).fail(this.onUpdateAccountError);
+    },
+
+    toggle: function (e) {
+      this.isEditingPlan = e.target.checked;
+      if(this.isEditingPlan) {
+        this.originalProfile = this.$.extend({}, this.profile);
+      } else {
+        this.profile = this.$.extend({}, this.originalProfile);
+      }
+      this.setVisiblePlans(this.profile);
     }
+
   });
 
 
@@ -25910,7 +25994,8 @@ var app = (function () {
         '$',
         'ErrorHandler',
         'Router',
-        'Account'
+        'Account',
+        'Plans'
       ]
   );
 
@@ -25932,7 +26017,7 @@ var app = (function () {
 })();
 
 (function () {
-  var Login = Module.extend({
+  var Login = Component.extend({
 
     init: function ($, errorHandler, router, account) {
       this.$ = $;
@@ -26009,7 +26094,7 @@ var app = (function () {
 })();
 
 (function () {
-  var Organization = Module.extend({
+  var Organization = Component.extend({
 
     init: function ($, errorHandler, router, account) {
       this.$ = $;
@@ -26053,14 +26138,14 @@ var app = (function () {
 })();
 
 (function () {
-  var Profile = Module.extend({
+  var Profile = Component.extend({
 
     init: function ($, errorHandler, router, account) {
       this.$ = $;
       this.errorHandler = errorHandler;
       this.router = router;
       this.account = account;
-      this.data = {};
+      this.profile = {};
       this.editing = false;
     },
 
@@ -26081,7 +26166,7 @@ var app = (function () {
     },
 
     onGetCurrentSuccess: function (profile, status) {
-      this.data = profile;
+      this.profile = profile;
       this.tag.update();
     },
 
@@ -26094,7 +26179,7 @@ var app = (function () {
       this.tag.update();
     },
 
-    onUpdateAccountSuccess: function (data, status) {
+    onUpdateAccountSuccess: function (profile, status) {
       console.log('success');
       this.editing = false;
       this.tag.update();
@@ -26111,16 +26196,16 @@ var app = (function () {
     toggle: function (e) {
       this.editing = e.target.checked;
       if(this.editing) {
-        this.original = this.$.extend({}, this.data);
+        this.originalProfile = this.$.extend({}, this.profile);
       } else {
-        this.data = this.$.extend(this.data, this.getInputs(e.target.form));
+        this.profile = this.$.extend(this.profile, this.getInputs(e.target.form));
         this.tag.update();
       }
     },
 
     reset: function() {
       this.editing = false;
-      this.data = this.original || this.data;
+      this.profile = this.originalProfile || this.profile;
       this.tag.update();
     },
 
@@ -26167,7 +26252,7 @@ var app = (function () {
 })();
 
 (function () {
-  var RecoverPassword = Module.extend({
+  var RecoverPassword = Component.extend({
 
     init: function ($, errorHandler, router, account) {
       this.$ = $;
@@ -26232,7 +26317,7 @@ var app = (function () {
 })();
 
 (function () {
-  var Registration = Module.extend({
+  var Registration = Component.extend({
 
     init: function ($, errorHandler, router, account) {
       this.$ = $;
@@ -26301,7 +26386,7 @@ var app = (function () {
 })()
 
 (function () {
-  var ResetPassword = Module.extend({
+  var ResetPassword = Component.extend({
 
     init: function ($, errorHandler, router, account) {
       this.$ = $;
@@ -26372,7 +26457,7 @@ var app = (function () {
 })();
 
 (function () {
-  var SettingsContainer = Module.extend({
+  var SettingsContainer = Component.extend({
     init: function (account, router, $) {
       this.account = account;
       this.router = router;
@@ -26406,14 +26491,6 @@ var app = (function () {
 
 (function () {
   app.routes.push({
-    path: '/password-reset-instructions-sent',
-    templateName: 'PasswordResetInstructionsSent',
-    tag: 'password-reset-instructions-sent'
-  });
-})();
-
-(function () {
-  app.routes.push({
     path: '/reset-password-token-not-found',
     templateName: 'ResetPasswordTokenNotFound',
     tag: 'reset-password-token-not-found'
@@ -26432,7 +26509,49 @@ var app = (function () {
 })();
 
 (function () {
-  var Container = Module.extend({
+  app.routes.push({
+    path: '/password-reset-instructions-sent',
+    templateName: 'PasswordResetInstructionsSent',
+    tag: 'password-reset-instructions-sent'
+  });
+})();
+
+(function () {
+  var Plans = Component.extend({
+    init: function ($) {
+      this.isBasicVisible = true;
+      this.isProVisible = true;
+      this.isPremiumVisible = true;
+      this.isReadOnly = false;
+      this.$ = $;
+    },
+
+    onAfterMount: function () {
+      this.reset();
+      this.tag.update();
+    },
+
+    subscribe: function (e) {
+      this.trigger('select', this.$(e.currentTarget).data());
+    },
+
+    reset: function() {
+      this.isBasicVisible = true;
+      this.isProVisible = true;
+      this.isPremiumVisible = true;
+      this.isReadOnly = false;
+    }
+  });
+
+  app.component(
+      'Plans',
+      Plans,
+      ['$']
+  );
+})();
+
+(function () {
+  var Container = Component.extend({
     init: function (account, router, $) {
       this.account = account;
       this.router = router;
@@ -26469,10 +26588,9 @@ var app = (function () {
 })();
 
 (function () {
-  var Home = Module.extend({
+  var Home = Component.extend({
     init: function($) {
       this.$ = $;
-      this.onMount = this.onMount.bind(this);
     },
 
     onMount: function(tag) {
@@ -26491,5 +26609,29 @@ var app = (function () {
     component: 'Home',
     tag: 'home',
     authenticate: true
+  });
+})();
+
+(function () {
+  var Pricing = Component.extend({
+    init: function ($, plans) {
+      this.$ = $;
+      this.plans = plans;
+    }
+  });
+
+  app.component(
+      'Pricing',
+      Pricing,
+      [
+        '$',
+        'Plans'
+      ]
+  );
+
+  app.routes.push({
+    path: '/pricing',
+    component: 'Pricing',
+    tag: 'pricing'
   });
 })();

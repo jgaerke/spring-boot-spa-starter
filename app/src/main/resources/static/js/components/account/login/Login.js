@@ -1,5 +1,5 @@
 (function () {
-  var Login = Module.extend({
+  var Login = Component.extend({
 
     init: function ($, errorHandler, router, account) {
       this.$ = $;
@@ -9,10 +9,9 @@
       this.message = {};
     },
 
-    onMount: function (tag) {
+    onAfterMount: function () {
       this.message.displayPasswordResetSuccess = this.router.isCurrent('LoginAfterPasswordReset');
-      this.tag = tag;
-      this.form = this.$('form', tag.root).form({
+      this.form = this.$('form', this.tag.root).form({
         inline: false,
         fields: {
           email: ['email', 'empty'],

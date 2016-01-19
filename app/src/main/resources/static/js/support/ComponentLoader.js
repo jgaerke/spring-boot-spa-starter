@@ -1,5 +1,5 @@
 (function () {
-  var ComponentLoader = Module.extend({
+  var ComponentLoader = Class.extend({
 
     init: function ($, riot, app, http) {
       this.$ = $;
@@ -81,21 +81,21 @@
       });
     },
 
-    onMountComplete: function (viewport, component, tag, ctx, cb) {
+    onMountComplete: function (viewport, component, tag, ctrl, cb) {
       var self = this;
       return function () {
         self.unmountPrevious();
         self.$(viewport).html('<' + tag + '></' + tag + '>');
-        self.mounted = self.riot.mount(tag, ctx);
+        self.mounted = self.riot.mount(tag, ctrl);
         if (cb) {
           cb();
         }
       }
     },
 
-    mount: function (viewport, component, tag, ctx, cb) {
+    mount: function (viewport, component, tag, ctrl, cb) {
       component = component.toLowerCase();
-      this.load(component, this.onMountComplete(viewport, component, tag, ctx ,cb));
+      this.load(component, this.onMountComplete(viewport, component, tag, ctrl ,cb));
     }
   });
 

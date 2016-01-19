@@ -23,9 +23,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static java.util.Optional.empty;
@@ -209,19 +207,12 @@ public class SecurityIntegrationTest {
   }
 
   private Account getAccount(String email, String password) {
-    return new Account(
-        null,
-        email,
-        new StandardPasswordEncoder().encode(password),
-        "jeremy",
-        "gaerke",
-        null,
-        false,
-        false,
-        false,
-        false,
-        new ArrayList<>()
-    );
+    return Account.builder()
+        .email(email)
+        .password(new StandardPasswordEncoder().encode(password))
+        .first("jeremy")
+        .last("gaerke")
+        .build();
   }
 
   @Configuration

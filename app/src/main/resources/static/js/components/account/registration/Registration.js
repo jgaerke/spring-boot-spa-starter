@@ -1,5 +1,5 @@
 (function () {
-  var Registration = Module.extend({
+  var Registration = Component.extend({
 
     init: function ($, errorHandler, router, account) {
       this.$ = $;
@@ -8,9 +8,8 @@
       this.account = account;
     },
 
-    onMount: function (tag) {
-      this.tag = tag;
-      this.form = this.$('form', tag.root).form({
+    onAfterMount: function () {
+      this.form = this.$('form', this.tag.root).form({
         inline: false,
         fields: {
           email: ['email', 'empty'],

@@ -1,5 +1,5 @@
 (function () {
-  var Account = Module.extend({
+  var Account = Class.extend({
     init: function (http, authenticated) {
       this.http = http;
       this.authenticated = authenticated;

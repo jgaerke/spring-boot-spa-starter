@@ -1,12 +1,11 @@
 (function () {
-  var Home = Module.extend({
+  var Home = Component.extend({
     init: function($) {
       this.$ = $;
-      this.onMount = this.onMount.bind(this);
     },
 
-    onMount: function(tag) {
-      this.$('.ui.dropdown', tag.root).dropdown();
+    onAfterMount: function() {
+      this.$('.ui.dropdown', this.tag.root).dropdown();
     }
   });
 

@@ -1,13 +1,13 @@
 (function () {
-  var Container = Module.extend({
+  var Container = Component.extend({
     init: function (account, router, $) {
       this.account = account;
       this.router = router;
       this.$ = $;
     },
 
-    onMount: function(tag) {
-      this.$('.ui.dropdown', tag.root).dropdown();
+    onAfterMount: function(tag) {
+      this.$('.ui.dropdown', this.  tag.root).dropdown();
     },
 
     onLogoutSuccess: function () {

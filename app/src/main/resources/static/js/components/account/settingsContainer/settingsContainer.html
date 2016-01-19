@@ -14,9 +14,6 @@
 
   <yield/>
   <script>
-    var settingsContainer = this.settingsContainer = app.resolve('SettingsContainer');
-    this.on('mount', function () {
-      settingsContainer.onMount(this);
-    });
+    this.settingsContainer = app.resolve('SettingsContainer').wire(this);
   </script>
 </settings-container>

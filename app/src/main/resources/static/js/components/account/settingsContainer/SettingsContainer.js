@@ -1,5 +1,5 @@
 (function () {
-  var SettingsContainer = Module.extend({
+  var SettingsContainer = Component.extend({
     init: function (account, router, $) {
       this.account = account;
       this.router = router;
@@ -9,8 +9,7 @@
       this.isOrganizationTabActive = false;
     },
 
-    onMount: function(tag) {
-      this.tag = tag;
+    onAfterMount: function() {
       this.isProfileTabActive = this.router.isCurrent('Profile');
       this.isBillingTabActive = this.router.isCurrent('Billing');
       this.isOrganizationTabActive = this.router.isCurrent('Organization');

@@ -1,15 +1,20 @@
 (function () {
-  var Billing = Module.extend({
+  var Billing = Component.extend({
 
-    init: function ($, errorHandler, router, account) {
+    init: function ($, errorHandler, router, account, plans) {
       this.$ = $;
       this.errorHandler = errorHandler;
       this.router = router;
       this.account = account;
+      this.isEditingPlan = false;
+      this.plans = plans;
     },
 
-    onMount: function (tag) {
-      this.tag = tag;
+    onAfterMount: function () {
+      this.plans.on('select', this.selectPlan);
+      this.account.getCurrent().done(this.onGetCurrentSuccess).fail(this.onGetCurrentError);
+
+
       //this.form = this.$('form', tag.root).form({
       //  inline: false//,
       //  //fields: {
@@ -86,7 +91,83 @@
       //  });
       //
       //});
+    },
+
+    onAfterUnMount: function () {
+      this.plans.off('subscribe', this.subscribe);
+      this.isEditingPlan = false;
+      delete this.profile;
+    },
+
+    onGetCurrentSuccess: function (profile, status) {
+      this.profile = profile;
+      this.setVisiblePlans(profile);
+      this.tag.update();
+    },
+
+    onGetCurrentError: function (jqXHR, textStatus, errorThrown) {
+      //this.errorHandler.handle(jqXHR.status, {
+      //  401: { form: this.form, text: 'Email address or password invalid.' }
+      //});
+      //this.tag.update();
+      console.log(jqXHR);
+      this.tag.update();
+    },
+
+    setVisiblePlans: function (profile) {
+      this.plans.isBasicVisible = false;
+      this.plans.isProVisible = false;
+      this.plans.isPremiumVisible = false;
+      this.plans.isReadOnly = true;
+
+      if (this.isEditingPlan || !this.profile.plan) {
+        this.plans.isBasicVisible = true;
+        this.plans.isProVisible = true;
+        this.plans.isPremiumVisible = true;
+        this.plans.isReadOnly = false;
+        return;
+      }
+      if (profile.plan == 'basic') {
+        return this.plans.isBasicVisible = true;
+      }
+      if (profile.plan == 'pro') {
+        return this.plans.isProVisible = true;
+      }
+      if (profile.plan == 'premium') {
+        return this.plans.isPremiumVisible = true;
+      }
+    },
+
+    onUpdateAccountSuccess: function (profile, status) {
+      console.log('success');
+      this.isEditingPlan = false;
+      this.setVisiblePlans(this.profile);
+      this.tag.update();
+    },
+
+    onUpdateAccountError: function (jqXHR, textStatus, errorThrown) {
+      //this.errorHandler.handle(jqXHR.status, {
+      //  401: { form: this.form, text: 'Email address or password invalid.' }
+      //});
+      //this.tag.update();
+      this.tag.update();
+    },
+
+    selectPlan: function (data) {
+      this.profile.plan = data.plan;
+      this.account.update(this.profile).done(this.onUpdateAccountSuccess).fail(this.onUpdateAccountError);
+    },
+
+    toggle: function (e) {
+      this.isEditingPlan = e.target.checked;
+      if(this.isEditingPlan) {
+        this.originalProfile = this.$.extend({}, this.profile);
+      } else {
+        this.profile = this.$.extend({}, this.originalProfile);
+      }
+      this.setVisiblePlans(this.profile);
     }
+
   });
 
 
@@ -97,7 +178,8 @@
         '$',
         'ErrorHandler',
         'Router',
-        'Account'
+        'Account',
+        'Plans'
       ]
   );
 
@@ -105,14 +187,6 @@
     path: '/settings/billing',
     component: 'Billing',
     tag: 'billing',
-    authenticate: true
-  });
-
-  app.routes.push({
-    templateName: 'billingEdit',
-    path: '/settings/billing/edit',
-    component: 'Billing',
-    tag: 'billing-edit',
     authenticate: true
   });
 

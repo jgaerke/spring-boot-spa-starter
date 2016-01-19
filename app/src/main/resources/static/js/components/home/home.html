@@ -36,9 +36,6 @@
     <!--</div>-->
   </container>
   <script>
-    var home = this.home = this.tags.container.home = opts;
-    this.on('mount', function () {
-      home.onMount(this);
-    });
+    this.home = (this.tags.container.home = opts).wire(this);
   </script>
 </home>

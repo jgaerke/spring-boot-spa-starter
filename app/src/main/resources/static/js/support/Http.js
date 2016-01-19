@@ -1,5 +1,5 @@
 (function () {
-  var Http = Module.extend({
+  var Http = Class.extend({
     init: function ($) {
       this.$ = $;
 

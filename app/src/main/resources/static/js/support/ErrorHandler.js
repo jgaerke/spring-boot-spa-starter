@@ -1,5 +1,5 @@
 (function () {
-  var ErrorHandler = Module.extend({
+  var ErrorHandler = Class.extend({
     init: function (router) {
       this.router = router;
     },

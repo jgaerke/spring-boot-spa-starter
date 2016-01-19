@@ -1,42 +1,44 @@
 package com.jlg.app.account;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Value;
 import lombok.experimental.Wither;
 import org.springframework.data.annotation.Id;
 import org.springframework.security.core.GrantedAuthority;
 
+import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
-@Getter
+@Value
 @Wither
 @Builder
-@AllArgsConstructor
 public class Account {
   @Id
-  private final String id;
+  private String id;
 
-  private final String email;
+  private String email;
 
-  private final String password;
+  private String password;
 
-  private final String first;
+  private String first;
 
-  private final String last;
+  private String last;
 
-  private final String passwordResetToken;
+  private String plan;
 
-  private final boolean locked;
+  private Date trialExpirationDate;
 
-  private final boolean expired;
+  private String passwordResetToken;
 
-  private final boolean credentialsExpired;
+  private boolean locked;
 
-  private final boolean disabled;
+  private boolean expired;
 
-  private final List<? extends GrantedAuthority> authorities;
+  private boolean credentialsExpired;
 
+  private boolean disabled;
+
+  private List<? extends GrantedAuthority> authorities;
 }
 

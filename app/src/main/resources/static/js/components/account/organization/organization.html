@@ -9,9 +9,6 @@
     </settings-container>
   </container>
   <script>
-    var organization = this.organization = this.tags.container.tags['settings-container'].organization = opts;
-    this.on('mount', function () {
-      organization.onMount(this);
-    });
+    this.organization = (this.tags.container.tags['settings-container'].organization = opts).wire(this);
   </script>
 </organization>

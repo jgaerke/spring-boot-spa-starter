@@ -53,9 +53,6 @@
     </div>
   </container>
   <script>
-    var login = this.login = this.tags.container.login = opts;
-    this.on('mount', function () {
-      login.onMount(this);
-    });
+    this.login = (this.tags.container.login = opts).wire(this);
   </script>
 </login>

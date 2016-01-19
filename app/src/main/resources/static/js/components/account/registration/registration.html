@@ -46,9 +46,6 @@
     </div>
   </container>
   <script>
-    var registration = this.registration = this.tags.container.registration = opts;
-    this.on('mount', function () {
-      registration.onMount(this);
-    });
+    this.registration = (this.tags.container.registration = opts).wire(this);
   </script>
 </registration>
