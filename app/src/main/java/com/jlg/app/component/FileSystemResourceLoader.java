@@ -25,8 +25,8 @@ public class FileSystemResourceLoader implements ComponentResourceLoader {
   @Override
   public List<ComponentResource> loadAll() {
     try {
-      String pattern = "file://" + new File(".").getCanonicalPath() +
-          "/**/resources/static/js/components/**/*";
+      String pattern = "file://" + new File(".").getCanonicalPath().replace("/app", "") +
+          "/app/**/resources/static/js/components/**/*.html";
       return asList(resourcePatternResolver.getResources(pattern))
           .stream().map(r -> new ComponentResource(r)).collect(toList());
     } catch (IOException e) {

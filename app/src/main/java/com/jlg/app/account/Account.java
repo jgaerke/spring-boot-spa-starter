@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Value
 @Wither
@@ -27,6 +28,8 @@ public class Account {
 
   private String plan;
 
+  private Map<String, Object> paymentInfo;
+
   private Date trialExpirationDate;
 
   private String passwordResetToken;
@@ -40,5 +43,6 @@ public class Account {
   private boolean disabled;
 
   private List<? extends GrantedAuthority> authorities;
+
 }
 

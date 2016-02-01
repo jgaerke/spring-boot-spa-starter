@@ -68,6 +68,7 @@ var app = (function () {
       this.riot = riot;
       this.value('authenticated', authenticated);
       this.value('window', window);
+      this.value('JSON', JSON);
       this.value('$', $);
       this.value('riot', riot);
       this.value('page', page);

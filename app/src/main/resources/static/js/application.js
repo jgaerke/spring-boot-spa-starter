@@ -25353,6 +25353,7 @@ var app = (function () {
       this.riot = riot;
       this.value('authenticated', authenticated);
       this.value('window', window);
+      this.value('JSON', JSON);
       this.value('$', $);
       this.value('riot', riot);
       this.value('page', page);
@@ -25560,7 +25561,7 @@ var app = (function () {
       this.router = router;
     },
 
-    handle: function (status, possibleErrors) {
+    handle: function (status, possibleErrors, tag) {
       var handled, self;
       handled = false;
       self = this;
@@ -25568,11 +25569,11 @@ var app = (function () {
       for (statusKey in possibleErrors) {
         if(possibleErrors.hasOwnProperty(statusKey)) {
           var possibleError = possibleErrors[statusKey];
-          if(!handled && statusKey.toString().length == 1 && status.toString().indexOf(statusKey.toString())
+          if(!handled && (statusKey.toString().length == 1 && status.toString().indexOf(statusKey.toString()) > -1)
               || statusKey == status) {
             if(possibleError.form) {
               handled = true;
-              return possibleError.form.form('add errors', possibleError.text);
+              return possibleError.form.form('add errors', [possibleError.text]);
             }
             if(possibleError.route) {
               handled = true;
@@ -25581,6 +25582,10 @@ var app = (function () {
             throw new Error('All error handlers should either bind to a form or a route.');
           }
         }
+      }
+
+      if(handled && tag) {
+        tag.update();
       }
 
       return handled;
@@ -25596,86 +25601,239 @@ var app = (function () {
   );
 })();
 (function () {
-  var Http = Class.extend({
-    init: function ($) {
-      this.$ = $;
+    var FormHandlerFactory = Class.extend({
+        init: function ($) {
+            this.$ = $;
+        },
 
-      //this.dispatch = this.dispatch.bind(this);
-      //this.get = this.get.bind(this);
-      //this.post = this.post.bind(this);
-      //this.put = this.put.bind(this);
-      //this.patch = this.patch.bind(this);
-      //this.delete = this.delete.bind(this);
-    },
+        create: function (el, tag, settings) {
+            var self, form;
 
-    dispatch: function (options) {
-      if(options.contentType === undefined) {
-        options.contentType = false;
-      }
-      if(options.data && this.$.isPlainObject(options.data)) {
-        options.data = JSON.stringify(options.data);
-      }
-      options.headers = this.$.extend({
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-        'X-XSRF-TOKEN': this.$.cookie('XSRF-TOKEN')
-      }, options.headers);
-      return this.$.ajax(options);
-    },
+            self = this;
+            form = this.$(el, tag.root);
 
-    get: function (url, headers) {
-      return this.dispatch({
-        url: url,
-        type: 'GET',
-        dataType: 'json',
-        headers: headers
-      });
-    },
+            return {
+                $: this.$,
 
-    post: function (url, data, headers) {
-      return this.dispatch({
-        url: url,
-        type: 'POST',
-        data: data,
-        headers: headers
-      });
-    },
+                tag: tag,
 
-    put: function (url, data, headers) {
-      return this.dispatch({
-        url: url,
-        type: 'PUT',
-        data: data,
-        headers: headers
-      });
-    },
+                form: form.form(this.settings(form, settings)),
 
-    patch: function (url, data, headers) {
-      return this.dispatch({
-        url: url,
-        type: 'PATCH',
-        data: data,
-        headers: headers
-      });
-    },
+                originalValues: null,
 
-    delete: function (url, headers) {
-      return this.dispatch({
-        url: url,
-        type: 'DELETE',
-        headers: headers
-      });
-    }
-  });
+                get: function () {
+                    return this.form;
+                },
+
+                values: function (values) {
+                    if (values) {
+                        var defaults = this.values();
+                        this.each(function (input) {
+                            input.value(values[input.name()]);
+                        });
+                        this.tag.update();
+                        if(!this.originalValues) {
+                            this.originalValues = this.$.extend(defaults, values);
+                        }
+                        return this;
+                    }
+
+                    values = {};
+                    this.each(function (input) {
+                        values[input.name()] = input.value();
+                    });
+                    return values;
+                },
+
+                rollback: function() {
+                    if(!this.originalValues) {
+                        return this;
+                    }
+                    this.values(this.originalValues);
+                    return this;
+                },
+
+                commit: function() {
+                    this.originalValues = this.values();
+                    return this;
+                },
+
+                each: function(handler) {
+                  self.each(this.form, handler);
+                }
+            };
+        },
+
+        constraints: function(form) {
+            var self, constraints, entries;
+
+            self = this;
+            constraints = {
+                type: {
+                    email: ['email']
+                },
+                required: ['empty']
+            };
+
+            entries = {};
+
+            this.each(form, function(input) {
+                if(constraints.type[input.type] && self.$.inArray(input.value, constraints.type[input.type])) {
+                    entries[input.name()] = entries[input.name()] || [];
+                    entries[input.name()] = self.$.merge(entries[input.name()], constraints.type[input.type]);
+                }
+                if(input.required) {
+                    entries[input.name()] = entries[input.name()] || [];
+                    entries[input.name()] = self.$.merge(entries[input.name()], constraints.required);
+                }
+            });
+
+            return entries;
+        },
+
+        each: function (form, handler) {
+            var self = this;
+            form.find('input[type!=button][type!=submit], select').each(function (index) {
+                if(!this.name && !this.id) {
+                    return;
+                }
+                handler.call(this, {
+                    el: this,
+
+                    position: index,
+
+                    type: this.type,
+
+                    required: self.$(this).prop('required'),
+
+                    name: function () {
+                        return this.el.name || this.id;
+                    },
+
+                    value: function (value) {
+                        if (value != undefined) {
+                            if (this.el.type == 'checkbox' || this.el.type == 'radio') {
+                                return self.$(this.el).prop('checked', value);
+                            }
+                            self.$(this.el).val(value);
+                            return this.el;
+                        }
+
+                        value = this.el.value;
+
+                        if (this.el.type == 'checkbox' || this.el.type == 'radio') {
+                            value = this.el.checked;
+                        }
+
+                        return value;
+                    }
+                });
+            });
+        },
+
+        settings: function(form, settings) {
+            var fields, defaults;
+
+            fields = this.constraints(form);
+            defaults = {
+                inline: form.find('.ui error message').lenth == 0,
+            };
+
+            if(!this.$.isEmptyObject(fields)) {
+                defaults.fields = fields;
+            }
+
+            return this.$.extend(defaults, settings);
+        },
+
+    });
 
 
-  app.service(
-      'Http',
-      Http,
-      [
-        '$'
-      ]
-  );
+    app.service(
+        'FormHandlerFactory',
+        FormHandlerFactory,
+        [
+            '$'
+        ]
+    );
+
+})();
+(function () {
+    var Http = Class.extend({
+        init: function ($, JSON) {
+            this.$ = $;
+            this.JSON = JSON;
+        },
+
+        dispatch: function (options) {
+            if (options.contentType === undefined) {
+                options.contentType = false;
+            }
+            if (options.data && this.$.isPlainObject(options.data)) {
+                options.data = this.JSON.stringify(options.data);
+            }
+            options.headers = this.$.extend({
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-XSRF-TOKEN': this.$.cookie('XSRF-TOKEN')
+            }, options.headers);
+            return this.$.ajax(options);
+        },
+
+        get: function (url, headers) {
+            return this.dispatch({
+                url: url,
+                type: 'GET',
+                dataType: 'json',
+                headers: headers
+            });
+        },
+
+        post: function (url, data, headers) {
+            return this.dispatch({
+                url: url,
+                type: 'POST',
+                data: data,
+                headers: headers
+            });
+        },
+
+        put: function (url, data, headers) {
+            return this.dispatch({
+                url: url,
+                type: 'PUT',
+                data: data,
+                headers: headers
+            });
+        },
+
+        patch: function (url, data, headers) {
+            return this.dispatch({
+                url: url,
+                type: 'PATCH',
+                data: data,
+                headers: headers
+            });
+        },
+
+        delete: function (url, headers) {
+            return this.dispatch({
+                url: url,
+                type: 'DELETE',
+                headers: headers
+            });
+        }
+    });
+
+
+    app.service(
+        'Http',
+        Http,
+        [
+            '$',
+            'JSON'
+        ]
+    );
 
 })();
 (function () {
@@ -25724,10 +25882,8 @@ var app = (function () {
 
         ctrl.ctx = ctx;
         var viewport = route.viewport || '#viewport';
-        self.$(viewport).hide();
         self.componentLoader.mount(viewport, route.templateName || route.component, route.tag, ctrl, function() {
           self.window.scrollTo(0, 0);
-          self.$(viewport).show();
         });
 
         route.interceptors.forEach(function (interceptor) {
@@ -25814,440 +25970,369 @@ var app = (function () {
 
 })();
 (function () {
-  var Billing = Component.extend({
+    var Billing = Component.extend({
 
-    init: function ($, errorHandler, router, account, plans) {
-      this.$ = $;
-      this.errorHandler = errorHandler;
-      this.router = router;
-      this.account = account;
-      this.profile = {};
-      this.isEditingPlan = false;
-      this.plans = plans;
-    },
+        init: function ($, errorHandler, router, account, window) {
+            this.$ = $;
+            this.errorHandler = errorHandler;
+            this.router = router;
+            this.account = account;
+            this.window = window;
+            this.editingPlan = false;
+            this.submittingPlan = false;
+            this.editingPaymentInfo = false;
+            this.submittingPaymentInfo = false;
+        },
 
-    onMount: function (tag) {
-      this.tag = tag;
-      this.plans.on('select', this.selectPlan);
-      this.account.getCurrent().done(this.onGetCurrentSuccess).fail(this.onGetCurrentError);
+        onAfterMount: function () {
+            this.paymentInfoForm = this.$('#paymentInfo', this.tag.root).form({
+                inline: false
+            });
+            this.cardNumberInput = this.$('input[name=0]', this.paymentInfoForm).payment('formatCardNumber');
+            this.cardCvcInput = this.$('input[name=1]', this.paymentInfoForm).payment('formatCardCVC');
+            this.cardExpiryInput = this.$('input[name=2]', this.paymentInfoForm).payment('formatCardExpiry');
+            this.loadStripe();
+            this.account.getCurrent().done(this.onGetCurrentSuccess).fail(this.onGetCurrentError);
+        },
 
+        onAfterUnMount: function () {
+            this.editingPlan = false;
+            delete this.profile;
+        },
 
-      //this.form = this.$('form', tag.root).form({
-      //  inline: false//,
-      //  //fields: {
-      //  //  email: ['email', 'empty']
-      //  //}
-      //});
+        loadStripe: function () {
+            var self = this;
+            if (this.window.Stripe) {
+                return;
+            }
+            this.$.getScript("https://js.stripe.com/v2/", function () {
+                self.window.Stripe.setPublishableKey('pk_test_6pRNASCoBOKtIshFeQd4XMUh');
+            });
+        },
 
-      $('input.card-number').payment('formatCardNumber');
-      $('input.card-exp').payment('formatCardExpiry');
-      $('input.card-cvc').payment('formatCardCVC');
+        onGetCurrentSuccess: function (profile, status) {
+            this.profile = profile;
+            this.setFormattedCardNumber();
+            this.tag.update();
+        },
 
-      $('#payment-form').submit(function (event) {
-        var $form = $(this);
+        onGetCurrentError: function (jqXHR, textStatus, errorThrown) {
+            //TODO:: Handle error properly.
+            //this.errorHandler.handle(jqXHR.status, {
+            //  401: { form: this.form, text: 'Email address or password invalid.' }
+            //});
+            //this.tag.update();
+            console.log(jqXHR);
+            this.tag.update();
+        },
 
-        // Disable the submit button to prevent repeated clicks
-        $form.find('button').prop('disabled', true);
+        togglePlan: function (e) {
+            this.editingPlan = e.target.checked;
+            if (this.editingPlan) {
+                this.submittingPlan = false;
+                this.originalPlanProfile = this.$.extend({}, this.profile);
+            } else {
+                this.profile = this.$.extend({}, this.originalPlanProfile);
+                this.tag.update();
+            }
+        },
 
-        //Stripe.card.createToken($form, stripeResponseHandler);
-        alert(JSON.stringify($('input.card-exp').payment('cardExpiryVal')));
+        onPlanChange: function (e) {
+            this.profile.plan = e.target.value;
+        },
 
-        $form.find('button').prop('disabled', false);
+        onUpdatePlanSuccess: function (profile, status) {
+            this.editingPlan = false;
+            this.submittingPlan = false;
+            this.originalPlanProfile = null;
+            this.tag.update();
+        },
 
+        onUpdatePlanError: function (jqXHR, textStatus, errorThrown) {
+            //this.errorHandler.handle(jqXHR.status, {
+            //  401: { form: this.form, text: 'Email address or password invalid.' }
+            //});
+            this.submittingPlan = false;
+            this.tag.update();
+        },
 
-        //Stripe.card.createToken({
-        //  number: $('.card-number').val(),
-        //  cvc: $('.card-cvc').val(),
-        //  exp_month: $('.card-expiry-month').val(),
-        //  exp_year: $('.card-expiry-year').val()
-        //}, stripeResponseHandler);
+        onPlanSubmit: function (e) {
+            this.submittingPlan = true;
+            this.profile.plan = e.target.plan.value;
+            this.account.update(this.profile).done(this.onUpdatePlanSuccess).fail(this.onUpdatePlanError);
+        },
 
-        //{
-        //  id: "tok_u5dg20Gra", // String of token identifier,
-        //      card: {...}, // Dictionary of the card used to create the token
-        //  created: 1452731840, // Integer of date token was created
-        //      currency: "usd", // String currency that the token was created in
-        //    livemode: true, // Boolean of whether this token was created with a live or test API key
-        //    object: "token", // String identifier of the type of object, always "token"
-        //    used: false // Boolean of whether this token has been used
-        //}
+        togglePaymentInfo: function (e) {
+            this.editingPaymentInfo = e.target.checked;
+            if (this.editingPaymentInfo) {
+                this.originalPaymentProfile = this.$.extend({}, this.profile);
+                this.resetPaymentInfoForm();
+                this.tag.update();
+            } else {
+                this.setFormattedCardNumber();
+                this.profile = this.$.extend({}, this.originalPaymentProfile);
+                this.tag.update();
+            }
+        },
 
-        //function stripeResponseHandler(status, response) {
-        //  var $form = $('#payment-form');
-        //
-        //  if (response.error) {
-        //    // Show the errors on the form
-        //    $form.find('.payment-errors').text(response.error.message);
-        //    $form.find('button').prop('disabled', false);
-        //  } else {
-        //    // response contains id and card, which contains additional card details
-        //    var token = response.id;
-        //    // Insert the token into the form so it gets submitted to the server
-        //    $form.append($('<input type="hidden" name="stripeToken" />').val(token));
-        //    // and submit
-        //    $form.get(0).submit();
-        //  }
-        //}
+        getPaymentInfoInputs: function () {
+            var form, cardExpiryVal;
+            form = this.paymentInfoForm[0];
+            cardExpiryVal = this.cardExpiryInput.payment('cardExpiryVal');
+            return {
+                number: form[0].value,
+                cvc: form[1].value,
+                exp_month: cardExpiryVal.month,
+                exp_year: cardExpiryVal.year
+            };
+        },
 
-        // Prevent the form from submitting with the default action
-        // Prevent the form from submitting with the default action
-        return false;
-      });
+        onUpdatePaymentInfoSuccess: function (profile, status) {
+            this.editingPaymentInfo = false;
+            this.submittingPaymentInfo = false;
+            this.originalPaymentProfile = null;
+            this.resetPaymentInfoForm();
+            this.setFormattedCardNumber();
+            this.tag.update();
+        },
 
-      //this.$(this.tag.root).ready(function() {
-      //  //var s = document.createElement("script");
-      //  //s.type = "text/javascript";
-      //  //s.src = "https://js.stripe.com/v2/"
-      //  //$("body").append(s);
-      //
-      //
-      //  $.getScript("https://js.stripe.com/v2/", function(){
-      //
-      //
+        onUpdatePaymentInfoError: function (jqXHR, textStatus, errorThrown) {
+            //this.errorHandler.handle(jqXHR.status, {
+            //  401: { form: this.form, text: 'Email address or password invalid.' }
+            //});
+            this.submittingPaymentInfo = false;
+            this.tag.update();
+        },
 
-      //  });
-      //
-      //});
-    },
+        onStripeResponse: function (status, response) {
+            if (response.error) {
+                this.paymentInfoForm.form('add errors', [response.error.message]);
+                return this.submittingPaymentInfo = false;
+            }
+            this.profile.paymentInfo = response;
+            this.account.update(this.profile).done(this.onUpdatePaymentInfoSuccess).fail(this.onUpdatePaymentInfoError);
+        },
 
-    onUnMount: function () {
-      this.plans.off('subscribe', this.subscribe);
-      this.isEditingPlan = false;
-    },
+        setFormattedCardNumber: function () {
+            if (!this.profile || !this.profile.paymentInfo || !this.profile.paymentInfo.card) {
+                return;
+            }
+            this.cardNumberInput.val('•••• •••• •••• ' + this.profile.paymentInfo.card.last4);
+        },
 
-    onGetCurrentSuccess: function (profile, status) {
-      this.profile = profile;
-      this.setVisiblePlans(profile);
-      this.tag.update();
-    },
+        resetPaymentInfoForm: function () {
+            this.paymentInfoForm.removeClass('error');
+            this.cardNumberInput.val('');
+            this.cardCvcInput.val('');
+            this.cardExpiryInput.val('');
+            this.submittingPaymentInfo = false;
+        },
 
-    onGetCurrentError: function (jqXHR, textStatus, errorThrown) {
-      //this.errorHandler.handle(jqXHR.status, {
-      //  401: { form: this.form, text: 'Email address or password invalid.' }
-      //});
-      //this.tag.update();
-      console.log(jqXHR);
-      this.tag.update();
-    },
-
-    setVisiblePlans: function (profile) {
-      this.plans.isBasicVisible = false;
-      this.plans.isProVisible = false;
-      this.plans.isPremiumVisible = false;
-      this.plans.isReadOnly = true;
-
-      if (this.isEditingPlan || !this.profile.plan) {
-        this.plans.isBasicVisible = true;
-        this.plans.isProVisible = true;
-        this.plans.isPremiumVisible = true;
-        this.plans.isReadOnly = false;
-        return;
-      }
-      if (profile.plan == 'basic') {
-        return this.plans.isBasicVisible = true;
-      }
-      if (profile.plan == 'pro') {
-        return this.plans.isProVisible = true;
-      }
-      if (profile.plan == 'premium') {
-        return this.plans.isPremiumVisible = true;
-      }
-    },
-
-    onUpdateAccountSuccess: function (profile, status) {
-      console.log('success');
-      this.isEditingPlan = false;
-      this.setVisiblePlans(this.profile);
-      this.tag.update();
-    },
-
-    onUpdateAccountError: function (jqXHR, textStatus, errorThrown) {
-      //this.errorHandler.handle(jqXHR.status, {
-      //  401: { form: this.form, text: 'Email address or password invalid.' }
-      //});
-      //this.tag.update();
-      this.tag.update();
-    },
-
-    selectPlan: function (data) {
-      this.profile.plan = data.plan;
-      this.account.update(this.profile).done(this.onUpdateAccountSuccess).fail(this.onUpdateAccountError);
-    },
-
-    toggle: function (e) {
-      this.isEditingPlan = e.target.checked;
-      if(this.isEditingPlan) {
-        this.originalProfile = this.$.extend({}, this.profile);
-      } else {
-        this.profile = this.$.extend({}, this.originalProfile);
-      }
-      this.setVisiblePlans(this.profile);
-    }
-
-  });
-
-
-  app.component(
-      'Billing',
-      Billing,
-      [
-        '$',
-        'ErrorHandler',
-        'Router',
-        'Account',
-        'Plans'
-      ]
-  );
-
-  app.routes.push({
-    path: '/settings/billing',
-    component: 'Billing',
-    tag: 'billing',
-    authenticate: true
-  });
-
-  app.routes.push({
-    templateName: 'billingEdit',
-    path: '/settings/billing/edit',
-    component: 'Billing',
-    tag: 'billing-edit',
-    authenticate: true
-  });
-
-})();
-
-(function () {
-  var Login = Component.extend({
-
-    init: function ($, errorHandler, router, account) {
-      this.$ = $;
-      this.errorHandler = errorHandler;
-      this.router = router;
-      this.account = account;
-      this.message = {};
-    },
-
-    onMount: function (tag) {
-      this.message.displayPasswordResetSuccess = this.router.isCurrent('LoginAfterPasswordReset');
-      this.tag = tag;
-      this.form = this.$('form', tag.root).form({
-        inline: false,
-        fields: {
-          email: ['email', 'empty'],
-          password: ['empty']
+        onPaymentInfoSubmit: function (e) {
+            this.submittingPaymentInfo = true;
+            var paymentInfoInputs, errors;
+            paymentInfoInputs = this.getPaymentInfoInputs();
+            errors = [];
+            if (!this.$.payment.validateCardNumber(paymentInfoInputs.number)) {
+                errors.push('Valid card number required');
+            }
+            if (!this.$.payment.validateCardCVC(paymentInfoInputs.cvc)) {
+                errors.push('Valid card CVC required');
+            }
+            if (!this.$.payment.validateCardExpiry(paymentInfoInputs.exp_month, paymentInfoInputs.exp_year)) {
+                errors.push('Valid card expiration (MM/YYYY) required');
+            }
+            if (errors.length) {
+                this.submittingPaymentInfo = false;
+                this.paymentInfoForm.form('add errors', errors);
+                return false;
+            }
+            this.window.Stripe.card.createToken(paymentInfoInputs, this.onStripeResponse);
         }
-      });
-      this.tag.update();
-    },
 
-    getInputs: function (form) {
-      return {
-        email: form.email.value,
-        password: form.password.value,
-        rememberMe: true
-      }
-    },
-
-    onSuccess: function (data, status) {
-      this.router.go('Home', null, true);
-      this.tag.update();
-    },
-
-    onError: function (jqXHR, textStatus, errorThrown) {
-      this.errorHandler.handle(jqXHR.status, {
-        401: { form: this.form, text: 'Email address or password invalid.' }
-      });
-      this.tag.update();
-    },
-
-    submit: function (e) {
-      if(!e.result) return;
-      this.account.login(this.getInputs(e.target)).done(this.onSuccess).fail(this.onError);
-    }
-  });
+    });
 
 
-  app.component(
-      'Login',
-      Login,
-      [
-        '$',
-        'ErrorHandler',
-        'Router',
-        'Account'
-      ]
-  );
+    app.component(
+        'Billing',
+        Billing,
+        [
+            '$',
+            'ErrorHandler',
+            'Router',
+            'Account',
+            'window'
+        ]
+    );
 
-  app.routes.push({
-    path: '/login',
-    component: 'Login',
-    tag: 'login'
-  });
-
-  app.routes.push({
-    name: 'LoginAfterPasswordReset',
-    path: '/login/password-reset-success',
-    component: 'Login',
-    tag: 'login'
-  });
+    app.routes.push({
+        path: '/settings/billing',
+        component: 'Billing',
+        tag: 'billing',
+        authenticate: true
+    });
 
 })();
 
 (function () {
-  var Organization = Component.extend({
+    var Login = Component.extend({
 
-    init: function ($, errorHandler, router, account) {
-      this.$ = $;
-      this.errorHandler = errorHandler;
-      this.router = router;
-      this.account = account;
-    },
+        init: function ($, errorHandler, router, account, formHandlerFactory) {
+            this.$ = $;
+            this.errorHandler = errorHandler;
+            this.router = router;
+            this.account = account;
+            this.formHandlerFactory = formHandlerFactory;
+            this.message = {};
+        },
 
-    onMount: function (tag) {
-      this.tag = tag;
-    }
-  });
+        onAfterMount: function () {
+            this.message.displayPasswordResetSuccess = this.router.isCurrent('LoginAfterPasswordReset');
+            this.loginFormHandler = this.formHandlerFactory.create('#loginForm', this.tag);
+        },
 
+        onSuccess: function (data, status) {
+            this.router.go('Home', null, true);
+        },
 
-  app.component(
-      'Organization',
-      Organization,
-      [
-        '$',
-        'ErrorHandler',
-        'Router',
-        'Account'
-      ]
-  );
+        onError: function (jqXHR, textStatus, errorThrown) {
+            this.errorHandler.handle(jqXHR.status, {
+                401: {form: this.loginFormHandler.form, text: 'Email address or password invalid.'}
+            });
+        },
 
-  app.routes.push({
-    path: '/settings/organization',
-    component: 'Organization',
-    tag: 'organization',
-    authenticate: true
-  });
-
-  app.routes.push({
-    templateName: 'organizationEdit',
-    path: '/settings/organization/edit',
-    component: 'Organization',
-    tag: 'organization-edit',
-    authenticate: true
-  });
-
-})();
-
-(function () {
-  var Profile = Component.extend({
-
-    init: function ($, errorHandler, router, account) {
-      this.$ = $;
-      this.errorHandler = errorHandler;
-      this.router = router;
-      this.account = account;
-      this.profile = {};
-      this.editing = false;
-    },
-
-    onMount: function (tag) {
-      this.tag = tag;
-      this.form = this.$('form', tag.root).form({
-        inline: false,
-        fields: {
-          email: ['email', 'empty']
+        submit: function (e) {
+            if (!e.result) return;
+            this.account.login(this.loginFormHandler.values()).done(this.onSuccess).fail(this.onError);
         }
-      });
-
-      this.account.getCurrent().done(this.onGetCurrentSuccess).fail(this.onGetCurrentError);
-    },
-
-    onUnMount: function () {
-      this.reset();
-    },
-
-    onGetCurrentSuccess: function (profile, status) {
-      this.profile = profile;
-      this.tag.update();
-    },
-
-    onGetCurrentError: function (jqXHR, textStatus, errorThrown) {
-      //this.errorHandler.handle(jqXHR.status, {
-      //  401: { form: this.form, text: 'Email address or password invalid.' }
-      //});
-      //this.tag.update();
-      console.log(jqXHR);
-      this.tag.update();
-    },
-
-    onUpdateAccountSuccess: function (profile, status) {
-      console.log('success');
-      this.editing = false;
-      this.tag.update();
-    },
-
-    onUpdateAccountError: function (jqXHR, textStatus, errorThrown) {
-      //this.errorHandler.handle(jqXHR.status, {
-      //  401: { form: this.form, text: 'Email address or password invalid.' }
-      //});
-      //this.tag.update();
-      this.tag.update();
-    },
-
-    toggle: function (e) {
-      this.editing = e.target.checked;
-      if(this.editing) {
-        this.originalProfile = this.$.extend({}, this.profile);
-      } else {
-        this.profile = this.$.extend(this.profile, this.getInputs(e.target.form));
-        this.tag.update();
-      }
-    },
-
-    reset: function() {
-      this.editing = false;
-      this.profile = this.originalProfile || this.profile;
-      this.tag.update();
-    },
-
-    getInputs: function (form) {
-      return {
-        email: form[1].value,
-        first: form[2].value,
-        last: form[3].value
-      }
-    },
-
-    submit: function (e) {
-      this.account.update(this.getInputs(e.target)).done(this.onUpdateAccountSuccess).fail(this.onUpdateAccountError);
-    }
-  });
+    });
 
 
-  app.component(
-      'Profile',
-      Profile,
-      [
-        '$',
-        'ErrorHandler',
-        'Router',
-        'Account'
-      ]
-  );
+    app.component(
+        'Login',
+        Login,
+        [
+            '$',
+            'ErrorHandler',
+            'Router',
+            'Account',
+            'FormHandlerFactory'
+        ]
+    );
 
-  app.routes.push({
-    path: '/settings/profile',
-    component: 'Profile',
-    tag: 'profile',
-    authenticate: true
-  });
+    app.routes.push({
+        path: '/login',
+        component: 'Login',
+        tag: 'login'
+    });
 
-  app.routes.push({
-    templateName: 'profileEdit',
-    path: '/settings/profile/edit',
-    component: 'Profile',
-    tag: 'profile-edit',
-    authenticate: true
-  });
+    app.routes.push({
+        name: 'LoginAfterPasswordReset',
+        path: '/login/password-reset-success',
+        component: 'Login',
+        tag: 'login'
+    });
+
+})();
+
+(function () {
+    var Profile = Component.extend({
+
+        init: function ($, errorHandler, router, account, formHandlerFactory) {
+            this.$ = $;
+            this.errorHandler = errorHandler;
+            this.router = router;
+            this.account = account;
+            this.formHandlerFactory = formHandlerFactory;
+            this.profile = {};
+            this.editing = false;
+        },
+
+        onAfterMount: function () {
+            this.profileFormHandler = this.formHandlerFactory.create('#profileForm', this.tag);
+            this.account.getCurrent().done(this.onGetCurrentSuccess).fail(this.onGetCurrentError);
+        },
+
+        onAfterUnMount: function () {
+            this.reset();
+        },
+
+        onGetCurrentSuccess: function (profile, status) {
+            this.profile = profile;
+            this.profileFormHandler.values(profile);
+            this.tag.update();
+        },
+
+        onGetCurrentError: function (jqXHR, textStatus, errorThrown) {
+            //this.errorHandler.handle(jqXHR.status, {
+            //  401: { form: this.form, text: 'Email address or password invalid.' }
+            //});
+            //this.tag.update();
+            console.log(jqXHR);
+            this.tag.update();
+        },
+
+        onUpdateAccountSuccess: function (profile, status) {
+            console.log('success');
+            this.editing = false;
+            this.profileFormHandler.commit();
+            this.tag.update();
+        },
+
+        onUpdateAccountError: function (jqXHR, textStatus, errorThrown) {
+            //this.errorHandler.handle(jqXHR.status, {
+            //  401: { form: this.form, text: 'Email address or password invalid.' }
+            //});
+            //this.tag.update();
+            this.tag.update();
+        },
+
+        toggle: function (e) {
+            this.editing = e.target.checked;
+            if (!this.editing) {
+                this.profileFormHandler.rollback();
+            }
+            this.tag.update();
+        },
+
+        reset: function () {
+            this.editing = false;
+            this.profile = this.originalProfile || this.profile;
+            this.tag.update();
+        },
+
+        submit: function (e) {
+            this.account.update(this.profileFormHandler.values()).done(this.onUpdateAccountSuccess).fail(this.onUpdateAccountError);
+        }
+    });
+
+
+    app.component(
+        'Profile',
+        Profile,
+        [
+            '$',
+            'ErrorHandler',
+            'Router',
+            'Account',
+            'FormHandlerFactory'
+        ]
+    );
+
+    app.routes.push({
+        path: '/settings/profile',
+        component: 'Profile',
+        tag: 'profile',
+        authenticate: true
+    });
+
+    app.routes.push({
+        templateName: 'profileEdit',
+        path: '/settings/profile/edit',
+        component: 'Profile',
+        tag: 'profile-edit',
+        authenticate: true
+    });
 
 })();
 
@@ -26261,9 +26346,8 @@ var app = (function () {
       this.account = account;
     },
 
-    onMount: function (tag) {
-      this.tag = tag;
-      this.form = this.$('form', tag.root).form({
+    onAfterMount: function () {
+      this.form = this.$('form', this.tag.root).form({
         inline: false,
         fields: {
           email: ['email', 'empty']
@@ -26326,9 +26410,8 @@ var app = (function () {
       this.account = account;
     },
 
-    onMount: function (tag) {
-      this.tag = tag;
-      this.form = this.$('form', tag.root).form({
+    onAfterMount: function () {
+      this.form = this.$('form', this.tag.root).form({
         inline: false,
         fields: {
           email: ['email', 'empty'],
@@ -26395,9 +26478,8 @@ var app = (function () {
       this.account = account;
     },
 
-    onMount: function (tag) {
-      this.tag = tag;
-      this.form = this.$('form', tag.root).form({
+    onAfterMount: function () {
+      this.form = this.$('form', this.tag.root).form({
         inline: false,
         fields: {
           password: ['empty'],
@@ -26467,8 +26549,7 @@ var app = (function () {
       this.isOrganizationTabActive = false;
     },
 
-    onMount: function(tag) {
-      this.tag = tag;
+    onAfterMount: function() {
       this.isProfileTabActive = this.router.isCurrent('Profile');
       this.isBillingTabActive = this.router.isCurrent('Billing');
       this.isOrganizationTabActive = this.router.isCurrent('Organization');
@@ -26526,7 +26607,7 @@ var app = (function () {
       this.$ = $;
     },
 
-    onAfterMount: function () {
+    onAfterUnMount: function () {
       this.reset();
       this.tag.update();
     },
@@ -26558,8 +26639,8 @@ var app = (function () {
       this.$ = $;
     },
 
-    onMount: function(tag) {
-      this.$('.ui.dropdown', tag.root).dropdown();
+    onAfterMount: function(tag) {
+      this.$('.ui.dropdown', this.  tag.root).dropdown();
     },
 
     onLogoutSuccess: function () {
@@ -26593,8 +26674,8 @@ var app = (function () {
       this.$ = $;
     },
 
-    onMount: function(tag) {
-      this.$('.ui.dropdown', tag.root).dropdown();
+    onAfterMount: function() {
+      this.$('.ui.dropdown', this.tag.root).dropdown();
     }
   });
 

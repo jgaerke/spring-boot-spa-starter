@@ -24,70 +24,71 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 @RequestMapping(value = "/api/accounts")
 public class AccountController {
 
-  private final AccountService accountService;
-  private final UserDetailsService userDetailsService;
+    private final AccountService accountService;
+    private final UserDetailsService userDetailsService;
 
-  @Autowired
-  public AccountController(
-      AccountService accountService,
-      UserDetailsService userDetailsService) {
-    this.accountService = accountService;
-    this.userDetailsService = userDetailsService;
-  }
-
-  @RequestMapping(method = POST)
-  @ResponseStatus(OK)
-  public void create(@Valid @RequestBody RegistrationRequest registrationRequest) {
-    setAuthToken(accountService.create(registrationRequest));
-  }
-
-  @RequestMapping(value = "/password/change", method = PATCH)
-  @ResponseStatus(OK)
-  public void changePassword(
-      @Valid @RequestBody PasswordChangeRequest passwordChangeRequest, HttpServletRequest request) {
-    accountService.changePassword(passwordChangeRequest, request.getUserPrincipal().getName());
-  }
-
-  @RequestMapping(value = "/password/reset", method = POST)
-  @ResponseStatus(OK)
-  public void resetPassword(@Valid @RequestBody PasswordResetRequest passwordResetRequest) {
-    accountService.resetPassword(passwordResetRequest);
-  }
-
-  @RequestMapping(value = "/password/recover", method = POST)
-  @ResponseStatus(OK)
-  public void recoverPassword(@Valid @RequestBody PasswordRecoveryRequest passwordRecoveryRequest) {
-    accountService.sendPasswordResetInstructions(passwordRecoveryRequest.getEmail());
-  }
-
-  @RequestMapping(value = "/current", method = GET)
-  @ResponseStatus(OK)
-  public AccountResponse getCurrent(HttpServletRequest request) {
-    Optional<Account> current = accountService.getByEmail(request.getUserPrincipal().getName());
-    if (!current.isPresent()) {
-      throw new EmailNotFoundException();
+    @Autowired
+    public AccountController(
+            AccountService accountService,
+            UserDetailsService userDetailsService) {
+        this.accountService = accountService;
+        this.userDetailsService = userDetailsService;
     }
-    Account account = current.get();
-    return AccountResponse.builder()
-        .email(account.getEmail())
-        .first(account.getFirst())
-        .last(account.getLast())
-        .plan(account.getPlan())
-        .trialExpirationDate(account.getTrialExpirationDate())
-        .build();
-  }
 
-  @RequestMapping(method = PATCH)
-  @ResponseStatus(OK)
-  public void update(@Valid @RequestBody AccountUpdateRequest accountUpdateRequest, HttpServletRequest request) {
-    Account updated = accountService.update(request.getUserPrincipal().getName(), accountUpdateRequest);
-    setAuthToken(updated);
-  }
+    @RequestMapping(method = POST)
+    @ResponseStatus(OK)
+    public void create(@Valid @RequestBody RegistrationRequest registrationRequest) {
+        setAuthToken(accountService.create(registrationRequest));
+    }
 
-  private void setAuthToken(Account account) {
-    UserDetails userDetails = userDetailsService.loadUserByUsername(account.getEmail());
-    UsernamePasswordAuthenticationToken auth =
-        new UsernamePasswordAuthenticationToken(userDetails, account.getPassword(), userDetails.getAuthorities());
-    SecurityContextHolder.getContext().setAuthentication(auth);
-  }
+    @RequestMapping(value = "/password/change", method = PATCH)
+    @ResponseStatus(OK)
+    public void changePassword(
+            @Valid @RequestBody PasswordChangeRequest passwordChangeRequest, HttpServletRequest request) {
+        accountService.changePassword(passwordChangeRequest, request.getUserPrincipal().getName());
+    }
+
+    @RequestMapping(value = "/password/reset", method = POST)
+    @ResponseStatus(OK)
+    public void resetPassword(@Valid @RequestBody PasswordResetRequest passwordResetRequest) {
+        accountService.resetPassword(passwordResetRequest);
+    }
+
+    @RequestMapping(value = "/password/recover", method = POST)
+    @ResponseStatus(OK)
+    public void recoverPassword(@Valid @RequestBody PasswordRecoveryRequest passwordRecoveryRequest) {
+        accountService.sendPasswordResetInstructions(passwordRecoveryRequest.getEmail());
+    }
+
+    @RequestMapping(value = "/current", method = GET)
+    @ResponseStatus(OK)
+    public AccountResponse getCurrent(HttpServletRequest request) {
+        Optional<Account> current = accountService.getByEmail(request.getUserPrincipal().getName());
+        if (!current.isPresent()) {
+            throw new EmailNotFoundException();
+        }
+        Account account = current.get();
+        return AccountResponse.builder()
+                .email(account.getEmail())
+                .first(account.getFirst())
+                .last(account.getLast())
+                .plan(account.getPlan())
+                .trialExpirationDate(account.getTrialExpirationDate())
+                .paymentInfo(account.getPaymentInfo())
+                .build();
+    }
+
+    @RequestMapping(method = PATCH)
+    @ResponseStatus(OK)
+    public void update(@Valid @RequestBody AccountUpdateRequest accountUpdateRequest, HttpServletRequest request) {
+        Account updated = accountService.update(request.getUserPrincipal().getName(), accountUpdateRequest);
+        setAuthToken(updated);
+    }
+
+    private void setAuthToken(Account account) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(account.getEmail());
+        UsernamePasswordAuthenticationToken auth =
+                new UsernamePasswordAuthenticationToken(userDetails, account.getPassword(), userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
 }

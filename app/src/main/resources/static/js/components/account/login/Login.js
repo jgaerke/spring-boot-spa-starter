@@ -1,75 +1,60 @@
 (function () {
-  var Login = Component.extend({
+    var Login = Component.extend({
 
-    init: function ($, errorHandler, router, account) {
-      this.$ = $;
-      this.errorHandler = errorHandler;
-      this.router = router;
-      this.account = account;
-      this.message = {};
-    },
+        init: function ($, errorHandler, router, account, formHandlerFactory) {
+            this.$ = $;
+            this.errorHandler = errorHandler;
+            this.router = router;
+            this.account = account;
+            this.formHandlerFactory = formHandlerFactory;
+            this.message = {};
+        },
 
-    onAfterMount: function () {
-      this.message.displayPasswordResetSuccess = this.router.isCurrent('LoginAfterPasswordReset');
-      this.form = this.$('form', this.tag.root).form({
-        inline: false,
-        fields: {
-          email: ['email', 'empty'],
-          password: ['empty']
+        onAfterMount: function () {
+            this.message.displayPasswordResetSuccess = this.router.isCurrent('LoginAfterPasswordReset');
+            this.loginFormHandler = this.formHandlerFactory.create('#loginForm', this.tag);
+        },
+
+        onSuccess: function (data, status) {
+            this.router.go('Home', null, true);
+        },
+
+        onError: function (jqXHR, textStatus, errorThrown) {
+            this.errorHandler.handle(jqXHR.status, {
+                401: {form: this.loginFormHandler.form, text: 'Email address or password invalid.'}
+            });
+        },
+
+        submit: function (e) {
+            if (!e.result) return;
+            this.account.login(this.loginFormHandler.values()).done(this.onSuccess).fail(this.onError);
         }
-      });
-      this.tag.update();
-    },
-
-    getInputs: function (form) {
-      return {
-        email: form.email.value,
-        password: form.password.value,
-        rememberMe: true
-      }
-    },
-
-    onSuccess: function (data, status) {
-      this.router.go('Home', null, true);
-      this.tag.update();
-    },
-
-    onError: function (jqXHR, textStatus, errorThrown) {
-      this.errorHandler.handle(jqXHR.status, {
-        401: { form: this.form, text: 'Email address or password invalid.' }
-      });
-      this.tag.update();
-    },
-
-    submit: function (e) {
-      if(!e.result) return;
-      this.account.login(this.getInputs(e.target)).done(this.onSuccess).fail(this.onError);
-    }
-  });
+    });
 
 
-  app.component(
-      'Login',
-      Login,
-      [
-        '$',
-        'ErrorHandler',
-        'Router',
-        'Account'
-      ]
-  );
+    app.component(
+        'Login',
+        Login,
+        [
+            '$',
+            'ErrorHandler',
+            'Router',
+            'Account',
+            'FormHandlerFactory'
+        ]
+    );
 
-  app.routes.push({
-    path: '/login',
-    component: 'Login',
-    tag: 'login'
-  });
+    app.routes.push({
+        path: '/login',
+        component: 'Login',
+        tag: 'login'
+    });
 
-  app.routes.push({
-    name: 'LoginAfterPasswordReset',
-    path: '/login/password-reset-success',
-    component: 'Login',
-    tag: 'login'
-  });
+    app.routes.push({
+        name: 'LoginAfterPasswordReset',
+        path: '/login/password-reset-success',
+        component: 'Login',
+        tag: 'login'
+    });
 
 })();

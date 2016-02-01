@@ -1,56 +1,183 @@
 <billing>
-  <container>
-    <settings-container>
-      <div>
-        <div class="ui segment">
-          <div class="ui grid">
-            <div class="{ five: billing.profile.plan && !billing.isEditingPlan, wide: billing.profile.plan && !billing.isEditingPlan, column: true }">
-              <h3 class="ui header">Manage your plan</h3>
-              <div class="ui toggle checkbox" if="{ billing.profile.plan }">
-                <input type="checkbox" name="toggle" onchange="{ billing.toggle }" checked="{ billing.isEditingPlan }">
-                <label if="{ !billing.isEditingPlan }">Toggle to change</label>
-                <label if="{ billing.isEditingPlan }">Toggle to cancel</label>
-              </div>
-              <plans if="{ billing.profile }"></plans>
+    <container>
+        <settings-container>
+            <div>
+                <div class="ui segment">
+                    <div class="ui grid">
+                        <div class="row">
+                            <div class="five wide column">
+                                <h3 class="ui header">Your plan</h3>
+                                <div class="ui toggle checkbox">
+                                    <input type="checkbox" name="toggle" onchange="{ billing.togglePlan }"
+                                           checked="{ billing.editingPlan }">
+                                    <label if="{ !billing.editingPlan }">Toggle to change</label>
+                                    <label if="{ billing.editingPlan }">Toggle to cancel</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="five wide column">
+                                <form id="planForm" class="ui form" novalidate="novalidate" role="form"
+                                      onsubmit="{ billing.onPlanSubmit }">
+                                    <div class="inline fields" show="{ billing.editingPlan }">
+                                        <div class="field">
+                                            <div class="ui radio checkbox">
+                                                <input type="radio" name="plan"
+                                                       value="basic"
+                                                       onchange="{ billing.onPlanChange }">
+                                                <label>Basic</label>
+                                            </div>
+                                        </div>
+                                        <div class="field">
+                                            <div class="ui radio checkbox">
+                                                <input type="radio" name="plan"
+                                                       value="pro"
+                                                       onchange="{ billing.onPlanChange }">
+                                                <label>Pro</label>
+                                            </div>
+                                        </div>
+                                        <div class="field">
+                                            <div class="ui radio checkbox">
+                                                <input type="radio" name="plan"
+                                                       value="premium"
+                                                       onchange="{ billing.onPlanChange }">
+                                                <label>Premium</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <table class="ui very basic celled striped table"
+                                           if="{ billing.selectedPlan == 'basic' }">
+                                        <thead>
+                                        <tr>
+                                            <th><span if="{ !billing.editingPlan }">Basic -</span> $99.99</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td>Basic benefit 1</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Basic benefit 2</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Basic benefit 3</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Basic benefit 4</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Basic benefit 5</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                    <table class="ui very basic celled striped table"
+                                           if="{ billing.selectedPlan == 'pro' }">
+                                        <thead>
+                                        <tr>
+                                            <th><span if="{ !billing.editingPlan }">Pro -</span> 199.99</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td>Pro benefit 1</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Pro benefit 2</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Pro benefit 3</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Pro benefit 4</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Pro benefit 5</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                    <table class="ui very basic celled striped table"
+                                           if="{ billing.selectedPlan == 'premium' }">
+                                        <thead>
+                                        <tr>
+                                            <th><span if="{ !billing.editingPlan }">Premium -</span> $499.99</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td>Premium benefit 1</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Premium benefit 2</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Premium benefit 3</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Premium benefit 4</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Premium benefit 5</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                    <button type="submit" class="ui fluid large teal submit button"
+                                            if="{ billing.editingPlan }" disabled="{ billing.submittingPlan }">Save
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui segment" show="{ billing.profile.plan != undefined }">
+                    <div class="ui grid">
+                        <div class="row">
+                            <div class="five wide column">
+                                <h3 class="ui header">Payment info</h3>
+                                <div class="ui toggle checkbox">
+                                    <input type="checkbox" name="toggle" onchange="{ billing.togglePaymentInfo }"
+                                           checked="{ billing.editingPaymentInfo }">
+                                    <label if="{ !billing.editingPaymentInfo }">Toggle to change</label>
+                                    <label if="{ billing.editingPaymentInfo }">Toggle to cancel</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="five wide column">
+                                <form id="paymentInfoForm" class="ui form" novalidate="novalidate"
+                                      role="form" onsubmit="{ billing.onPaymentInfoSubmit }">
+                                    <div class="field">
+                                        <label>Card Number</label>
+                                        <div class="{ui: true, transparent: !billing.editingPaymentInfo, input: true}">
+                                            <input name="number" type="tel"
+                                                   placeholder="•••• •••• •••• ••••" autocomplete="off" value="{ billing.formattedCardNumber }" />
+                                        </div>
+                                    </div>
+                                    <div class="field" show="{ billing.editingPaymentInfo }">
+                                        <label>CVC</label>
+                                        <div class="ui input">
+                                            <input name="cvc" type="text" placeholder="n/a" autocomplete="off"  />
+                                        </div>
+                                    </div>
+                                    <div class="field" show="{ billing.editingPaymentInfo }">
+                                        <label>Expiration (MM/YYYY)</label>
+                                        <div class="ui input">
+                                            <input name="expiration" type="text" placeholder="n/a" autocomplete="off" />
+                                        </div>
+                                    </div>
+                                    <div class="ui fluid large teal submit button"
+                                            show="{ billing.editingPaymentInfo }"
+                                            disabled="{ billing.submittingPaymentInfo }">Save Card
+                                    </div>
+                                    <div class="ui error message" show="{ billing.editingPaymentInfo }"></div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-        <div class="ui segment">
-          <div class="ui grid">
-            <div class="five wide column">
-              <h3 class="ui header">Manage your payment methods </h3>
-              <form action="" method="POST" id="payment-form" class="ui form" novalidate="novalidate" role="form">
-                <div class="field">
-                  <label>Card Number</label>
-
-                  <div class="{ui: true, transparent: false, input: true}">
-                    <input type="tel" class="card-number" size="20" placeholder="•••• •••• •••• ••••" pattern="\d*"/>
-                  </div>
-                </div>
-                <div class="field">
-                  <label>CVC</label>
-
-                  <div class="{ui: true, transparent: false, input: true}">
-                    <input type="text" class="card-cvc" size="4" data-stripe="cvc"/>
-                  </div>
-                </div>
-                <div class="field">
-                  <label>Expiration (MM/YYYY)</label>
-
-                  <div class="{ui: true, transparent: false, input: true}">
-                    <input type="text" class="card-exp" size="4" data-stripe="exp-year"/>
-                  </div>
-                </div>
-                <button type="submit" class="ui fluid large teal submit button">Add Card</button>
-                <div class="ui error message"></div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    </settings-container>
-  </container>
-  <script>
-    this.billing = (this.tags.container.tags['settings-container'].billing = opts).wire(this);
-  </script>
+        </settings-container>
+    </container>
+    <script>
+        this.billing = (this.tags.container.tags['settings-container'].billing = opts).wire(this);
+    </script>
 </billing>

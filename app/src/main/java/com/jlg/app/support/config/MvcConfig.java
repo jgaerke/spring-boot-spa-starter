@@ -35,7 +35,7 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
     if (!asList(environment.getActiveProfiles()).contains("production")) {
       try {
-        String resourceDirectory = "file://" + new File(".").getCanonicalPath() +
+        String resourceDirectory = "file://" + new File(".").getCanonicalPath().replace("/app", "") +
             "/app/src/main/resources/static/";
         registry.addResourceHandler("/**").addResourceLocations(resourceDirectory).setCachePeriod(0);
       } catch (IOException e) {
