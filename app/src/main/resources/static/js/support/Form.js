@@ -1,10 +1,10 @@
 (function () {
-    var FormHandlerFactory = Class.extend({
+    var Form = Class.extend({
         init: function ($) {
             this.$ = $;
         },
 
-        create: function (el, tag, settings) {
+        bind: function (el, tag, settings) {
             var self, form;
 
             self = this;
@@ -21,6 +21,16 @@
 
                 get: function () {
                     return this.form;
+                },
+
+                value: function(name, value) {
+                    if(value != undefined) {
+                        var values = {};
+                        values[name] = value;
+                        this.values(values);
+                        return this;
+                    }
+                    return this.values()[name];
                 },
 
                 values: function (values) {
@@ -54,6 +64,9 @@
                         return this;
                     }
                     this.values(this.originalValues);
+                    this.form.find('.ui error message').empty();
+                    this.form.removeClass('error');
+                    this.form.addClass('success');
                     this.tag.update();
                     return this;
                 },
@@ -62,6 +75,10 @@
                     this.originalValues = this.values();
                     this.tag.update();
                     return this;
+                },
+
+                validate: function() {
+                    this.form.form('validate form');
                 },
 
                 each: function(handler) {
@@ -150,6 +167,7 @@
             fields = this.constraints(form);
             defaults = {
                 inline: form.find('.ui error message').lenth == 0,
+                fields: {},
             };
 
             if(!this.$.isEmptyObject(fields)) {
@@ -163,8 +181,8 @@
 
 
     app.service(
-        'FormHandlerFactory',
-        FormHandlerFactory,
+        'Form',
+        Form,
         [
             '$'
         ]

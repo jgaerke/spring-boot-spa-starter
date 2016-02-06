@@ -188,6 +188,9 @@ describe('Router', function () {
     //given
     router.routes['foo'] = { path: '/foo'};
     router.window = { location: { href: '/foo' }};
+    router.current = {
+      path: '/foo'
+    };
 
     //when
     var result = router.isCurrent('foo');

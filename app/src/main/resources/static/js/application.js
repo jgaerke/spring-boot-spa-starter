@@ -25573,7 +25573,7 @@ var app = (function () {
               || statusKey == status) {
             if(possibleError.form) {
               handled = true;
-              return possibleError.form.form('add errors', [possibleError.text]);
+              return possibleError.form.errors([possibleError.text]);
             }
             if(possibleError.route) {
               handled = true;
@@ -25601,12 +25601,12 @@ var app = (function () {
   );
 })();
 (function () {
-    var FormHandlerFactory = Class.extend({
+    var Form = Class.extend({
         init: function ($) {
             this.$ = $;
         },
 
-        create: function (el, tag, settings) {
+        bind: function (el, tag, settings) {
             var self, form;
 
             self = this;
@@ -25623,6 +25623,16 @@ var app = (function () {
 
                 get: function () {
                     return this.form;
+                },
+
+                value: function(name, value) {
+                    if(value != undefined) {
+                        var values = {};
+                        values[name] = value;
+                        this.values(values);
+                        return this;
+                    }
+                    return this.values()[name];
                 },
 
                 values: function (values) {
@@ -25642,7 +25652,13 @@ var app = (function () {
                     this.each(function (input) {
                         values[input.name()] = input.value();
                     });
+                    this.tag.update();
                     return values;
+                },
+
+                errors: function(errors) {
+                    this.form.form('add errors', errors);
+                    this.tag.update();
                 },
 
                 rollback: function() {
@@ -25650,12 +25666,21 @@ var app = (function () {
                         return this;
                     }
                     this.values(this.originalValues);
+                    this.form.find('.ui error message').empty();
+                    this.form.removeClass('error');
+                    this.form.addClass('success');
+                    this.tag.update();
                     return this;
                 },
 
                 commit: function() {
                     this.originalValues = this.values();
+                    this.tag.update();
                     return this;
+                },
+
+                validate: function() {
+                    this.form.form('validate form');
                 },
 
                 each: function(handler) {
@@ -25713,7 +25738,10 @@ var app = (function () {
                     value: function (value) {
                         if (value != undefined) {
                             if (this.el.type == 'checkbox' || this.el.type == 'radio') {
-                                return self.$(this.el).prop('checked', value);
+                                if(this.el.value == value) {
+                                    return self.$(this.el).prop('checked', true);
+                                }
+                                return;
                             }
                             self.$(this.el).val(value);
                             return this.el;
@@ -25722,7 +25750,11 @@ var app = (function () {
                         value = this.el.value;
 
                         if (this.el.type == 'checkbox' || this.el.type == 'radio') {
-                            value = this.el.checked;
+                            if(self.$(this.el).data('boolean') == 'true') {
+                                value = this.el.checked;
+                                return;
+                            }
+                            value = this.el.value;
                         }
 
                         return value;
@@ -25737,6 +25769,7 @@ var app = (function () {
             fields = this.constraints(form);
             defaults = {
                 inline: form.find('.ui error message').lenth == 0,
+                fields: {},
             };
 
             if(!this.$.isEmptyObject(fields)) {
@@ -25750,8 +25783,8 @@ var app = (function () {
 
 
     app.service(
-        'FormHandlerFactory',
-        FormHandlerFactory,
+        'Form',
+        Form,
         [
             '$'
         ]
@@ -25972,31 +26005,28 @@ var app = (function () {
 (function () {
     var Billing = Component.extend({
 
-        init: function ($, errorHandler, router, account, window) {
+        init: function ($, errorHandler, router, account, window, form) {
             this.$ = $;
             this.errorHandler = errorHandler;
             this.router = router;
             this.account = account;
             this.window = window;
-            this.editingPlan = false;
-            this.submittingPlan = false;
-            this.editingPaymentInfo = false;
-            this.submittingPaymentInfo = false;
+            this.form = form
+            this.editing = false;
+            this.submitting = false;
         },
 
         onAfterMount: function () {
-            this.paymentInfoForm = this.$('#paymentInfo', this.tag.root).form({
-                inline: false
-            });
-            this.cardNumberInput = this.$('input[name=0]', this.paymentInfoForm).payment('formatCardNumber');
-            this.cardCvcInput = this.$('input[name=1]', this.paymentInfoForm).payment('formatCardCVC');
-            this.cardExpiryInput = this.$('input[name=2]', this.paymentInfoForm).payment('formatCardExpiry');
+            this.paymentInfoForm = this.form.bind('#paymentInfo', this.tag);
+            this.$('input[name=number]').payment('formatCardNumber');
+            this.$('input[name=cvc]').payment('formatCardCVC');
+            this.$('input[name=expiration]').payment('formatCardExpiry');
             this.loadStripe();
             this.account.getCurrent().done(this.onGetCurrentSuccess).fail(this.onGetCurrentError);
         },
 
         onAfterUnMount: function () {
-            this.editingPlan = false;
+            this.editing = false;
             delete this.profile;
         },
 
@@ -26006,14 +26036,15 @@ var app = (function () {
                 return;
             }
             this.$.getScript("https://js.stripe.com/v2/", function () {
-                self.window.Stripe.setPublishableKey('pk_test_6pRNASCoBOKtIshFeQd4XMUh');
+                self.window.Stripe.setPublishableKey('pk_0H9Yr42FEoJtxa7Tt2U3Sead6u8hL');
             });
         },
 
         onGetCurrentSuccess: function (profile, status) {
             this.profile = profile;
+            this.editing = profile.plan == undefined || !this.profile.paymentInfo || !this.profile.paymentInfo.card;
+            this.paymentInfoForm.values(this.profile);
             this.setFormattedCardNumber();
-            this.tag.update();
         },
 
         onGetCurrentError: function (jqXHR, textStatus, errorThrown) {
@@ -26026,88 +26057,34 @@ var app = (function () {
             this.tag.update();
         },
 
-        togglePlan: function (e) {
-            this.editingPlan = e.target.checked;
-            if (this.editingPlan) {
-                this.submittingPlan = false;
-                this.originalPlanProfile = this.$.extend({}, this.profile);
-            } else {
-                this.profile = this.$.extend({}, this.originalPlanProfile);
-                this.tag.update();
-            }
-        },
-
-        onPlanChange: function (e) {
-            this.profile.plan = e.target.value;
-        },
-
-        onUpdatePlanSuccess: function (profile, status) {
-            this.editingPlan = false;
-            this.submittingPlan = false;
-            this.originalPlanProfile = null;
-            this.tag.update();
-        },
-
-        onUpdatePlanError: function (jqXHR, textStatus, errorThrown) {
-            //this.errorHandler.handle(jqXHR.status, {
-            //  401: { form: this.form, text: 'Email address or password invalid.' }
-            //});
-            this.submittingPlan = false;
-            this.tag.update();
-        },
-
-        onPlanSubmit: function (e) {
-            this.submittingPlan = true;
-            this.profile.plan = e.target.plan.value;
-            this.account.update(this.profile).done(this.onUpdatePlanSuccess).fail(this.onUpdatePlanError);
-        },
-
-        togglePaymentInfo: function (e) {
-            this.editingPaymentInfo = e.target.checked;
-            if (this.editingPaymentInfo) {
-                this.originalPaymentProfile = this.$.extend({}, this.profile);
-                this.resetPaymentInfoForm();
-                this.tag.update();
+        toggle: function (e) {
+            this.editing = e.target.checked;
+            if (this.editing) {
+                this.submitting = false;
             } else {
                 this.setFormattedCardNumber();
-                this.profile = this.$.extend({}, this.originalPaymentProfile);
-                this.tag.update();
+                this.paymentInfoForm.rollback();
             }
-        },
-
-        getPaymentInfoInputs: function () {
-            var form, cardExpiryVal;
-            form = this.paymentInfoForm[0];
-            cardExpiryVal = this.cardExpiryInput.payment('cardExpiryVal');
-            return {
-                number: form[0].value,
-                cvc: form[1].value,
-                exp_month: cardExpiryVal.month,
-                exp_year: cardExpiryVal.year
-            };
         },
 
         onUpdatePaymentInfoSuccess: function (profile, status) {
-            this.editingPaymentInfo = false;
-            this.submittingPaymentInfo = false;
-            this.originalPaymentProfile = null;
-            this.resetPaymentInfoForm();
+            this.editing = false;
+            this.submitting = false;
             this.setFormattedCardNumber();
-            this.tag.update();
         },
 
         onUpdatePaymentInfoError: function (jqXHR, textStatus, errorThrown) {
             //this.errorHandler.handle(jqXHR.status, {
             //  401: { form: this.form, text: 'Email address or password invalid.' }
             //});
-            this.submittingPaymentInfo = false;
+            this.submitting = false;
             this.tag.update();
         },
 
         onStripeResponse: function (status, response) {
             if (response.error) {
-                this.paymentInfoForm.form('add errors', [response.error.message]);
-                return this.submittingPaymentInfo = false;
+                this.paymentInfoForm.errors([response.error.message]);
+                return this.submitting = false;
             }
             this.profile.paymentInfo = response;
             this.account.update(this.profile).done(this.onUpdatePaymentInfoSuccess).fail(this.onUpdatePaymentInfoError);
@@ -26117,37 +26094,40 @@ var app = (function () {
             if (!this.profile || !this.profile.paymentInfo || !this.profile.paymentInfo.card) {
                 return;
             }
-            this.cardNumberInput.val('•••• •••• •••• ' + this.profile.paymentInfo.card.last4);
+            this.paymentInfoForm.values({
+                number: '•••• •••• •••• ' + this.profile.paymentInfo.card.last4
+            });
         },
 
-        resetPaymentInfoForm: function () {
-            this.paymentInfoForm.removeClass('error');
-            this.cardNumberInput.val('');
-            this.cardCvcInput.val('');
-            this.cardExpiryInput.val('');
-            this.submittingPaymentInfo = false;
-        },
-
-        onPaymentInfoSubmit: function (e) {
-            this.submittingPaymentInfo = true;
-            var paymentInfoInputs, errors;
-            paymentInfoInputs = this.getPaymentInfoInputs();
+        onSubmit: function () {
+            this.submitting = true;
+            this.paymentInfoForm.validate();
+            var values, errors, expiryVal, stripeRequest;
+            values = this.paymentInfoForm.values();
+            expiryVal = this.$.payment.cardExpiryVal(values.expiration || '');
+            stripeRequest = {
+                number: values.number,
+                cvc: values.cvc,
+                exp_month: expiryVal.month,
+                exp_year: expiryVal.year
+            };
             errors = [];
-            if (!this.$.payment.validateCardNumber(paymentInfoInputs.number)) {
+            this.profile.plan = values.plan;
+            if (!this.$.payment.validateCardNumber(stripeRequest.number)) {
                 errors.push('Valid card number required');
             }
-            if (!this.$.payment.validateCardCVC(paymentInfoInputs.cvc)) {
+            if (!this.$.payment.validateCardCVC(stripeRequest.cvc)) {
                 errors.push('Valid card CVC required');
             }
-            if (!this.$.payment.validateCardExpiry(paymentInfoInputs.exp_month, paymentInfoInputs.exp_year)) {
+            if (!this.$.payment.validateCardExpiry(stripeRequest.exp_month, stripeRequest.exp_year)) {
                 errors.push('Valid card expiration (MM/YYYY) required');
             }
             if (errors.length) {
-                this.submittingPaymentInfo = false;
-                this.paymentInfoForm.form('add errors', errors);
-                return false;
+                this.submitting = false;
+                this.paymentInfoForm.errors(errors);
+                return;
             }
-            this.window.Stripe.card.createToken(paymentInfoInputs, this.onStripeResponse);
+            this.window.Stripe.card.createToken(stripeRequest, this.onStripeResponse);
         }
 
     });
@@ -26161,7 +26141,8 @@ var app = (function () {
             'ErrorHandler',
             'Router',
             'Account',
-            'window'
+            'window',
+            'Form'
         ]
     );
 
@@ -26177,18 +26158,18 @@ var app = (function () {
 (function () {
     var Login = Component.extend({
 
-        init: function ($, errorHandler, router, account, formHandlerFactory) {
+        init: function ($, errorHandler, router, account, form) {
             this.$ = $;
             this.errorHandler = errorHandler;
             this.router = router;
             this.account = account;
-            this.formHandlerFactory = formHandlerFactory;
+            this.form = form;
             this.message = {};
         },
 
         onAfterMount: function () {
             this.message.displayPasswordResetSuccess = this.router.isCurrent('LoginAfterPasswordReset');
-            this.loginFormHandler = this.formHandlerFactory.create('#loginForm', this.tag);
+            this.loginForm = this.form.bind('#loginForm', this.tag);
         },
 
         onSuccess: function (data, status) {
@@ -26197,13 +26178,13 @@ var app = (function () {
 
         onError: function (jqXHR, textStatus, errorThrown) {
             this.errorHandler.handle(jqXHR.status, {
-                401: {form: this.loginFormHandler.form, text: 'Email address or password invalid.'}
+                401: {form: this.loginForm, text: 'Email address or password invalid.'}
             });
         },
 
-        submit: function (e) {
+        onSubmit: function (e) {
             if (!e.result) return;
-            this.account.login(this.loginFormHandler.values()).done(this.onSuccess).fail(this.onError);
+            this.account.login(this.loginForm.values()).done(this.onSuccess).fail(this.onError);
         }
     });
 
@@ -26216,7 +26197,7 @@ var app = (function () {
             'ErrorHandler',
             'Router',
             'Account',
-            'FormHandlerFactory'
+            'Form'
         ]
     );
 
@@ -26238,28 +26219,28 @@ var app = (function () {
 (function () {
     var Profile = Component.extend({
 
-        init: function ($, errorHandler, router, account, formHandlerFactory) {
+        init: function ($, errorHandler, router, account, form) {
             this.$ = $;
             this.errorHandler = errorHandler;
             this.router = router;
             this.account = account;
-            this.formHandlerFactory = formHandlerFactory;
+            this.form = form;
             this.profile = {};
             this.editing = false;
         },
 
         onAfterMount: function () {
-            this.profileFormHandler = this.formHandlerFactory.create('#profileForm', this.tag);
+            this.profileForm = this.form.bind('#profileForm', this.tag);
             this.account.getCurrent().done(this.onGetCurrentSuccess).fail(this.onGetCurrentError);
         },
 
         onAfterUnMount: function () {
-            this.reset();
+            this.profileForm.rollback();
         },
 
         onGetCurrentSuccess: function (profile, status) {
             this.profile = profile;
-            this.profileFormHandler.values(profile);
+            this.profileForm.values(profile);
             this.tag.update();
         },
 
@@ -26269,40 +26250,30 @@ var app = (function () {
             //});
             //this.tag.update();
             console.log(jqXHR);
-            this.tag.update();
         },
 
         onUpdateAccountSuccess: function (profile, status) {
             console.log('success');
             this.editing = false;
-            this.profileFormHandler.commit();
-            this.tag.update();
+            this.profileForm.commit();
         },
 
         onUpdateAccountError: function (jqXHR, textStatus, errorThrown) {
             //this.errorHandler.handle(jqXHR.status, {
             //  401: { form: this.form, text: 'Email address or password invalid.' }
             //});
-            //this.tag.update();
-            this.tag.update();
         },
 
         toggle: function (e) {
             this.editing = e.target.checked;
             if (!this.editing) {
-                this.profileFormHandler.rollback();
+                this.profileForm.rollback();
             }
             this.tag.update();
         },
 
-        reset: function () {
-            this.editing = false;
-            this.profile = this.originalProfile || this.profile;
-            this.tag.update();
-        },
-
         submit: function (e) {
-            this.account.update(this.profileFormHandler.values()).done(this.onUpdateAccountSuccess).fail(this.onUpdateAccountError);
+            this.account.update(this.profileForm.values()).done(this.onUpdateAccountSuccess).fail(this.onUpdateAccountError);
         }
     });
 
@@ -26315,7 +26286,7 @@ var app = (function () {
             'ErrorHandler',
             'Router',
             'Account',
-            'FormHandlerFactory'
+            'Form'
         ]
     );
 
@@ -26337,162 +26308,127 @@ var app = (function () {
 })();
 
 (function () {
-  var RecoverPassword = Component.extend({
+    var RecoverPassword = Component.extend({
 
-    init: function ($, errorHandler, router, account) {
-      this.$ = $;
-      this.errorHandler = errorHandler;
-      this.router = router;
-      this.account = account;
-    },
+        init: function ($, errorHandler, router, account, form) {
+            this.$ = $;
+            this.errorHandler = errorHandler;
+            this.router = router;
+            this.account = account;
+            this.form = form;
+        },
 
-    onAfterMount: function () {
-      this.form = this.$('form', this.tag.root).form({
-        inline: false,
-        fields: {
-          email: ['email', 'empty']
+        onAfterMount: function () {
+            this.recoverPasswordForm = this.form.bind('#recoverPassword', this.tag);
+        },
+
+        onSuccess: function () {
+            this.router.go('PasswordResetInstructionsSent');
+        },
+
+        onError: function (jqXHR, textStatus, errorThrown) {
+            this.errorHandler.handle(jqXHR.status, {
+                400: {form: this.recoverPasswordForm, text: 'Invalid request'},
+                404: {form: this.recoverPasswordForm, text: 'Email address not found'}
+            });
+        },
+
+        onSubmit: function (e) {
+            if (!e.result) return;
+            this.account.recoverPassword(this.value('email')).done(this.onSuccess).fail(this.onError);
         }
-      });
-    },
-
-    getInputs: function (form) {
-      return {
-        email: form.email.value
-      }
-    },
-
-    onSuccess: function () {
-      this.router.go('PasswordResetInstructionsSent');
-      this.tag.update();
-    },
-
-    onError: function (jqXHR, textStatus, errorThrown) {
-      this.errorHandler.handle(jqXHR.status, {
-        400: { form: this.form, text: 'Invalid request' },
-        404: { form: this.form, text: 'Email address not found' }
-      });
-      this.tag.update();
-    },
-
-    submit: function (e) {
-      if(!e.result) return;
-      this.account.recoverPassword(this.getInputs(e.target).email).done(this.onSuccess).fail(this.onError);
-    }
-  });
+    });
 
 
-  app.component(
-      'RecoverPassword',
-      RecoverPassword,
-      [
-        '$',
-        'ErrorHandler',
-        'Router',
-        'Account'
-      ]
-  );
+    app.component(
+        'RecoverPassword',
+        RecoverPassword,
+        [
+            '$',
+            'ErrorHandler',
+            'Router',
+            'Account',
+            'Form'
+        ]
+    );
 
-  app.routes.push({
-    path: '/recover-password',
-    component: 'RecoverPassword',
-    tag: 'recover-password'
-  });
+    app.routes.push({
+        path: '/recover-password',
+        component: 'RecoverPassword',
+        tag: 'recover-password'
+    });
 
 })();
 
 (function () {
-  var Registration = Component.extend({
+    var Registration = Component.extend({
 
-    init: function ($, errorHandler, router, account) {
-      this.$ = $;
-      this.errorHandler = errorHandler;
-      this.router = router;
-      this.account = account;
-    },
+        init: function ($, errorHandler, router, account, form) {
+            this.$ = $;
+            this.errorHandler = errorHandler;
+            this.router = router;
+            this.account = account;
+            this.form = form;
+        },
 
-    onAfterMount: function () {
-      this.form = this.$('form', this.tag.root).form({
-        inline: false,
-        fields: {
-          email: ['email', 'empty'],
-          password: ['minLength[6]', 'empty']
+        onAfterMount: function () {
+            this.registrationForm = this.form.bind('#registrationForm', this.tag);
+        },
+
+        onSubmit: function (e) {
+            if (!e.result) return;
+            this.account
+                .create(this.registrationForm.values())
+                .done(this.onSuccess)
+                .fail(this.onError);
+        },
+
+        onSuccess: function () {
+            this.router.go('Home', null, true);
+        },
+
+        onError: function (jqXHR, textStatus, errorThrown) {
+            this.errorHandler.handle(jqXHR.status, {
+                400: {form: this.registrationForm, text: 'Invalid request'},
+                409: {form: this.registrationForm, text: 'Email address taken'}
+            });
+            this.tag.update();
         }
-      });
-    },
+    });
 
-    getInputs: function (form) {
-      return {
-        email: form.email.value,
-        password: form.password.value,
-        rememberMe: true
-      }
-    },
+    app.component(
+        'Registration',
+        Registration,
+        [
+            '$',
+            'ErrorHandler',
+            'Router',
+            'Account',
+            'Form'
+        ]
+    );
 
-    submit: function (e) {
-      if(!e.result) return;
-      this.account
-          .create(this.getInputs(e.target))
-          .done(this.onSuccess)
-          .fail(this.onError);
-    },
-
-    onSuccess: function () {
-      this.router.go('Home', null, true);
-    },
-
-    onError: function (jqXHR, textStatus, errorThrown) {
-      this.errorHandler.handle(jqXHR.status, {
-        400: { form: this.form, text: 'Invalid request' },
-        409: { form: this.form, text: 'Email address taken' }
-      });
-      this.tag.update();
-    }
-  });
-
-  app.component(
-      'Registration',
-      Registration,
-      [
-        '$',
-        'ErrorHandler',
-        'Router',
-        'Account'
-      ]
-  );
-
-  app.routes.push({
-    path: '/register',
-    component: 'Registration',
-    tag: 'registration'
-  });
+    app.routes.push({
+        path: '/register',
+        component: 'Registration',
+        tag: 'registration'
+    });
 
 })()
 
 (function () {
   var ResetPassword = Component.extend({
 
-    init: function ($, errorHandler, router, account) {
+    init: function ($, errorHandler, router, account, form) {
       this.$ = $;
       this.errorHandler = errorHandler;
       this.router = router;
       this.account = account;
+      this.form = form;
     },
 
     onAfterMount: function () {
-      this.form = this.$('form', this.tag.root).form({
-        inline: false,
-        fields: {
-          password: ['empty'],
-          passwordConfirmation: ['empty']
-        }
-      });
-    },
-
-    getInputs: function (form) {
-      return {
-        password: form.password.value,
-        passwordConfirmation: form.passwordConfirmation.value
-      }
+      this.resetPasswordForm = this.form.bind('#resetPassword', this.tag);
     },
 
     onSuccess: function () {
@@ -26502,19 +26438,18 @@ var app = (function () {
 
     onError: function (jqXHR, textStatus, errorThrown) {
       this.errorHandler.handle(jqXHR.status, {
-        400: { form: this.form, text: 'Invalid request' },
+        400: { form: this.resetPasswordForm, text: 'Invalid request' },
         404: { route: 'ResetPasswordTokenNotFound' }
       });
-      this.tag.update();
     },
 
     submit: function (e) {
       if(!e.result) return;
-      var inputs = this.getInputs(e.target);
-      if(inputs.password != inputs.passwordConfirmation) {
-        return this.form.form('add errors', ['Password must match.']);
+      var values = this.resetPasswordForm.values();
+      if(values.password != values.passwordConfirmation) {
+        return this.form.errors(['Password must match.']);
       }
-      this.account.resetPassword(this.ctx.params.token, inputs.passwordConfirmation).done(this.onSuccess).fail(this.onError);
+      this.account.resetPassword(this.ctx.params.token, values.passwordConfirmation).done(this.onSuccess).fail(this.onError);
     }
   });
 
@@ -26546,13 +26481,13 @@ var app = (function () {
       this.$ = $;
       this.isProfileTabActive = true;
       this.isBillingTabActive = false;
-      this.isOrganizationTabActive = false;
+      //this.isOrganizationTabActive = false;
     },
 
     onAfterMount: function() {
       this.isProfileTabActive = this.router.isCurrent('Profile');
       this.isBillingTabActive = this.router.isCurrent('Billing');
-      this.isOrganizationTabActive = this.router.isCurrent('Organization');
+      //this.isOrganizationTabActive = this.router.isCurrent('Organization');
       this.tag.update();
     }
   });

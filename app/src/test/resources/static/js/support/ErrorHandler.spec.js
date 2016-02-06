@@ -9,7 +9,7 @@ describe('ErrorHandler', function () {
 
   it('should handle error by binding to form', function (done) {
     //given
-    var form = {form: sinon.spy()};
+    var form = {errors: sinon.spy()};
     var status = 400;
     var errors = {
       400: {form: form, text: 'some error text'}
@@ -19,7 +19,7 @@ describe('ErrorHandler', function () {
     errorHandler.handle(status, errors);
 
     //then
-    expect(form.form).to.have.been.calledWith('add errors', 'some error text');
+    expect(form.errors).to.have.been.calledWith(['some error text']);
     done();
   });
 

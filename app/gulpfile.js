@@ -35,7 +35,7 @@ gulp.task('js', function () {
       .pipe(gulp.dest(assets.staticDir + '/js'))
 });
 
-gulp.task('link', ['js'], function () {
+gulp.task('link', function () {
   return gulp.src(assets.resourcesDir + '/templates/**/*.html')
     // Link the JavaScript
       .pipe(linker({
@@ -47,6 +47,7 @@ gulp.task('link', ['js'], function () {
       }))
       .pipe(gulp.dest(assets.resourcesDir + '/templates'));
 });
+
 
 gulp.task('test', function (done) {
   console.log(assets.testFiles);

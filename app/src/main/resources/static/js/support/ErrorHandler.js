@@ -16,7 +16,7 @@
               || statusKey == status) {
             if(possibleError.form) {
               handled = true;
-              return possibleError.form.form('add errors', [possibleError.text]);
+              return possibleError.form.errors([possibleError.text]);
             }
             if(possibleError.route) {
               handled = true;

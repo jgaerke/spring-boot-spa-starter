@@ -1,22 +1,19 @@
 (function () {
     var Billing = Component.extend({
 
-        init: function ($, errorHandler, router, account, window, formHandlerFactory) {
+        init: function ($, errorHandler, router, account, window, form) {
             this.$ = $;
             this.errorHandler = errorHandler;
             this.router = router;
             this.account = account;
             this.window = window;
-            this.formHandlerFactory = formHandlerFactory
-            this.editingPlan = false;
-            this.submittingPlan = false;
-            this.editingPaymentInfo = false;
-            this.submittingPaymentInfo = false;
+            this.form = form
+            this.editing = false;
+            this.submitting = false;
         },
 
         onAfterMount: function () {
-            this.planFormHandler = this.formHandlerFactory.create('#planForm', this.tag);
-            this.paymentInfoFormHandler = this.formHandlerFactory.create('#paymentInfoForm', this.tag);
+            this.paymentInfoForm = this.form.bind('#paymentInfo', this.tag);
             this.$('input[name=number]').payment('formatCardNumber');
             this.$('input[name=cvc]').payment('formatCardCVC');
             this.$('input[name=expiration]').payment('formatCardExpiry');
@@ -25,8 +22,7 @@
         },
 
         onAfterUnMount: function () {
-            this.editingPlan = false;
-            this.editingPaymentInfo = false;
+            this.editing = false;
             delete this.profile;
         },
 
@@ -42,9 +38,8 @@
 
         onGetCurrentSuccess: function (profile, status) {
             this.profile = profile;
-            this.selectedPlan = this.profile.plan;
-            this.planFormHandler.values(this.profile);
-            this.paymentInfoFormHandler.values(this.profile);
+            this.editing = profile.plan == undefined || !this.profile.paymentInfo || !this.profile.paymentInfo.card;
+            this.paymentInfoForm.values(this.profile);
             this.setFormattedCardNumber();
         },
 
@@ -58,54 +53,19 @@
             this.tag.update();
         },
 
-        togglePlan: function (e) {
-            this.editingPlan = e.target.checked;
-            if (this.editingPlan) {
-                this.submittingPlan = false;
-            } else {
-                this.selectedPlan = this.profile.plan;
-                this.planFormHandler.rollback();
-            }
-        },
-
-        onPlanChange: function (e) {
-            this.selectedPlan = e.target.value;
-            this.tag.update();
-        },
-
-        onUpdatePlanSuccess: function (profile, status) {
-            this.editingPlan = false;
-            this.submittingPlan = false;
-            this.planFormHandler.commit();
-        },
-
-        onUpdatePlanError: function (jqXHR, textStatus, errorThrown) {
-            //this.errorHandler.handle(jqXHR.status, {
-            //  401: { form: this.form, text: 'Email address or password invalid.' }
-            //});
-            this.submittingPlan = false;
-            this.profileFormHandler.commit();
-        },
-
-        onPlanSubmit: function (e) {
-            this.submittingPlan = true;
-            this.profile.plan = e.target.plan.value;
-            this.account.update(this.profile).done(this.onUpdatePlanSuccess).fail(this.onUpdatePlanError);
-        },
-
-        togglePaymentInfo: function (e) {
-            this.editingPaymentInfo = e.target.checked;
-            if (this.editingPaymentInfo) {
-                this.submittingPaymentInfo = false;
+        toggle: function (e) {
+            this.editing = e.target.checked;
+            if (this.editing) {
+                this.submitting = false;
             } else {
                 this.setFormattedCardNumber();
-                this.paymentInfoFormHandler.rollback();
+                this.paymentInfoForm.rollback();
             }
         },
 
         onUpdatePaymentInfoSuccess: function (profile, status) {
-            this.editingPaymentInfo = false;
-            this.submittingPaymentInfo = false;
+            this.editing = false;
+            this.submitting = false;
             this.setFormattedCardNumber();
         },
 
@@ -113,14 +73,14 @@
             //this.errorHandler.handle(jqXHR.status, {
             //  401: { form: this.form, text: 'Email address or password invalid.' }
             //});
-            this.submittingPaymentInfo = false;
+            this.submitting = false;
             this.tag.update();
         },
 
         onStripeResponse: function (status, response) {
             if (response.error) {
-                this.paymentInfoFormHandler.form('add errors', [response.error.message]);
-                return this.submittingPaymentInfo = false;
+                this.paymentInfoForm.errors([response.error.message]);
+                return this.submitting = false;
             }
             this.profile.paymentInfo = response;
             this.account.update(this.profile).done(this.onUpdatePaymentInfoSuccess).fail(this.onUpdatePaymentInfoError);
@@ -130,16 +90,17 @@
             if (!this.profile || !this.profile.paymentInfo || !this.profile.paymentInfo.card) {
                 return;
             }
-            this.paymentInfoFormHandler.values({
+            this.paymentInfoForm.values({
                 number: '•••• •••• •••• ' + this.profile.paymentInfo.card.last4
             });
         },
 
-        onPaymentInfoSubmit: function () {
-            this.submittingPaymentInfo = true;
+        onSubmit: function () {
+            this.submitting = true;
+            this.paymentInfoForm.validate();
             var values, errors, expiryVal, stripeRequest;
-            values = this.paymentInfoFormHandler.values();
-            expiryVal = this.$.payment.cardExpiryVal(values.expiration);
+            values = this.paymentInfoForm.values();
+            expiryVal = this.$.payment.cardExpiryVal(values.expiration || '');
             stripeRequest = {
                 number: values.number,
                 cvc: values.cvc,
@@ -147,6 +108,7 @@
                 exp_year: expiryVal.year
             };
             errors = [];
+            this.profile.plan = values.plan;
             if (!this.$.payment.validateCardNumber(stripeRequest.number)) {
                 errors.push('Valid card number required');
             }
@@ -157,9 +119,9 @@
                 errors.push('Valid card expiration (MM/YYYY) required');
             }
             if (errors.length) {
-                this.submittingPaymentInfo = false;
-                this.paymentInfoFormHandler.errors(errors);
-                return false;
+                this.submitting = false;
+                this.paymentInfoForm.errors(errors);
+                return;
             }
             this.window.Stripe.card.createToken(stripeRequest, this.onStripeResponse);
         }
@@ -176,7 +138,7 @@
             'Router',
             'Account',
             'window',
-            'FormHandlerFactory'
+            'Form'
         ]
     );
 

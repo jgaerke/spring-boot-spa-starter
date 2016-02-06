@@ -1,18 +1,18 @@
 (function () {
     var Login = Component.extend({
 
-        init: function ($, errorHandler, router, account, formHandlerFactory) {
+        init: function ($, errorHandler, router, account, form) {
             this.$ = $;
             this.errorHandler = errorHandler;
             this.router = router;
             this.account = account;
-            this.formHandlerFactory = formHandlerFactory;
+            this.form = form;
             this.message = {};
         },
 
         onAfterMount: function () {
             this.message.displayPasswordResetSuccess = this.router.isCurrent('LoginAfterPasswordReset');
-            this.loginFormHandler = this.formHandlerFactory.create('#loginForm', this.tag);
+            this.loginForm = this.form.bind('#loginForm', this.tag);
         },
 
         onSuccess: function (data, status) {
@@ -21,13 +21,13 @@
 
         onError: function (jqXHR, textStatus, errorThrown) {
             this.errorHandler.handle(jqXHR.status, {
-                401: {form: this.loginFormHandler.form, text: 'Email address or password invalid.'}
+                401: {form: this.loginForm, text: 'Email address or password invalid.'}
             });
         },
 
-        submit: function (e) {
+        onSubmit: function (e) {
             if (!e.result) return;
-            this.account.login(this.loginFormHandler.values()).done(this.onSuccess).fail(this.onError);
+            this.account.login(this.loginForm.values()).done(this.onSuccess).fail(this.onError);
         }
     });
 
@@ -40,7 +40,7 @@
             'ErrorHandler',
             'Router',
             'Account',
-            'FormHandlerFactory'
+            'Form'
         ]
     );
 

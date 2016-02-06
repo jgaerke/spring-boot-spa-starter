@@ -1,28 +1,16 @@
 (function () {
   var ResetPassword = Component.extend({
 
-    init: function ($, errorHandler, router, account) {
+    init: function ($, errorHandler, router, account, form) {
       this.$ = $;
       this.errorHandler = errorHandler;
       this.router = router;
       this.account = account;
+      this.form = form;
     },
 
     onAfterMount: function () {
-      this.form = this.$('form', this.tag.root).form({
-        inline: false,
-        fields: {
-          password: ['empty'],
-          passwordConfirmation: ['empty']
-        }
-      });
-    },
-
-    getInputs: function (form) {
-      return {
-        password: form.password.value,
-        passwordConfirmation: form.passwordConfirmation.value
-      }
+      this.resetPasswordForm = this.form.bind('#resetPassword', this.tag);
     },
 
     onSuccess: function () {
@@ -32,19 +20,18 @@
 
     onError: function (jqXHR, textStatus, errorThrown) {
       this.errorHandler.handle(jqXHR.status, {
-        400: { form: this.form, text: 'Invalid request' },
+        400: { form: this.resetPasswordForm, text: 'Invalid request' },
         404: { route: 'ResetPasswordTokenNotFound' }
       });
-      this.tag.update();
     },
 
     submit: function (e) {
       if(!e.result) return;
-      var inputs = this.getInputs(e.target);
-      if(inputs.password != inputs.passwordConfirmation) {
-        return this.form.form('add errors', ['Password must match.']);
+      var values = this.resetPasswordForm.values();
+      if(values.password != values.passwordConfirmation) {
+        return this.form.errors(['Password must match.']);
       }
-      this.account.resetPassword(this.ctx.params.token, inputs.passwordConfirmation).done(this.onSuccess).fail(this.onError);
+      this.account.resetPassword(this.ctx.params.token, values.passwordConfirmation).done(this.onSuccess).fail(this.onError);
     }
   });
 

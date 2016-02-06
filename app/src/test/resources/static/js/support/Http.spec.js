@@ -3,7 +3,7 @@ describe('Http', function () {
 
   beforeEach(function (done) {
     Http = app.getType('Http');
-    http = new Http(jQuery);
+    http = new Http(jQuery, JSON);
     done();
   });
 

@@ -1,67 +1,55 @@
 (function () {
-  var Registration = Component.extend({
+    var Registration = Component.extend({
 
-    init: function ($, errorHandler, router, account) {
-      this.$ = $;
-      this.errorHandler = errorHandler;
-      this.router = router;
-      this.account = account;
-    },
+        init: function ($, errorHandler, router, account, form) {
+            this.$ = $;
+            this.errorHandler = errorHandler;
+            this.router = router;
+            this.account = account;
+            this.form = form;
+        },
 
-    onAfterMount: function () {
-      this.form = this.$('form', this.tag.root).form({
-        inline: false,
-        fields: {
-          email: ['email', 'empty'],
-          password: ['minLength[6]', 'empty']
+        onAfterMount: function () {
+            this.registrationForm = this.form.bind('#registrationForm', this.tag);
+        },
+
+        onSubmit: function (e) {
+            if (!e.result) return;
+            this.account
+                .create(this.registrationForm.values())
+                .done(this.onSuccess)
+                .fail(this.onError);
+        },
+
+        onSuccess: function () {
+            this.router.go('Home', null, true);
+        },
+
+        onError: function (jqXHR, textStatus, errorThrown) {
+            this.errorHandler.handle(jqXHR.status, {
+                400: {form: this.registrationForm, text: 'Invalid request'},
+                409: {form: this.registrationForm, text: 'Email address taken'}
+            });
+            this.tag.update();
         }
-      });
-    },
+    });
 
-    getInputs: function (form) {
-      return {
-        email: form.email.value,
-        password: form.password.value,
-        rememberMe: true
-      }
-    },
+    app.component(
+        'Registration',
+        Registration,
+        [
+            '$',
+            'ErrorHandler',
+            'Router',
+            'Account',
+            'Form'
+        ]
+    );
 
-    submit: function (e) {
-      if(!e.result) return;
-      this.account
-          .create(this.getInputs(e.target))
-          .done(this.onSuccess)
-          .fail(this.onError);
-    },
-
-    onSuccess: function () {
-      this.router.go('Home', null, true);
-    },
-
-    onError: function (jqXHR, textStatus, errorThrown) {
-      this.errorHandler.handle(jqXHR.status, {
-        400: { form: this.form, text: 'Invalid request' },
-        409: { form: this.form, text: 'Email address taken' }
-      });
-      this.tag.update();
-    }
-  });
-
-  app.component(
-      'Registration',
-      Registration,
-      [
-        '$',
-        'ErrorHandler',
-        'Router',
-        'Account'
-      ]
-  );
-
-  app.routes.push({
-    path: '/register',
-    component: 'Registration',
-    tag: 'registration'
-  });
+    app.routes.push({
+        path: '/register',
+        component: 'Registration',
+        tag: 'registration'
+    });
 
 })()
