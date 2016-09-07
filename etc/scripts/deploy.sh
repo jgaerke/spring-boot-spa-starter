@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 cd ../../
-#./gradlew clean build integrationTest functionalTest
+./gradlew clean build
 if [ $? -eq 0 ]; then
   printf "Successfully built"
 else
