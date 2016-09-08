@@ -2,20 +2,12 @@ task wrapper(type: Wrapper) {
   gradleVersion = '2.12'
 }
 
-//task copyDeploymentFiles(type: Copy) {
-//  from(".elasticbeanstalk") {
-//    into "${projectDir}/server/build/libs/.elasticbeanstalk"
-//  }
-//  from("${projectDir}/etc/scripts/Procfile")
-//  into ("${projectDir}/server/build/libs")
-//}
-
 task copyDeploymentFiles(dependsOn: ['client:build', 'server:build']) {
   doLast {
-    copy {
-      from '.elasticbeanstalk'
-      into 'server/build/libs/.elasticbeanstalk'
-    }
+//    copy {
+//      from '.elasticbeanstalk'
+//      into 'server/build/libs/.elasticbeanstalk'
+//    }
     copy {
       from 'etc/scripts/Procfile'
       into 'server/build/libs'

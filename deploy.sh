@@ -2,4 +2,5 @@
 
 ./gradlew clean bundleDeploymentFiles
 eb create
-eb swap
+eb setenv SPRING_PROFILES_ACTIVE=production
+
