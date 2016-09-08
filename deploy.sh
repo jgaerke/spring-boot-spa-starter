@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
 ./gradlew clean bundleDeploymentFiles
-eb create
-eb setenv SPRING_PROFILES_ACTIVE=production
+eb create --envvars SPRING_PROFILES_ACTIVE=production --cfg spring-boot-spa-starter
 
