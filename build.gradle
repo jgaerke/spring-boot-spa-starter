@@ -12,8 +12,9 @@ task wrapper(type: Wrapper) {
 
 task copyDeploymentFiles(dependsOn: ['client:build', 'server:build']) {
   doLast {
-    ant.copy(todir: 'server/build/libs/.elasticbeanstalk') {
-      fileset(dir: '.elasticbeanstalk')
+    copy {
+      from '.elasticbeanstalk'
+      into 'server/build/libs/.elasticbeanstalk'
     }
     copy {
       from 'etc/scripts/Procfile'
@@ -26,8 +27,6 @@ task copyDeploymentFiles(dependsOn: ['client:build', 'server:build']) {
 task bundleDeploymentFiles(type: Zip, dependsOn: copyDeploymentFiles) {
   destinationDir new File("${projectDir}/server/build/libs")
   archiveName 'bundle.zip'
-  from("server/build/libs") {
-    include '*'
-    exclude '*.zip'
-  }
+  from fileTree('server/build/libs')
+  exclude '*.zip'
 }

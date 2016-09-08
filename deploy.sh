@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 
-./gradlew bundleDeploymentFiles
+./gradlew clean bundleDeploymentFiles
 eb create
+eb swap
