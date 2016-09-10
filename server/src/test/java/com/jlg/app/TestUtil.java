@@ -28,7 +28,7 @@ public class TestUtil {
 
   public static Account createValidExistingAccount() {
     return Account.builder()
-        .id(UUID.randomUUID().toString())
+        .id(UUID.randomUUID())
         .email("some-email@gmail.com")
         .password("password")
         .roles(newHashSet())

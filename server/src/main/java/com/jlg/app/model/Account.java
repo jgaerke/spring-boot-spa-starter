@@ -9,6 +9,7 @@ import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -21,11 +22,8 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Entity
 public class Account {
   @Id
-  @GeneratedValue(strategy = IDENTITY)
-  private String id;
+  private UUID id;
 
-  @NotEmpty
-  @Size(max = 254)
   private String email;
 
   @NotEmpty

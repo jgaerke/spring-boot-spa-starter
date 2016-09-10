@@ -108,7 +108,7 @@ public class AccountControllerIntegrationTest {
   public void should_return_403_and_error_when_csrf_token_not_provided() throws Exception {
     //given
     Account input = createValidNewAccount();
-    Account output = input.withId(UUID.randomUUID().toString());
+    Account output = input.withId(UUID.randomUUID());
     String request = objectMapper.writeValueAsString(input);
     when(accountRepository.save(any(Account.class))).thenReturn(output);
 

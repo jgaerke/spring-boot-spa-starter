@@ -5,6 +5,7 @@ import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.util.UUID;
 
 
 @Value
@@ -12,7 +13,7 @@ import javax.persistence.Id;
 public class Role implements GrantedAuthority {
 
   @Id
-  private Long account;
+  private UUID account;
 
   @Id
   private String name;
