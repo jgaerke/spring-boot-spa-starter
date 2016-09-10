@@ -65,7 +65,8 @@ dependencies {
   compile('org.springframework.boot:spring-boot-starter-aop')
   compile('org.springframework.boot:spring-boot-starter-data-rest')
   compile("org.springframework.boot:spring-boot-starter-data-jpa")
-  compile("com.h2database:h2")
+  compile('com.h2database:h2')
+  compile('mysql:mysql-connector-java:6.0.3')
   compile('nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:1.2.8')
   compile('com.google.guava:guava:19.0')
   compile('commons-beanutils:commons-beanutils:1.9.2')
@@ -76,6 +77,7 @@ dependencies {
   compile('com.xebia:jackson-lombok:1.1')
   compile('com.squareup.retrofit2:retrofit:2.1.0')
   compile('com.squareup.retrofit2:converter-jackson:2.1.0')
+  compile('org.flywaydb:flyway-core:3.0')
 
   testCompile('org.springframework.boot:spring-boot-starter-test')
   testCompile('com.jayway.restassured:rest-assured:2.4.1')

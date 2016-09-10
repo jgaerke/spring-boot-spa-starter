@@ -58,6 +58,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     http.exceptionHandling()
         .accessDeniedHandler(authorizationErrorHandler)
         .authenticationEntryPoint(authenticationErrorHandler);
+
     //authentication
     http.formLogin()
         .permitAll()
@@ -89,11 +90,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/app/recover-password",
             "/app/reset-password/**",
             "/app/settings/**",
-            "/api/**"
+            "/api/**",
+            "/h2",
+            "/h2/**",
+            "/h2/login**"
         )
         .permitAll()
         .anyRequest()
         .authenticated();
+
+
+    http.headers().frameOptions().disable();
 
     //session
     http.sessionManagement().maximumSessions(1);
