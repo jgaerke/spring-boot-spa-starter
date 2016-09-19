@@ -2,8 +2,10 @@ package com.jlg.app.functional;
 
 
 import com.jlg.app.Application;
+import com.jlg.app.repository.AccountRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -24,6 +26,8 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @SpringBootTest(classes = Application.class, webEnvironment = DEFINED_PORT)
 public class FunctionalTest {
 
+  @Autowired
+  AccountRepository accountRepository;
 
   @Value("${local.server.port}")
   private int port;

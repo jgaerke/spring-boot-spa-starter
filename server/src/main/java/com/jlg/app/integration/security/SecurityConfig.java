@@ -90,6 +90,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/app/recover-password",
             "/app/reset-password/**",
             "/app/settings/**",
+            "/partials/**",
             "/api/**",
             "/h2",
             "/h2/**",

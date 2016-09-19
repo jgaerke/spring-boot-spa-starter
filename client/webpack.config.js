@@ -6,7 +6,7 @@ const isProd = process.env.NODE_ENV === 'production';
 
 var config = {
     devtool: 'cheap-module-eval-source-map',
-    entry: './src/main/index.js',
+    entry: './src/main/App.js',
     output: {
         path: './',
         filename: '../server/src/main/resources/static/js/bundle.js'
