@@ -11542,7 +11542,11 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.LoginView = exports.IndexView = exports.CreateAccountView = undefined;
+	exports.LoginView = exports.IndexView = exports.CreateAccountView = exports.View = undefined;
+
+	var _View = __webpack_require__(22);
+
+	var _View2 = _interopRequireDefault(_View);
 
 	var _CreateAccountView = __webpack_require__(11);
 
@@ -11558,9 +11562,10 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	exports.View = _View2.default;
 	exports.CreateAccountView = _CreateAccountView2.default;
 	exports.IndexView = _IndexView2.default;
-		exports.LoginView = _LoginView2.default;
+	exports.LoginView = _LoginView2.default;
 
 /***/ },
 /* 3 */
@@ -11593,7 +11598,7 @@
 	    value: function handle(data) {
 	      var onViewBound = arguments.length <= 1 || arguments[1] === undefined ? function () {} : arguments[1];
 
-	      console.log('create account');
+	      //console.log('create account');
 	      this.createAccountView.render(data, onViewBound);
 	    }
 	  }]);
@@ -11636,7 +11641,7 @@
 	    value: function handle(data) {
 	      var onViewBound = arguments.length <= 1 || arguments[1] === undefined ? function () {} : arguments[1];
 
-	      console.log('index');
+	      //console.log('index');
 	      this.indexView.render(data, onViewBound);
 	    }
 	  }]);
@@ -11679,7 +11684,7 @@
 	    value: function handle(data) {
 	      var onViewBound = arguments.length <= 1 || arguments[1] === undefined ? function () {} : arguments[1];
 
-	      console.log('login');
+	      //console.log('login');
 	      this.loginView.render(data, onViewBound);
 	    }
 	  }]);
@@ -12011,8 +12016,8 @@
 	  _createClass(App, [{
 	    key: 'start',
 	    value: function start() {
-	      console.log('starting', this.authenticated);
-	      console.log(this);
+	      //console.log('starting', this.authenticated);
+	      //console.log(this);
 	      this.router.start();
 	    }
 	  }]);
@@ -12129,60 +12134,33 @@
 	  value: true
 	});
 
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	var _View2 = __webpack_require__(22);
 
-	var _jquery = __webpack_require__(0);
-
-	var _jquery2 = _interopRequireDefault(_jquery);
-
-	var _rivets = __webpack_require__(1);
-
-	var _rivets2 = _interopRequireDefault(_rivets);
+	var _View3 = _interopRequireDefault(_View2);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var CreateAccountView = function () {
-	  function CreateAccountView() {
-	    var $ = arguments.length <= 0 || arguments[0] === undefined ? CreateAccountView.$ : arguments[0];
-	    var rivets = arguments.length <= 1 || arguments[1] === undefined ? CreateAccountView.rivets : arguments[1];
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var CreateAccountView = function (_View) {
+	  _inherits(CreateAccountView, _View);
+
+	  function CreateAccountView() {
 	    _classCallCheck(this, CreateAccountView);
 
-	    this.selector = '#viewport';
-	    this.partial = '/partials/account/create-account.html';
-	    this.$ = $;
-	    this.rivets = rivets;
+	    return _possibleConstructorReturn(this, (CreateAccountView.__proto__ || Object.getPrototypeOf(CreateAccountView)).call(this, '#viewport', '/partials/account/create-account.html'));
 	  }
 
-	  _createClass(CreateAccountView, [{
-	    key: 'bind',
-	    value: function bind(data) {
-	      return this.rivets.bind(this.$(this.selector), { route: data });
-	    }
-	  }, {
-	    key: 'render',
-	    value: function render(data) {
-	      var _this = this;
-
-	      var onBindComplete = arguments.length <= 1 || arguments[1] === undefined ? function () {} : arguments[1];
-
-	      this.$(this.selector).load(this.partial, function (data) {
-	        onBindComplete(_this.bind(data));
-	      });
-	    }
-	  }]);
-
 	  return CreateAccountView;
-	}();
+	}(_View3.default);
 
 	;
 
-	CreateAccountView.$ = _jquery2.default;
-	CreateAccountView.rivets = _rivets2.default;
-
-		exports.default = CreateAccountView;
+	exports.default = CreateAccountView;
 
 /***/ },
 /* 12 */
@@ -12194,58 +12172,31 @@
 	  value: true
 	});
 
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	var _View2 = __webpack_require__(22);
 
-	var _jquery = __webpack_require__(0);
-
-	var _jquery2 = _interopRequireDefault(_jquery);
-
-	var _rivets = __webpack_require__(1);
-
-	var _rivets2 = _interopRequireDefault(_rivets);
+	var _View3 = _interopRequireDefault(_View2);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var IndexView = function () {
-	  function IndexView() {
-	    var $ = arguments.length <= 0 || arguments[0] === undefined ? IndexView.$ : arguments[0];
-	    var rivets = arguments.length <= 1 || arguments[1] === undefined ? IndexView.rivets : arguments[1];
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var IndexView = function (_View) {
+	  _inherits(IndexView, _View);
+
+	  function IndexView() {
 	    _classCallCheck(this, IndexView);
 
-	    this.selector = '#viewport';
-	    this.partial = '/partials/index.html';
-	    this.$ = $;
-	    this.rivets = rivets;
+	    return _possibleConstructorReturn(this, (IndexView.__proto__ || Object.getPrototypeOf(IndexView)).call(this, '#viewport', '/partials/index.html'));
 	  }
 
-	  _createClass(IndexView, [{
-	    key: 'bind',
-	    value: function bind(data) {
-	      return this.rivets.bind(this.$(this.selector), { route: data });
-	    }
-	  }, {
-	    key: 'render',
-	    value: function render(data) {
-	      var _this = this;
-
-	      var onBindComplete = arguments.length <= 1 || arguments[1] === undefined ? function () {} : arguments[1];
-
-	      this.$(this.selector).load(this.partial, function (data) {
-	        onBindComplete(_this.bind(data));
-	      });
-	    }
-	  }]);
-
 	  return IndexView;
-	}();
+	}(_View3.default);
 
 	;
-
-	IndexView.$ = _jquery2.default;
-	IndexView.rivets = _rivets2.default;
 
 	exports.default = IndexView;
 
@@ -12259,58 +12210,31 @@
 	  value: true
 	});
 
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	var _View2 = __webpack_require__(22);
 
-	var _jquery = __webpack_require__(0);
-
-	var _jquery2 = _interopRequireDefault(_jquery);
-
-	var _rivets = __webpack_require__(1);
-
-	var _rivets2 = _interopRequireDefault(_rivets);
+	var _View3 = _interopRequireDefault(_View2);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var LoginView = function () {
-	  function LoginView() {
-	    var $ = arguments.length <= 0 || arguments[0] === undefined ? LoginView.$ : arguments[0];
-	    var rivets = arguments.length <= 1 || arguments[1] === undefined ? LoginView.rivets : arguments[1];
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var LoginView = function (_View) {
+	  _inherits(LoginView, _View);
+
+	  function LoginView() {
 	    _classCallCheck(this, LoginView);
 
-	    this.selector = '#viewport';
-	    this.partial = '/partials/account/login.html';
-	    this.$ = $;
-	    this.rivets = rivets;
+	    return _possibleConstructorReturn(this, (LoginView.__proto__ || Object.getPrototypeOf(LoginView)).call(this, '#viewport', '/partials/account/login.html'));
 	  }
 
-	  _createClass(LoginView, [{
-	    key: 'bind',
-	    value: function bind(data) {
-	      return this.rivets.bind(this.$(this.selector), { route: data });
-	    }
-	  }, {
-	    key: 'render',
-	    value: function render(data) {
-	      var _this = this;
-
-	      var onBindComplete = arguments.length <= 1 || arguments[1] === undefined ? function () {} : arguments[1];
-
-	      this.$(this.selector).load(this.partial, function (data) {
-	        onBindComplete(_this.bind(data));
-	      });
-	    }
-	  }]);
-
 	  return LoginView;
-	}();
+	}(_View3.default);
 
 	;
-
-	LoginView.$ = _jquery2.default;
-	LoginView.rivets = _rivets2.default;
 
 	exports.default = LoginView;
 
@@ -12323,7 +12247,7 @@
 
 
 	// module
-	exports.push([module.i, "body {\n    background-color: red;\n}", ""]);
+	exports.push([module.i, "/*body {*/\n    /*background-color: red;*/\n/*}*/", ""]);
 
 	// exports
 
@@ -13887,6 +13811,83 @@
 		return module;
 	}
 
+
+/***/ },
+/* 22 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _jquery = __webpack_require__(0);
+
+	var _jquery2 = _interopRequireDefault(_jquery);
+
+	var _rivets = __webpack_require__(1);
+
+	var _rivets2 = _interopRequireDefault(_rivets);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var View = function () {
+	  function View() {
+	    var selector = arguments.length <= 0 || arguments[0] === undefined ? '#viewport' : arguments[0];
+	    var partial = arguments[1];
+	    var dataProducer = arguments.length <= 2 || arguments[2] === undefined ? function () {} : arguments[2];
+	    var $ = arguments.length <= 3 || arguments[3] === undefined ? View.$ : arguments[3];
+	    var rivets = arguments.length <= 4 || arguments[4] === undefined ? View.rivets : arguments[4];
+
+	    _classCallCheck(this, View);
+
+	    this.selector = selector;
+	    this.partial = partial;
+	    this.dataProducer = dataProducer;
+	    this.$ = $;
+	    this.rivets = rivets;
+	  }
+
+	  _createClass(View, [{
+	    key: 'bind',
+	    value: function bind(data) {
+	      return this.rivets.bind(this.$(this.selector), Object.assign({ route: data }, this.dataProducer()));
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render(data) {
+	      var _this = this;
+
+	      var onBindComplete = arguments.length <= 1 || arguments[1] === undefined ? function () {} : arguments[1];
+
+	      if (View.cache[this.partial]) {
+	        this.$(this.selector).html(View.cache[this.partial]);
+	        return onBindComplete(this.bind(data));
+	      }
+	      this.$(this.selector).load(this.partial, function (html, responseText, jqXhr) {
+	        if (jqXhr.status && jqXhr.status.toString().indexOf('2') == 0) {
+	          View.cache[_this.partial] = html;
+	        }
+	        onBindComplete(_this.bind(data));
+	      });
+	    }
+	  }]);
+
+	  return View;
+	}();
+
+	;
+
+	View.cache = {};
+	View.$ = _jquery2.default;
+	View.rivets = _rivets2.default;
+
+	exports.default = View;
 
 /***/ }
 /******/ ]);

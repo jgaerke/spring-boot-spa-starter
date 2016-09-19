@@ -7,7 +7,7 @@ class IndexRoute {
   }
 
   handle(data, onViewBound = ()=> {}) {
-    console.log('index');
+    //console.log('index');
     this.indexView.render(data, onViewBound);
   }
 };

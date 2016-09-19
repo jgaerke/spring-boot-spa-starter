@@ -10,8 +10,8 @@ class App {
   }
 
   start() {
-    console.log('starting', this.authenticated);
-    console.log(this);
+    //console.log('starting', this.authenticated);
+    //console.log(this);
     this.router.start()
   }
 };

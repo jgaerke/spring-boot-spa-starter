@@ -7,7 +7,7 @@ class LoginRoute {
   }
 
   handle(data, onViewBound = ()=> {}) {
-    console.log('login');
+    //console.log('login');
     this.loginView.render(data, onViewBound);
   }
 };

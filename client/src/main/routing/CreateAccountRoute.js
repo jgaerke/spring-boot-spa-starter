@@ -7,7 +7,7 @@ class CreateAccountRoute {
   }
 
   handle(data, onViewBound = ()=> {}) {
-    console.log('create account');
+    //console.log('create account');
     this.createAccountView.render(data, onViewBound);
   }
 };
