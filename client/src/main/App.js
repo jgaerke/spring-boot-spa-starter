@@ -1,7 +1,8 @@
 import 'rivets';
+import $ from 'jquery';
+import bootstrap from 'bootstrap'
 import './style/Index.css';
 import { Router } from './routing';
-import $ from 'jquery';
 
 class App {
   constructor(authenticated = false, router = new Router()) {
