@@ -2,9 +2,9 @@ package com.jlg.app.security;
 
 
 import com.jlg.app.Application;
-import com.jlg.app.model.Account;
+import com.jlg.app.domain.Account;
 import com.jlg.app.repository.AccountRepository;
-import com.jlg.app.integration.support.MockPostProcessor;
+import com.jlg.app.MockPostProcessor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

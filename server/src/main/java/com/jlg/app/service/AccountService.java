@@ -4,28 +4,27 @@ import com.jlg.app.exception.AccountEmailConflictException;
 import com.jlg.app.exception.AccountPrincipalMismatchException;
 import com.jlg.app.exception.EmailNotFoundException;
 import com.jlg.app.exception.PasswordResetTokenNotFoundException;
-import com.jlg.app.model.Account;
-import com.jlg.app.model.MailMessage;
+import com.jlg.app.domain.Account;
+import com.jlg.app.domain.MailMessage;
 import com.jlg.app.repository.AccountRepository;
-import com.jlg.app.request.AccountUpdateRequest;
-import com.jlg.app.request.PasswordChangeRequest;
-import com.jlg.app.request.PasswordResetRequest;
-import com.jlg.app.request.RegistrationRequest;
+import com.jlg.app.domain.PasswordChange;
+import com.jlg.app.domain.PasswordReset;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.lang.System.getProperty;
 
 @Service
 public class AccountService {
-  private final UserDetailsService userDetailsService;
   private final AccountRepository accountRepository;
   private PasswordEncoder passwordEncoder;
   private final MailService mailService;
@@ -38,59 +37,48 @@ public class AccountService {
       PasswordEncoder passwordEncoder,
       MailService mailService,
       Environment environment) {
-    this.userDetailsService = userDetailsService;
     this.accountRepository = accountRepository;
     this.passwordEncoder = passwordEncoder;
     this.mailService = mailService;
     this.environment = environment;
   }
 
-  public Account create(RegistrationRequest registrationRequest) {
-    if (accountRepository.findOneByEmail(registrationRequest.getEmail()).isPresent()) {
+  public Account create(Account account) {
+    if (accountRepository.findOneByEmail(account.getEmail()).isPresent()) {
       throw new AccountEmailConflictException();
     }
-
-    return accountRepository.save(
-        registrationRequest.withPassword(
-            passwordEncoder.encode(registrationRequest.getPassword())
-        ).toAccount()
-    );
+    return accountRepository.save(account
+        .withGeneratedId()
+        .withPassword(passwordEncoder.encode(account.getPassword())));
   }
 
-  public Account update(String existingEmail, AccountUpdateRequest accountUpdateRequest) {
+  public Account update(String existingEmail, Account account) {
     Optional<Account> existing = accountRepository.findOneByEmail(existingEmail);
     if (!existing.isPresent()) {
       throw new EmailNotFoundException();
     }
-
-    return accountRepository.save(accountUpdateRequest.copyToAccount(existing.get()));
+    return accountRepository.save(account);
   }
 
-  public Account changePassword(PasswordChangeRequest passwordChangeRequest, String email) {
+  public Account changePassword(PasswordChange passwordChange, String email) {
     Optional<Account> account = accountRepository.findOneByEmail(email);
     if (!account.isPresent()) {
       throw new AccountPrincipalMismatchException();
     }
-
-    return accountRepository.save(
-        account.get().withPassword(passwordEncoder.encode(passwordChangeRequest.getPassword()))
-    );
+    return accountRepository.save(account.get().withPassword(passwordEncoder.encode(passwordChange.getPassword())));
   }
 
-  public Account resetPassword(PasswordResetRequest passwordResetRequest) {
-
+  public Account resetPassword(PasswordReset passwordReset) {
     Optional<Account> account =
-        accountRepository.findOneByPasswordResetToken(passwordResetRequest.getPasswordResetToken());
+        accountRepository.findOneByPasswordResetToken(passwordReset.getPasswordResetToken());
     if (!account.isPresent()) {
       throw new PasswordResetTokenNotFoundException();
     }
-
     return accountRepository.save(
         account.get()
-            .withPassword(passwordEncoder.encode(passwordResetRequest.getPassword()))
+            .withPassword(passwordEncoder.encode(passwordReset.getPassword()))
             .withPasswordResetToken(null)
     );
-
   }
 
   public boolean sendPasswordResetInstructions(String email) {

@@ -4,16 +4,11 @@ import com.jlg.app.exception.AccountEmailConflictException;
 import com.jlg.app.exception.AccountPrincipalMismatchException;
 import com.jlg.app.exception.EmailNotFoundException;
 import com.jlg.app.exception.PasswordResetTokenNotFoundException;
-import com.jlg.app.model.Account;
-import com.jlg.app.model.MailMessage;
+import com.jlg.app.domain.Account;
 import com.jlg.app.repository.AccountRepository;
-import com.jlg.app.request.PasswordChangeRequest;
-import com.jlg.app.request.PasswordResetRequest;
-import com.jlg.app.request.RegistrationRequest;
-import com.jlg.app.service.AccountService;
+import com.jlg.app.domain.PasswordChange;
+import com.jlg.app.domain.PasswordReset;
 import com.jlg.app.exception.MessageSendException;
-import okhttp3.MediaType;
-import okhttp3.ResponseBody;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +21,6 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import retrofit2.Call;
-import retrofit2.Response;
 
 import java.security.Principal;
 
@@ -34,7 +28,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.jlg.app.TestUtil.createValidExistingAccount;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static okhttp3.MediaType.parse;
 import static okhttp3.ResponseBody.create;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -78,7 +71,7 @@ public class AccountServiceTest {
     when(passwordEncoder.encode(any(CharSequence.class))).thenReturn("encoded");
 
     //when
-    accountService.create(new RegistrationRequest("some-email@gmail.com", "password"));
+    accountService.create(Account.builder().email("some-email@gmail.com").password("password").build());
 
     //then
     ArgumentCaptor<Account> argument = ArgumentCaptor.forClass(Account.class);
@@ -93,7 +86,7 @@ public class AccountServiceTest {
     when(passwordEncoder.encode(any(CharSequence.class))).thenReturn("encoded");
 
     //when
-    accountService.create(new RegistrationRequest("some-email@gmail.com", "password"));
+    accountService.create(Account.builder().email("some-email@gmail.com").password("password").build());
   }
 
   @Test
@@ -107,7 +100,7 @@ public class AccountServiceTest {
         newArrayList()));
 
     //when
-    accountService.changePassword(new PasswordChangeRequest("password"), "some-email@gmail.com");
+    accountService.changePassword(new PasswordChange("password"), "some-email@gmail.com");
 
     //then
     ArgumentCaptor<Account> argument = ArgumentCaptor.forClass(Account.class);
@@ -122,7 +115,7 @@ public class AccountServiceTest {
     when(accountRepository.findOneByEmail(anyString())).thenReturn(empty());
 
     //when
-    accountService.changePassword(new PasswordChangeRequest("foo"), "some-email@gmail.com");
+    accountService.changePassword(new PasswordChange("foo"), "some-email@gmail.com");
   }
 
   @Test
@@ -136,7 +129,7 @@ public class AccountServiceTest {
         newArrayList()));
 
     //when
-    accountService.resetPassword(new PasswordResetRequest("token", "password"));
+    accountService.resetPassword(new PasswordReset("token", "password"));
 
     //then
     ArgumentCaptor<Account> argument = ArgumentCaptor.forClass(Account.class);
@@ -152,7 +145,7 @@ public class AccountServiceTest {
     when(accountRepository.findOneByPasswordResetToken(anyString())).thenReturn(empty());
 
     //when
-    accountService.resetPassword(new PasswordResetRequest("token", "password"));
+    accountService.resetPassword(new PasswordReset("token", "password"));
   }
 
   @Test

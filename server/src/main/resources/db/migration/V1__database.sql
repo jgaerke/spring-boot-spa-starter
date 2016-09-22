@@ -24,7 +24,7 @@ CREATE INDEX spring_session_attributes_ix1 ON spring_session_attributes (session
 
 
 CREATE TABLE account (
-  id                    BINARY(255)  NOT NULL,
+  id                    VARCHAR(255)  NOT NULL,
   credentials_expired   BIT          NOT NULL,
   disabled              BIT          NOT NULL,
   email                 VARCHAR(255),
@@ -39,11 +39,3 @@ CREATE TABLE account (
   trial_expiration_date DATETIME,
   PRIMARY KEY (id)
 );
-
-CREATE TABLE role (
-  name    VARCHAR(255) NOT NULL,
-  account BINARY(255)  NOT NULL,
-  PRIMARY KEY (name, account)
-);
-
-ALTER TABLE role ADD CONSTRAINT role_account FOREIGN KEY (account) REFERENCES account (id)

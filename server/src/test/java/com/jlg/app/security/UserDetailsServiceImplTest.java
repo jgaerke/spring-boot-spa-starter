@@ -1,7 +1,7 @@
 package com.jlg.app.security;
 
-import com.jlg.app.model.Account;
-import com.jlg.app.model.Role;
+import com.jlg.app.domain.Account;
+import com.jlg.app.domain.Role;
 import com.jlg.app.repository.AccountRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,7 +28,7 @@ public class UserDetailsServiceImplTest {
     String password = "password";
     String role = "role";
     Set<Role> roles = new HashSet<>();
-    roles.add(new Role(role));
+    roles.add(Role.builder().name(role).build());
     Account account = Account.builder()
         .email(email)
         .password(password)

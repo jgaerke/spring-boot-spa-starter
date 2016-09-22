@@ -3,8 +3,9 @@ package com.jlg.app.exception;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
-@ResponseStatus(value = NOT_FOUND, reason = "Email not found")
+@ResponseStatus(value = UNAUTHORIZED, reason = "Not authenticated")
 public class NotAuthenticatedException extends RuntimeException {
-  private static final long serialVersionUID = -7406630554270011192L;
+  private static final long serialVersionUID = -4789387106212276067L;
 }

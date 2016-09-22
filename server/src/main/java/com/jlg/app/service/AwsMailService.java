@@ -1,6 +1,6 @@
 package com.jlg.app.service;
 
-import com.jlg.app.model.MailMessage;
+import com.jlg.app.domain.MailMessage;
 import org.springframework.stereotype.Component;
 
 @Component

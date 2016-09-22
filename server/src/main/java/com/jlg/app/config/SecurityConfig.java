@@ -27,19 +27,19 @@ import static org.springframework.http.HttpMethod.DELETE;
 @Order(ACCESS_OVERRIDE_ORDER)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
   @Autowired
-  UserDetailsService userDetailsService;
+  public UserDetailsService userDetailsService;
   @Autowired
-  AuthorizationErrorHandler authorizationErrorHandler;
+  public AuthorizationErrorHandler authorizationErrorHandler;
   @Autowired
-  AuthenticationErrorHandler authenticationErrorHandler;
+  public AuthenticationErrorHandler authenticationErrorHandler;
   @Autowired
-  LoginSuccessHandler loginSuccessHandler;
+  public LoginSuccessHandler loginSuccessHandler;
   @Autowired
-  LoginFailureHandler loginFailureHandler;
+  public LoginFailureHandler loginFailureHandler;
   @Autowired
-  HttpLogoutSuccessHandler logoutSuccessHandler;
+  public HttpLogoutSuccessHandler logoutSuccessHandler;
   @Autowired
-  SecurityConfigProperties securityConfigProperties;
+  public SecurityConfigProperties securityConfigProperties;
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -47,7 +47,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   }
 
   @Bean
-  CsrfTokenRepository csrfTokenRepository() {
+  public CsrfTokenRepository csrfTokenRepository() {
     HttpSessionCsrfTokenRepository repository = new HttpSessionCsrfTokenRepository();
     repository.setHeaderName("X-XSRF-TOKEN");
     return repository;
@@ -108,14 +108,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     http.sessionManagement().maximumSessions(1);
 
     //cross site forgery protection
-//    http.csrf().disable();
-    http
-        .csrf()
-        .requireCsrfProtectionMatcher(new AntPathRequestMatcher("/api/**"))
-        .requireCsrfProtectionMatcher(new AntPathRequestMatcher("/api/**/*"))
-        .csrfTokenRepository(csrfTokenRepository())
-        .and()
-        .addFilterAfter(new CsrfHeaderFilter(), CsrfFilter.class);
+    http.csrf().disable();
+//    http
+//        .csrf()
+////        .requireCsrfProtectionMatcher(new AntPathRequestMatcher("/api/**"))
+////        .requireCsrfProtectionMatcher(new AntPathRequestMatcher("/api/**/*"))
+//        .csrfTokenRepository(csrfTokenRepository())
+//        .and()
+//        .addFilterAfter(new CsrfHeaderFilter(), CsrfFilter.class);
   }
 
   @Override

@@ -1,5 +1,6 @@
 package com.jlg.app.security;
 
+import com.jlg.app.config.SecurityConfig;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;

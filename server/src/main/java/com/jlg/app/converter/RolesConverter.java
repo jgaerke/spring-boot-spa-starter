@@ -8,29 +8,28 @@ import javax.persistence.AttributeConverter;
 import java.io.IOException;
 import java.util.Set;
 
+import static com.jlg.app.util.StaticRefUtil.getRef;
+
 
 public class RolesConverter implements AttributeConverter<Set<Role>, String> {
-  private static ObjectMapper mapper = null;
-
   @Override
   public String convertToDatabaseColumn(Set<Role> roles) {
     try {
-      return mapper.writeValueAsString(roles);
+      return getRef(ObjectMapper.class).writeValueAsString(roles);
     } catch (JsonProcessingException e) {
       throw new RuntimeException(e);
     }
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public Set<Role> convertToEntityAttribute(String dbData) {
     try {
-      return mapper.readValue(dbData, Set.class);
+      return getRef(ObjectMapper.class).readValue(dbData, getRef(ObjectMapper.class).getTypeFactory()
+          .constructCollectionType(Set.class, Role.class));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
-  public static void setObjectMapper(ObjectMapper objectMapper) {
-    mapper = objectMapper;
-  }
 }

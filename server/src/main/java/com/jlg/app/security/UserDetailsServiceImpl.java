@@ -1,6 +1,6 @@
 package com.jlg.app.security;
 
-import com.jlg.app.model.Account;
+import com.jlg.app.domain.Account;
 import com.jlg.app.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;

@@ -1,6 +1,5 @@
 package com.jlg.app.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jlg.app.domain.Account;
 import com.jlg.app.domain.PasswordChange;
 import com.jlg.app.domain.PasswordRecovery;
@@ -24,6 +23,7 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
@@ -33,22 +33,19 @@ public class AccountController {
 
   private final AccountService accountService;
   private final UserDetailsService userDetailsService;
-  private final ObjectMapper objectMapper;
 
   @Autowired
-  public AccountController(
-      AccountService accountService,
-      UserDetailsService userDetailsService,
-      ObjectMapper objectMapper) {
+  public AccountController(AccountService accountService, UserDetailsService userDetailsService) {
     this.accountService = accountService;
     this.userDetailsService = userDetailsService;
-    this.objectMapper = objectMapper;
   }
 
-  @RequestMapping(method = POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+  @RequestMapping(method = POST, consumes = APPLICATION_JSON_UTF8_VALUE, produces = APPLICATION_JSON_UTF8_VALUE)
   @ResponseStatus(OK)
-  public void create(@RequestBody @Valid Account account) {
-    setAuthToken(accountService.create(account));
+  public Account create(@RequestBody @Valid Account account) {
+    Account created = accountService.create(account);
+    setAuthToken(created);
+    return created;
   }
 
   @RequestMapping(value = "/password/change", method = PATCH, consumes = APPLICATION_JSON_VALUE, produces =

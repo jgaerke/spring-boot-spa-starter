@@ -1,33 +1,33 @@
 package com.jlg.app.domain;
 
+import com.jlg.app.converter.RolesConverter;
 import lombok.*;
-import lombok.experimental.NonFinal;
 import lombok.experimental.Wither;
-import org.hibernate.validator.constraints.NotEmpty;
 
-import javax.persistence.*;
-import javax.validation.constraints.Size;
-import java.util.Date;
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import java.time.LocalDateTime;
 import java.util.Set;
-import java.util.UUID;
+
+import static java.util.UUID.randomUUID;
+import static lombok.AccessLevel.PRIVATE;
 
 
 @AllArgsConstructor
-@Value
-@Wither
-@Builder
-@NonFinal
+@NoArgsConstructor(access = PRIVATE)
+@Getter
+@Builder(toBuilder = true)
 @EqualsAndHashCode
 @ToString
+@Wither
 @Entity
 public class Account {
   @Id
-  private UUID id;
+  private String id;
 
   private String email;
 
-  @NotEmpty
-  @Size(max = 254)
   private String password;
 
   private String first;
@@ -38,7 +38,7 @@ public class Account {
 
   private String paymentInfo;
 
-  private Date trialExpirationDate;
+  private LocalDateTime trialExpirationDate;
 
   private String passwordResetToken;
 
@@ -50,9 +50,13 @@ public class Account {
 
   private boolean disabled;
 
-  @OneToMany(orphanRemoval = true)
-  @JoinColumn(name = "account")
+  @Convert(converter = RolesConverter.class)
   private Set<Role> roles;
+
+  public Account withGeneratedId() {
+    return this.toBuilder().id(randomUUID().toString()).build();
+  }
+
 
 }
 
