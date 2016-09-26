@@ -1,10 +1,9 @@
-import page from 'page';
 import CreateAccountRoute from './CreateAccountRoute';
 import IndexRoute from './IndexRoute';
 import LoginRoute from './LoginRoute';
 
 class Router {
-  constructor(page = Router.page, routes = Router.routes) {
+  constructor(page = page, routes = Router.routes) {
     this.activeView = null;
     this.page = page;
     this.routes = routes;
@@ -41,7 +40,6 @@ class Router {
 }
 ;
 
-Router.page = page;
 Router.routes = [
   new CreateAccountRoute(),
   new LoginRoute(),

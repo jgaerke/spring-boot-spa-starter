@@ -9,7 +9,8 @@ import java.io.IOException;
 import java.time.LocalDate;
 
 public class LocalDateDeserializer extends JsonDeserializer<LocalDate> {
-  @Override public LocalDate deserialize(JsonParser p, DeserializationContext ctxt)
+  @Override
+  public LocalDate deserialize(JsonParser p, DeserializationContext ctxt)
       throws IOException, JsonProcessingException {
     return LocalDate.parse(p.getText());
   }

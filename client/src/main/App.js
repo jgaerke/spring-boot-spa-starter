@@ -1,6 +1,4 @@
 import 'rivets';
-import $ from 'jquery';
-import bootstrap from 'bootstrap'
 import './style/Index.css';
 import { Router } from './routing';
 
@@ -18,7 +16,5 @@ class App {
 };
 
 window.App = App;
-window.jQuery = $;
-window.$ = $;
 
 export default App;

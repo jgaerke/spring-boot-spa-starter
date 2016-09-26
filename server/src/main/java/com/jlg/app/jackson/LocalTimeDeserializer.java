@@ -9,7 +9,8 @@ import java.io.IOException;
 import java.time.LocalTime;
 
 public class LocalTimeDeserializer extends JsonDeserializer<LocalTime> {
-  @Override public LocalTime deserialize(JsonParser p, DeserializationContext ctxt)
+  @Override
+  public LocalTime deserialize(JsonParser p, DeserializationContext ctxt)
       throws IOException, JsonProcessingException {
     return LocalTime.parse(p.getText());
   }

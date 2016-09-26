@@ -2,10 +2,9 @@ package com.jlg.app.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jlg.app.Application;
-import com.jlg.app.api.AccountApiContractTest;
+import com.jlg.app.MockPostProcessor;
 import com.jlg.app.domain.Account;
 import com.jlg.app.repository.AccountRepository;
-import com.jlg.app.MockPostProcessor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,29 +42,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes={Application.class,AccountControllerIntegrationTest.Config.class}, webEnvironment = RANDOM_PORT)
+@SpringBootTest(classes = {Application.class, AccountControllerIntegrationTest.Config.class}, webEnvironment =
+    RANDOM_PORT)
 @ActiveProfiles("account-controller-integration-test")
 public class AccountControllerIntegrationTest {
-  private MockMvc mvc;
-
   @Autowired
   CsrfTokenRepository csrfTokenRepository;
-
   @Autowired
   UserDetailsService userDetailsService;
-
-  @Autowired
-  private WebApplicationContext webApplicationContext;
-
-  @Autowired
-  private ObjectMapper objectMapper;
-
-  @Autowired
-  private AccountRepository accountRepository;
-
   @Autowired
   Filter springSecurityFilterChain;
-
+  private MockMvc mvc;
+  @Autowired
+  private WebApplicationContext webApplicationContext;
+  @Autowired
+  private ObjectMapper objectMapper;
+  @Autowired
+  private AccountRepository accountRepository;
   private DefaultCsrfToken token;
 
   @Before

@@ -1,20 +1,19 @@
-
-<section layout:decorator="layout" layout:fragment="content" xmlns:layout="">
-  <a href="/app/">Home</a>
-  <a href="login">Login</a>
-  <a href="register">Register</a>
-  <div id="viewport"></div>
-  <script th:src="@{'/js/bundle.js'}"/>
-  <script th:text="'var authenticated = ' + ${#httpServletRequest .getUserPrincipal() != null} + ';'">
-  </script>
-  <script th:inline="javascript">
-    var partials = [[${partials}]];
-  </script>
-  <script>
-    jQuery(document).ready(function () {
-      new App(authenticated).start();
-    });
-  </script>
+<section xmlns:layout="" layout:decorator="layout" layout:fragment="content">
+    <a href="/app/">Home</a>
+    <a href="login">Login</a>
+    <a href="register">Register</a>
+    <div id="viewport"></div>
+    <script th:src="@{'/js/bundle.js'}"/>
+    <script th:text="'var authenticated = ' + ${#httpServletRequest .getUserPrincipal() != null} + ';'">
+    </script>
+    <script th:inline="javascript">
+        var partials = [[${partials}]];
+    </script>
+    <script>
+        jQuery(document).ready(function () {
+            new App(authenticated).start();
+        });
+    </script>
 </section>
 
 

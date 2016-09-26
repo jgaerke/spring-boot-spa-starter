@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
-import static java.util.Collections.emptySet;
 import static java.util.Optional.ofNullable;
 
 @Service
@@ -34,7 +33,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     return new User(
         account.getEmail(),
         account.getPassword(),
-        ofNullable(account.getRoles()).orElse(emptySet())
+        ofNullable(account.getAuthorities()).orElse(newArrayList())
     );
   }
 }

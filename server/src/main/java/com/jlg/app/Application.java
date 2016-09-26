@@ -1,16 +1,15 @@
 package com.jlg.app;
 
 import com.jlg.app.domain.Account;
-import com.jlg.app.domain.Role;
 import com.jlg.app.repository.AccountRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
-import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.UUID.randomUUID;
 
 @SpringBootApplication
@@ -31,7 +30,7 @@ public class Application {
         .passwordResetToken(null)
         .paymentInfo(null)
         .plan("plan-a")
-        .roles(newHashSet(Role.builder().name("role").build()))
+        .authorities(newArrayList(new SimpleGrantedAuthority("role")))
         .trialExpirationDate(LocalDateTime.now().plusMonths(1))
         .build());
   }

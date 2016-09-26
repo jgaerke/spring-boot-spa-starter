@@ -2,9 +2,9 @@ package com.jlg.app.security;
 
 
 import com.jlg.app.Application;
+import com.jlg.app.MockPostProcessor;
 import com.jlg.app.domain.Account;
 import com.jlg.app.repository.AccountRepository;
-import com.jlg.app.MockPostProcessor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes={Application.class, SecurityIntegrationTest.Config.class}, webEnvironment = RANDOM_PORT)
+@SpringBootTest(classes = {Application.class, SecurityIntegrationTest.Config.class}, webEnvironment = RANDOM_PORT)
 @ActiveProfiles("security-integration-test")
 public class SecurityIntegrationTest {
 

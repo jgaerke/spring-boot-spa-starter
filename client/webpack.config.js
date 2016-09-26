@@ -5,41 +5,54 @@ const isProd = process.env.NODE_ENV === 'production';
 
 
 var config = {
-    devtool: 'cheap-module-eval-source-map',
-    entry: './src/main/App.js',
-    output: {
-        path: './',
-        filename: '../server/src/main/resources/static/js/bundle.js'
-    },
-    plugins: [],
-    module: {
-        loaders: [
-            { test: /\.(js)$/, loaders: ['babel'], exclude: /node_modules/},
-            { test: /\.css$/, loader: 'style-loader!css-loader', exclude: /node_modules/ }
-        ]
-    }
+  devtool: 'cheap-module-eval-source-map',
+  entry: './src/main/App.js',
+  output: {
+    path: './',
+    filename: '../server/src/main/resources/static/js/bundle.js'
+  },
+  externals: {
+    "jquery": 'jQuery',
+    'page': 'page',
+    'rivets': 'rivets'
+  },
+  plugins: [
+    new webpack.ProvidePlugin({
+      $: 'jquery',
+      jQuery: 'jquery',
+      'window.jQuery': 'jquery',
+      'page': 'page',
+      'rivets': 'rivets'
+    })
+  ],
+  module: {
+    loaders: [
+      {test: /\.(js)$/, loaders: ['babel'], exclude: /node_modules/},
+      {test: /\.css$/, loader: 'style-loader!css-loader', exclude: /node_modules/}
+    ]
+  }
 }
 
 if (!isProd) {
-    config.devtool = 'cheap-module-source-map';
+  config.devtool = 'cheap-module-source-map';
 }
 
 if (isProd) {
-    config.plugins.push(
-        new webpack.LoaderOptionsPlugin({
-            minimize: true,
-            debug: false
-        }),
-        new webpack.optimize.UglifyJsPlugin({
-            compress: {
-                warnings: false
-            },
-            output: {
-                comments: false
-            },
-            sourceMap: false
-        })
-    );
+  config.plugins.push(
+      new webpack.LoaderOptionsPlugin({
+        minimize: true,
+        debug: false
+      }),
+      new webpack.optimize.UglifyJsPlugin({
+        compress: {
+          warnings: false
+        },
+        output: {
+          comments: false
+        },
+        sourceMap: false
+      })
+  );
 }
 
 module.exports = config;

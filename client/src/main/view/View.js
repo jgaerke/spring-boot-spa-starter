@@ -1,12 +1,11 @@
 import $ from 'jquery';
-import rivets from 'rivets';
 
 class View {
   constructor(selector = '#viewport',
               partial,
               dataProducer = ()=> {},
-              $ = View.$,
-              rivets = View.rivets) {
+              $ = $,
+              rivets = rivets) {
     this.selector = selector;
     this.partial = partial;
     this.dataProducer = dataProducer;
@@ -33,7 +32,5 @@ class View {
 };
 
 View.cache = {};
-View.$ = $;
-View.rivets = rivets;
 
 export default View;

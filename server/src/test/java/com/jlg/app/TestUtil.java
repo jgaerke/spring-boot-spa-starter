@@ -4,9 +4,6 @@ import com.jlg.app.domain.Account;
 
 import java.util.UUID;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Sets.newHashSet;
-
 public class TestUtil {
   public static Account createValidNewAccount() {
     return Account.builder()

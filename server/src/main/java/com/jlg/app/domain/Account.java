@@ -1,16 +1,13 @@
 package com.jlg.app.domain;
 
-import com.jlg.app.converter.RolesConverter;
 import lombok.*;
 import lombok.experimental.Wither;
+import org.springframework.data.annotation.Id;
+import org.springframework.security.core.GrantedAuthority;
 
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.Id;
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
 
-import static java.util.UUID.randomUUID;
 import static lombok.AccessLevel.PRIVATE;
 
 
@@ -21,8 +18,8 @@ import static lombok.AccessLevel.PRIVATE;
 @EqualsAndHashCode
 @ToString
 @Wither
-@Entity
 public class Account {
+
   @Id
   private String id;
 
@@ -50,13 +47,5 @@ public class Account {
 
   private boolean disabled;
 
-  @Convert(converter = RolesConverter.class)
-  private Set<Role> roles;
-
-  public Account withGeneratedId() {
-    return this.toBuilder().id(randomUUID().toString()).build();
-  }
-
-
+  private List<? extends GrantedAuthority> authorities;
 }
-

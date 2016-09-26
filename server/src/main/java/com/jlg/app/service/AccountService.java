@@ -1,34 +1,32 @@
 package com.jlg.app.service;
 
+import com.jlg.app.domain.Account;
+import com.jlg.app.domain.MailMessage;
+import com.jlg.app.domain.PasswordChange;
+import com.jlg.app.domain.PasswordReset;
 import com.jlg.app.exception.AccountEmailConflictException;
 import com.jlg.app.exception.AccountPrincipalMismatchException;
 import com.jlg.app.exception.EmailNotFoundException;
 import com.jlg.app.exception.PasswordResetTokenNotFoundException;
-import com.jlg.app.domain.Account;
-import com.jlg.app.domain.MailMessage;
 import com.jlg.app.repository.AccountRepository;
-import com.jlg.app.domain.PasswordChange;
-import com.jlg.app.domain.PasswordReset;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.lang.System.getProperty;
 
 @Service
 public class AccountService {
   private final AccountRepository accountRepository;
-  private PasswordEncoder passwordEncoder;
   private final MailService mailService;
   private final Environment environment;
+  private PasswordEncoder passwordEncoder;
 
   @Autowired
   public AccountService(
@@ -48,7 +46,6 @@ public class AccountService {
       throw new AccountEmailConflictException();
     }
     return accountRepository.save(account
-        .withGeneratedId()
         .withPassword(passwordEncoder.encode(account.getPassword())));
   }
 

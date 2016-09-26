@@ -31,12 +31,10 @@ public class AccountControllerTest {
 
   @Mock
   UserDetailsService userDetailsService;
-
-  @Mock
-  private HttpServletRequest request;
-
   @InjectMocks
   AccountController accountController;
+  @Mock
+  private HttpServletRequest request;
 
   @Before
   public void setup() {

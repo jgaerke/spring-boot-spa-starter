@@ -23,7 +23,8 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class SecurityConfigTest {
 
-  private static String getHeaderName(CsrfTokenRepository csrfTokenRepository) throws IllegalAccessException, NoSuchFieldException {
+  private static String getHeaderName(CsrfTokenRepository csrfTokenRepository) throws IllegalAccessException,
+      NoSuchFieldException {
     Field f = csrfTokenRepository.getClass().getDeclaredField("headerName"); //NoSuchFieldException
     f.setAccessible(true);
     return (String) f.get(csrfTokenRepository);
@@ -38,7 +39,8 @@ public class SecurityConfigTest {
     PasswordEncoder standardPasswordEncoder = securityConfig.passwordEncoder();
 
     //then
-    assertEquals("Should be StandardPasswordEncoder.class instance.", StandardPasswordEncoder.class, standardPasswordEncoder.getClass());
+    assertEquals("Should be StandardPasswordEncoder.class instance.", StandardPasswordEncoder.class,
+        standardPasswordEncoder.getClass());
   }
 
   @Test
@@ -51,7 +53,8 @@ public class SecurityConfigTest {
     CsrfTokenRepository csrfTokenRepository = securityConfig.csrfTokenRepository();
 
     //then
-    assertSame("Should be HttpSessionCsrfTokenRepository.class instance.", HttpSessionCsrfTokenRepository.class, csrfTokenRepository.getClass());
+    assertSame("Should be HttpSessionCsrfTokenRepository.class instance.", HttpSessionCsrfTokenRepository.class,
+        csrfTokenRepository.getClass());
     assertEquals("Should be set with expected header name .", headerName, getHeaderName(csrfTokenRepository));
 
   }
@@ -63,7 +66,8 @@ public class SecurityConfigTest {
     securityConfig.userDetailsService = mock(UserDetailsService.class);
     DaoAuthenticationConfigurer authenticationConfigurer = mock(DaoAuthenticationConfigurer.class);
     AuthenticationManagerBuilder authenticationManagerBuilder = mock(AuthenticationManagerBuilder.class);
-    when(authenticationManagerBuilder.userDetailsService(any(UserDetailsService.class))).thenReturn(authenticationConfigurer);
+    when(authenticationManagerBuilder.userDetailsService(any(UserDetailsService.class))).thenReturn
+        (authenticationConfigurer);
 
     //when
     securityConfig.configure(authenticationManagerBuilder);

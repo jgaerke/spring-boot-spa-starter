@@ -1,14 +1,10 @@
 package com.jlg.app.service;
 
-import com.jlg.app.exception.AccountEmailConflictException;
-import com.jlg.app.exception.AccountPrincipalMismatchException;
-import com.jlg.app.exception.EmailNotFoundException;
-import com.jlg.app.exception.PasswordResetTokenNotFoundException;
 import com.jlg.app.domain.Account;
-import com.jlg.app.repository.AccountRepository;
 import com.jlg.app.domain.PasswordChange;
 import com.jlg.app.domain.PasswordReset;
-import com.jlg.app.exception.MessageSendException;
+import com.jlg.app.exception.*;
+import com.jlg.app.repository.AccountRepository;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,14 +24,12 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.jlg.app.TestUtil.createValidExistingAccount;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static okhttp3.ResponseBody.create;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static retrofit2.Response.error;
-import static retrofit2.Response.success;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccountServiceTest {
@@ -54,15 +48,12 @@ public class AccountServiceTest {
 
   @Mock
   Environment environment;
-
-  @Mock
-  private Principal principal;
-
-  @Mock
-  private Call<Void> call;
-
   @InjectMocks
   AccountService accountService;
+  @Mock
+  private Principal principal;
+  @Mock
+  private Call<Void> call;
 
   @Test
   public void should_create_account() throws Exception {

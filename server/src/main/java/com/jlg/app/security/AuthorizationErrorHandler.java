@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.UUID;
 
-import static java.lang.String.format;
 import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
