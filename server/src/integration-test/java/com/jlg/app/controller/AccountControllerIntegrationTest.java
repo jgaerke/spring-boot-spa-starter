@@ -21,6 +21,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.servlet.Filter;
@@ -31,6 +33,7 @@ import static com.google.common.collect.ImmutableMap.of;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.jlg.app.TestUtil.*;
 import static java.util.Optional.empty;
+import static java.util.UUID.randomUUID;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -38,6 +41,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.security.core.context.SecurityContextHolder.clearContext;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -75,7 +79,7 @@ public class AccountControllerIntegrationTest {
 
 
   @Test
-  public void should_return_200_and_account_upon_creation() throws Exception {
+  public void create_should_return_200_and_account() throws Exception {
     //given
     Account input = createValidRegistrationRequest();
     Account output = createValidExistingAccount();
@@ -98,10 +102,10 @@ public class AccountControllerIntegrationTest {
   }
 
   @Test
-  public void should_return_403_and_error_when_csrf_token_not_provided() throws Exception {
+  public void create_should_return_403_and_error_when_csrf_token_not_provided() throws Exception {
     //given
     Account input = createValidNewAccount();
-    Account output = input.withId(UUID.randomUUID().toString());
+    Account output = input.withId(randomUUID().toString());
     String request = objectMapper.writeValueAsString(input);
     when(accountRepository.save(any(Account.class))).thenReturn(output);
 
@@ -116,6 +120,29 @@ public class AccountControllerIntegrationTest {
         .andDo(print());
   }
 
+
+  @Test
+  public void create_should_return_400_and_expected_errors_when_account_creation_validation_fails() throws Exception {
+    //given
+    Account input = createValidNewAccount()
+        .withEmail(null)
+        .withPassword(null);
+    String request = objectMapper.writeValueAsString(input);
+
+    //when
+    ResultActions result = mvc.perform(
+        post("/api/accounts")
+            .contentType(APPLICATION_JSON_VALUE)
+            .header("XSRF-TOKEN", "bar")
+            .content(request)
+    );
+
+    //then
+    result
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string("foo"))
+        .andDo(print());
+  }
 
   @Configuration
   @Profile("account-controller-integration-test")

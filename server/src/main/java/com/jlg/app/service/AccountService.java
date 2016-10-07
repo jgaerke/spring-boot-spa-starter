@@ -2,8 +2,6 @@ package com.jlg.app.service;
 
 import com.jlg.app.domain.Account;
 import com.jlg.app.domain.MailMessage;
-import com.jlg.app.domain.PasswordChange;
-import com.jlg.app.domain.PasswordReset;
 import com.jlg.app.exception.AccountEmailConflictException;
 import com.jlg.app.exception.AccountPrincipalMismatchException;
 import com.jlg.app.exception.EmailNotFoundException;
@@ -25,7 +23,6 @@ import static java.lang.System.getProperty;
 public class AccountService {
   private final AccountRepository accountRepository;
   private final MailService mailService;
-  private final Environment environment;
   private PasswordEncoder passwordEncoder;
 
   @Autowired
@@ -33,12 +30,10 @@ public class AccountService {
       UserDetailsService userDetailsService,
       AccountRepository accountRepository,
       PasswordEncoder passwordEncoder,
-      MailService mailService,
-      Environment environment) {
+      MailService mailService) {
     this.accountRepository = accountRepository;
     this.passwordEncoder = passwordEncoder;
     this.mailService = mailService;
-    this.environment = environment;
   }
 
   public Account create(Account account) {
@@ -57,7 +52,7 @@ public class AccountService {
     return accountRepository.save(account);
   }
 
-  public Account changePassword(PasswordChange passwordChange, String email) {
+  public Account changePassword(Account passwordChange, String email) {
     Optional<Account> account = accountRepository.findOneByEmail(email);
     if (!account.isPresent()) {
       throw new AccountPrincipalMismatchException();
@@ -65,7 +60,7 @@ public class AccountService {
     return accountRepository.save(account.get().withPassword(passwordEncoder.encode(passwordChange.getPassword())));
   }
 
-  public Account resetPassword(PasswordReset passwordReset) {
+  public Account resetPassword(Account passwordReset) {
     Optional<Account> account =
         accountRepository.findOneByPasswordResetToken(passwordReset.getPasswordResetToken());
     if (!account.isPresent()) {

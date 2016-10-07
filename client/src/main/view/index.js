@@ -1,11 +1,17 @@
 import View from './View';
-import CreateAccountView from './CreateAccountView';
+import LoadableView from './LoadableView';
+import CompositeView from './CompositeView';
+import GlobalNavView from './GlobalNavView';
+import RegistrationView from './RegistrationView';
 import IndexView from './IndexView';
 import LoginView from './LoginView';
 
 export {
     View,
-    CreateAccountView,
+    LoadableView,
+    CompositeView,
+    GlobalNavView,
+    RegistrationView,
     IndexView,
     LoginView
 };

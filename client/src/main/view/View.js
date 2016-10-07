@@ -1,36 +1,30 @@
-import $ from 'jquery';
+import { session } from '../middleware';
 
 class View {
-  constructor(selector = '#viewport',
-              partial,
-              dataProducer = ()=> {},
-              $ = $,
-              rivets = rivets) {
-    this.selector = selector;
-    this.partial = partial;
-    this.dataProducer = dataProducer;
+  constructor(viewSelector) {
+    this.viewSelector = viewSelector;
     this.$ = $;
-    this.rivets = rivets
+    this.rivets = rivets;
+    this.binding = null;
+    this.session = session;
+  }
+  
+  getInitialState(routeState) {
+    return Promise.resolve({});
+  }
+  
+  bind(viewState) {
+    this.state = viewState;
+    //console.log(JSON.parse(JSON.stringify(viewState)));
+    this.binding = this.rivets.bind(this.$(this.viewSelector), viewState);
+    return Promise.resolve(this);
   }
 
-  bind(data) {
-    return this.rivets.bind(this.$(this.selector), Object.assign({route: data}, this.dataProducer()));
-  }
-
-  render(data, onBindComplete = ()=> {}) {
-    if(View.cache[this.partial]) {
-      this.$(this.selector).html(View.cache[this.partial]);
-      return onBindComplete(this.bind(data));
+  unbind() {
+    if(this.binding) {
+      this.binding.unbind();
     }
-    this.$(this.selector).load(this.partial, (html, responseText, jqXhr)=> {
-      if(jqXhr.status && jqXhr.status.toString().indexOf('2') == 0) {
-        View.cache[this.partial] = html;
-      }
-      onBindComplete(this.bind(data));
-    });
   }
-};
-
-View.cache = {};
+}
 
 export default View;

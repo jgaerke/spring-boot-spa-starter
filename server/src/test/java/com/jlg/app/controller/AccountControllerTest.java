@@ -1,9 +1,6 @@
 package com.jlg.app.controller;
 
 import com.jlg.app.domain.Account;
-import com.jlg.app.domain.PasswordChange;
-import com.jlg.app.domain.PasswordRecovery;
-import com.jlg.app.domain.PasswordReset;
 import com.jlg.app.service.AccountService;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,12 +53,12 @@ public class AccountControllerTest {
   @Test
   public void should_change_password() throws Exception {
     //given
-    when(accountService.changePassword(any(PasswordChange.class), anyString())).thenReturn
+    when(accountService.changePassword(any(Account.class), anyString())).thenReturn
         (createValidExistingAccount());
     Principal principal = mock(Principal.class);
     when(principal.getName()).thenReturn("some-email@gmail.com");
     when(request.getUserPrincipal()).thenReturn(principal);
-    PasswordChange passwordChange = new PasswordChange("password");
+    Account passwordChange = Account.builder().password("password").build();
     //when
     accountController.changePassword(passwordChange, request);
     //then
@@ -71,9 +68,9 @@ public class AccountControllerTest {
   @Test
   public void should_reset_password() throws Exception {
     //given
-    when(accountService.resetPassword(any(PasswordReset.class))).thenReturn
+    when(accountService.resetPassword(any(Account.class))).thenReturn
         (createValidExistingAccount());
-    PasswordReset passwordReset = new PasswordReset("token", "password");
+    Account passwordReset = Account.builder().passwordResetToken("token").password("password").build();
     //when
     accountController.resetPassword(passwordReset);
     //then
@@ -83,9 +80,9 @@ public class AccountControllerTest {
   @Test
   public void should_recover_password() throws Exception {
     //given
-    when(accountService.resetPassword(any(PasswordReset.class))).thenReturn
+    when(accountService.resetPassword(any(Account.class))).thenReturn
         (createValidExistingAccount());
-    PasswordRecovery passwordRecovery = new PasswordRecovery("some-email@gmail.com");
+    Account passwordRecovery = Account.builder().email("some-email@gmail.com").build();
     //when
     accountController.recoverPassword(passwordRecovery);
     //then

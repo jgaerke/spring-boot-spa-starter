@@ -6,8 +6,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.password.StandardPasswordEncoder;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.UUID.randomUUID;
@@ -16,11 +18,21 @@ import static java.util.UUID.randomUUID;
 public class Application {
   public static void main(String[] args) {
     ConfigurableApplicationContext ctx = SpringApplication.run(Application.class, args);
+    seedData(ctx);
+  }
+
+  private static void seedData(ConfigurableApplicationContext ctx) {
     AccountRepository accountRepository = ctx.getBean(AccountRepository.class);
+    StandardPasswordEncoder standardPasswordEncoder = ctx.getBean(StandardPasswordEncoder.class);
+
+    Optional<Account> existing = accountRepository.findOneByEmail("jgaerke@gmail.com");
+    if(existing.isPresent()) {
+      accountRepository.delete(existing.get());
+    }
     accountRepository.save(Account.builder()
         .id(randomUUID().toString())
         .email("jgaerke@gmail.com")
-        .password("password")
+        .password(standardPasswordEncoder.encode("password"))
         .credentialsExpired(false)
         .disabled(false)
         .expired(false)

@@ -1,9 +1,9 @@
-import View from './View';
+import LoadableView from './LoadableView';
 
-class IndexView extends View {
+class IndexView extends LoadableView {
   constructor() {
-    super('#viewport', '/partials/index.html');
+    super('/partials/index.html', "#index");
   }
-};
+}
 
 export default IndexView;

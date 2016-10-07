@@ -7,11 +7,11 @@ import lombok.experimental.Wither;
 
 @AllArgsConstructor
 @Value
-@Wither
-@Builder
 @NonFinal
+@Builder(toBuilder = true)
 @EqualsAndHashCode
 @ToString
+@Wither
 public class MailMessage {
   private String from;
   private String to;

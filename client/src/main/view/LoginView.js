@@ -1,9 +1,9 @@
-import View from './View';
+import LoadableView from './LoadableView';
 
-class LoginView extends View {
+class LoginView extends LoadableView {
   constructor() {
-    super('#viewport', '/partials/account/login.html');
+    super('/partials/account/login.html', '#login');
   }
-};
+}
 
 export default LoginView;

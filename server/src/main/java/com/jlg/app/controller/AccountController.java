@@ -1,24 +1,22 @@
 package com.jlg.app.controller;
 
 import com.jlg.app.domain.Account;
-import com.jlg.app.domain.PasswordChange;
-import com.jlg.app.domain.PasswordRecovery;
-import com.jlg.app.domain.PasswordReset;
 import com.jlg.app.exception.EmailNotFoundException;
 import com.jlg.app.exception.NotAuthenticatedException;
 import com.jlg.app.service.AccountService;
+import com.jlg.app.validation.group.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
@@ -42,7 +40,7 @@ public class AccountController {
 
   @RequestMapping(method = POST, consumes = APPLICATION_JSON_UTF8_VALUE, produces = APPLICATION_JSON_UTF8_VALUE)
   @ResponseStatus(OK)
-  public Account create(@RequestBody @Valid Account account) {
+  public Account create(@RequestBody @Validated(AccountCreation.class) Account account) {
     Account created = accountService.create(account);
     setAuthToken(created);
     return created;
@@ -52,21 +50,21 @@ public class AccountController {
       APPLICATION_JSON_VALUE)
   @ResponseStatus(OK)
   public void changePassword(
-      @RequestBody @Valid PasswordChange passwordChange, HttpServletRequest request) {
+      @RequestBody @Validated(PasswordChange.class) Account passwordChange, HttpServletRequest request) {
     accountService.changePassword(passwordChange, request.getUserPrincipal().getName());
   }
 
   @RequestMapping(value = "/password/reset", method = POST, consumes = APPLICATION_JSON_VALUE, produces =
       APPLICATION_JSON_VALUE)
   @ResponseStatus(OK)
-  public void resetPassword(@RequestBody @Valid PasswordReset passwordReset) {
+  public void resetPassword(@RequestBody @Validated(PasswordReset.class) Account passwordReset) {
     accountService.resetPassword(passwordReset);
   }
 
   @RequestMapping(value = "/password/recover", method = POST, consumes = APPLICATION_JSON_VALUE, produces =
       APPLICATION_JSON_VALUE)
   @ResponseStatus(OK)
-  public void recoverPassword(@RequestBody @Valid PasswordRecovery passwordRecovery) {
+  public void recoverPassword(@RequestBody @Validated(PasswordRecovery.class) Account passwordRecovery) {
     accountService.sendPasswordResetInstructions(passwordRecovery.getEmail());
   }
 
@@ -83,7 +81,7 @@ public class AccountController {
 
   @RequestMapping(method = {PATCH, PUT}, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
   @ResponseStatus(OK)
-  public void update(@RequestBody @Valid Account account, HttpServletRequest request) {
+  public void update(@RequestBody @Validated(AccountUpdate.class) Account account, HttpServletRequest request) {
     Account updated = accountService.update(request.getUserPrincipal().getName(), account);
     setAuthToken(updated);
   }

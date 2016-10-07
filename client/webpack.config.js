@@ -14,7 +14,8 @@ var config = {
   externals: {
     "jquery": 'jQuery',
     'page': 'page',
-    'rivets': 'rivets'
+    'rivets': 'rivets',
+    'lodash': 'lodash'
   },
   plugins: [
     new webpack.ProvidePlugin({
@@ -22,7 +23,8 @@ var config = {
       jQuery: 'jquery',
       'window.jQuery': 'jquery',
       'page': 'page',
-      'rivets': 'rivets'
+      'rivets': 'rivets',
+      'lodash': '_'
     })
   ],
   module: {

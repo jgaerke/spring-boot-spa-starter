@@ -1,17 +1,18 @@
-import 'rivets';
 import './style/Index.css';
-import { Router } from './routing';
+import { router } from './middleware';
 
 class App {
-  constructor(authenticated = false, router = new Router()) {
-    this.authenticated = authenticated;
+  constructor() {
+    this.started = false;
     this.router = router;
   }
 
   start() {
-    //console.log('starting', this.authenticated);
-    //console.log(this);
-    this.router.start()
+    if(this.started) {
+      return false;
+    }
+    this.router.start();
+    this.started = true;
   }
 };
 

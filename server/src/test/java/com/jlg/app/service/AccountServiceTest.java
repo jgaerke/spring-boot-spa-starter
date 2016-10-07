@@ -1,8 +1,6 @@
 package com.jlg.app.service;
 
 import com.jlg.app.domain.Account;
-import com.jlg.app.domain.PasswordChange;
-import com.jlg.app.domain.PasswordReset;
 import com.jlg.app.exception.*;
 import com.jlg.app.repository.AccountRepository;
 import org.junit.Ignore;
@@ -91,7 +89,7 @@ public class AccountServiceTest {
         newArrayList()));
 
     //when
-    accountService.changePassword(new PasswordChange("password"), "some-email@gmail.com");
+    accountService.changePassword(Account.builder().password("password").build(), "some-email@gmail.com");
 
     //then
     ArgumentCaptor<Account> argument = ArgumentCaptor.forClass(Account.class);
@@ -106,7 +104,7 @@ public class AccountServiceTest {
     when(accountRepository.findOneByEmail(anyString())).thenReturn(empty());
 
     //when
-    accountService.changePassword(new PasswordChange("foo"), "some-email@gmail.com");
+    accountService.changePassword(Account.builder().password("foo").build(), "some-email@gmail.com");
   }
 
   @Test
@@ -120,7 +118,7 @@ public class AccountServiceTest {
         newArrayList()));
 
     //when
-    accountService.resetPassword(new PasswordReset("token", "password"));
+    accountService.resetPassword(Account.builder().passwordResetToken("token").password("password").build());
 
     //then
     ArgumentCaptor<Account> argument = ArgumentCaptor.forClass(Account.class);
@@ -136,7 +134,7 @@ public class AccountServiceTest {
     when(accountRepository.findOneByPasswordResetToken(anyString())).thenReturn(empty());
 
     //when
-    accountService.resetPassword(new PasswordReset("token", "password"));
+    accountService.resetPassword(Account.builder().passwordResetToken("token").password("password").build());
   }
 
   @Test
