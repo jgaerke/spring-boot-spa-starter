@@ -26,7 +26,7 @@
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 </head>
-<body>
+<body class="cloak">
 
 <nav id="globalnav" class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
@@ -41,9 +41,9 @@
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
-                <li rv-class-active="globalNav.isLoginRoute" rv-hide="globalNav.authenticated"><a href="login">Login</a></li>
-                <li rv-show="globalNav.authenticated"><a rv-on-click="globalNav.logout" href="javascript:void(0);">Logout</a></li>
-                <li rv-class-active="globalNav.isRegistrationRoute" rv-hide="globalNav.authenticated"><a href="register">Create Account</a></li>
+                <li id="global-nav-login"><a href="login">Login</a></li>
+                <li id="global-nav-logout"><a href="javascript:void(0);">Logout</a></li>
+                <li id="global-nav-registration"><a href="register">Create Account</a></li>
             </ul>
         </div>
         <!--/.nav-collapse -->

@@ -5,7 +5,7 @@ const isProd = process.env.NODE_ENV === 'production';
 
 
 var config = {
-  devtool: 'cheap-module-eval-source-map',
+  devtool: 'source-map',
   entry: './src/main/App.js',
   output: {
     path: './',
@@ -23,7 +23,6 @@ var config = {
       jQuery: 'jquery',
       'window.jQuery': 'jquery',
       'page': 'page',
-      'rivets': 'rivets',
       'lodash': '_'
     })
   ],
@@ -33,10 +32,6 @@ var config = {
       {test: /\.css$/, loader: 'style-loader!css-loader', exclude: /node_modules/}
     ]
   }
-}
-
-if (!isProd) {
-  config.devtool = 'cheap-module-source-map';
 }
 
 if (isProd) {

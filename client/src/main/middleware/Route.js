@@ -12,12 +12,8 @@ class Route {
     return this.path;
   }
 
-  handle(routeState) {
-    const namedRouteState = this._.assign({}, { name: this.name}, routeState);
-    return this.view.getInitialState(namedRouteState).then((viewState) => {
-      const extendedViewState = this._.assign({ route: namedRouteState }, viewState);
-      return this.view.bind(extendedViewState);
-    });
+  handle(route) {
+    return this.view.bind(this._.assign({}, { name: this.name}, route));
   }
 }
 

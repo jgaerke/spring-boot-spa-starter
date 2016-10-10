@@ -5,6 +5,7 @@ class Router {
   constructor() {
     this.activeView = null;
     this.page = page;
+    this.$ = $;
 
     this.routes = [
       new Route('index', '/', new CompositeView(new GlobalNavView(), new IndexView())),
@@ -18,10 +19,12 @@ class Router {
 
   onViewBound(view) {
     this.activeView = view;
+    //this.$(document.body).removeClass('cloak');
   }
 
   onRouteChange(route) {
     return (routeState)=> {
+      this.$(document.body).addClass('cloak');
       if (this.activeView) {
         this.activeView.unbind();
       }

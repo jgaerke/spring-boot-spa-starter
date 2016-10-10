@@ -2,7 +2,7 @@ import LoadableView from './LoadableView';
 
 class LoginView extends LoadableView {
   constructor() {
-    super('/partials/account/login.html', '#login');
+    super('#viewport', '/partials/account/login.html', '#login');
   }
 }
 

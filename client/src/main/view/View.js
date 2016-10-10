@@ -1,29 +1,17 @@
-import { session } from '../middleware';
-
 class View {
-  constructor(viewSelector) {
-    this.viewSelector = viewSelector;
+  constructor(el) {
     this.$ = $;
-    this.rivets = rivets;
-    this.binding = null;
-    this.session = session;
+    this._ = _;
+    this.el = el;
+    this.$el = this.$(this.el);
   }
-  
-  getInitialState(routeState) {
-    return Promise.resolve({});
-  }
-  
-  bind(viewState) {
-    this.state = viewState;
-    //console.log(JSON.parse(JSON.stringify(viewState)));
-    this.binding = this.rivets.bind(this.$(this.viewSelector), viewState);
-    return Promise.resolve(this);
+
+  bind(route) {
+    Promise.resolve(this);
   }
 
   unbind() {
-    if(this.binding) {
-      this.binding.unbind();
-    }
+    console.log('unbind');
   }
 }
 

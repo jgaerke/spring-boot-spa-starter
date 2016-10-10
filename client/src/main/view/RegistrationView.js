@@ -2,7 +2,7 @@ import LoadableView from './LoadableView';
 
 class RegistrationView extends LoadableView {
   constructor() {
-    super('/partials/account/register.html', '#registration');
+    super('#viewport', '/partials/account/register.html');
   }
 }
 
