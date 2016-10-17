@@ -137,18 +137,18 @@
 	    this.$ = $;
 	    this.el = el;
 	    this.$el = this.$(el);
-	    this.eventSelectorRegex = /^(\S+)\s*(.*)$/;
 	    this.uid = View.uniqueId();
 	  }
 	
 	  _createClass(View, [{
-	    key: 'getRefs',
-	    value: function getRefs() {
-	      return {};
+	    key: 'evaluate',
+	    value: function evaluate(expression) {
+	      var fn = new Function('return ' + expression + ';');
+	      return fn.call(this);
 	    }
 	  }, {
-	    key: 'getEvents',
-	    value: function getEvents() {
+	    key: 'getRefs',
+	    value: function getRefs() {
 	      return {};
 	    }
 	  }, {
@@ -156,57 +156,66 @@
 	    value: function bindRefs() {
 	      var _this = this;
 	
-	      var refs = this.getRefs();
-	      if (refs) {
-	        Object.keys(refs).forEach(function (prop) {
-	          _this[prop] = _this.$el.find(refs[prop]);
-	        });
-	      }
-	    }
-	  }, {
-	    key: 'bindEvents',
-	    value: function bindEvents() {
-	      var _this2 = this;
-	
-	      var events = this.getEvents();
 	      var $ = this.$;
-	      var $el = this.$el;
-	      var eventSelectorRegex = this.eventSelectorRegex;
 	
-	      if (events) {
-	        Object.keys(events).forEach(function (eventAndSelector) {
-	          var handler = $.isFunction(events[handler]) ? handler : _this2[events[handler]];
-	          if ($.isFunction(handler)) {
-	            var matches = eventAndSelector.match(eventSelectorRegex);
-	            var event = matches[0];
-	            var selector = matches[1];
-	            $el.on(event + '.delegate.' + _this2.uid, selector, handler);
+	      $.each(this.getRefs(), function (refKey, refVal) {
+	        var name = refKey;
+	        var value = refVal.value;
+	        var expression = refVal.expression;
+	        var selector = refVal.selector;
+	        var events = refVal.events || {};
+	        var show = refVal.show;
+	        var hide = refVal.hide;
+	        var css = refVal.css || {};
+	
+	        var ref = value ? _this.evaluate(value) : expression ? _this.evaluate(expression) : selector ? _this.$el.find(selector) : null;
+	
+	        if (!ref) {
+	          return;
+	        }
+	
+	        $.each(events, function (event, handler) {
+	          ref.on(event + '.child.event.' + _this.uid, $.isFunction(handler) ? handler : _this[handler]);
+	        });
+	
+	        $.each(css, function (clazz, expression) {
+	          var result = _this.evaluate(expression);
+	          if (result) {
+	            ref.addClass(clazz);
+	          } else {
+	            ref.removeClass(clazz);
 	          }
 	        });
-	      }
+	
+	        if (show && _this.evaluate(show)) {
+	          ref.show();
+	        }
+	
+	        if (hide && _this.evaluate(hide)) {
+	          ref.hide();
+	        }
+	
+	        _this[name] = ref;
+	      });
 	    }
 	  }, {
 	    key: 'unBindRefs',
 	    value: function unBindRefs() {
-	      var _this3 = this;
+	      var _this2 = this;
 	
-	      var refs = this.getRefs();
-	      if (refs) {
-	        Object.keys(refs).forEach(function (prop) {
-	          delete _this3[prop];
-	        });
-	      }
-	    }
-	  }, {
-	    key: 'unBindEvents',
-	    value: function unBindEvents() {
-	      this.$el.off('.delegate.' + this.uid);
+	      var $ = this.$;
+	      $.each(this.getRefs(), function (refKey) {
+	        var ref = _this2[refKey];
+	        if (ref instanceof $) {
+	          ref.off('child.event.' + _this2.uid);
+	        }
+	      });
 	    }
 	  }, {
 	    key: 'bind',
 	    value: function bind(route) {
+	      this.route = route;
 	      this.bindRefs();
-	      this.bindEvents();
 	      if (this.onBind) {
 	        return this.onBind(route);
 	      }
@@ -216,7 +225,6 @@
 	    key: 'unbind',
 	    value: function unbind() {
 	      this.unBindRefs();
-	      this.unBindEvents();
 	      if (this.onUnBind) {
 	        this.onUnBind();
 	      }
@@ -770,49 +778,34 @@
 	    key: 'getRefs',
 	    value: function getRefs() {
 	      return {
-	        'globalNavLogin': '#global-nav-login',
-	        'globalNavLogout': '#global-nav-logout',
-	        'globalNavRegistration': '#global-nav-registration'
+	        'isAuthenticated': {
+	          expression: 'this.session.isAuthenticated()'
+	        },
+	        'globalNavLogin': {
+	          'selector': '#global-nav-login',
+	          'show': '!this.isAuthenticated',
+	          'hide': 'this.isAuthenticated',
+	          'css': {
+	            'active': 'this.route.name == "login"'
+	          }
+	        },
+	        'globalNavLogout': {
+	          'selector': '#global-nav-logout',
+	          'show': 'this.isAuthenticated',
+	          'hide': '!this.isAuthenticated',
+	          'events': {
+	            'click': 'logout'
+	          }
+	        },
+	        'globalNavRegistration': {
+	          'selector': '#global-nav-registration',
+	          'show': '!this.isAuthenticated',
+	          'hide': 'this.isAuthenticated',
+	          'css': {
+	            'active': 'this.route.name == "registration"'
+	          }
+	        }
 	      };
-	    }
-	  }, {
-	    key: 'getEvents',
-	    value: function getEvents() {
-	      return {
-	        'click #global-nav-registration': 'logout'
-	      };
-	    }
-	  }, {
-	    key: 'onBind',
-	    value: function onBind(route) {
-	      var globalNavLogin = this.globalNavLogin;
-	      var globalNavLogout = this.globalNavLogout;
-	      var globalNavRegistration = this.globalNavRegistration;
-	
-	      if (!this.session.isAuthenticated()) {
-	        globalNavLogin.show();
-	        globalNavLogout.hide();
-	        globalNavRegistration.show();
-	      } else {
-	        globalNavLogin.hide();
-	        globalNavLogout.show();
-	        globalNavRegistration.hide();
-	      }
-	
-	      globalNavLogin.removeClass('active');
-	      globalNavLogout.removeClass('active');
-	      globalNavRegistration.removeClass('active');
-	
-	      switch (route.name) {
-	        case 'login':
-	          globalNavLogin.addClass('active');
-	          break;
-	        case 'registration':
-	          globalNavRegistration.addClass('active');
-	          break;
-	      }
-	
-	      return Promise.resolve(this);
 	    }
 	  }, {
 	    key: 'logout',

@@ -3,63 +3,77 @@ class View {
     this.$ = $;
     this.el = el;
     this.$el = this.$(el);
-    this.eventSelectorRegex = /^(\S+)\s*(.*)$/;
     this.uid = View.uniqueId();
+  }
+
+  evaluate(expression) {
+    const fn = new Function('return ' + expression + ';');
+    return fn.call(this);
   }
 
   getRefs() {
     return {};
   }
 
-  getEvents() {
-    return {};
-  }
-
   bindRefs() {
-    const refs = this.getRefs();
-    if(refs) {
-      Object.keys(refs).forEach((prop) => {
-        this[prop] = this.$el.find(refs[prop]);
-      });
-    }
-  }
-
-  bindEvents() {
-    const events = this.getEvents();
     const $ = this.$;
-    const $el = this.$el;
-    const eventSelectorRegex = this.eventSelectorRegex;
 
-    if(events) {
-      Object.keys(events).forEach((eventAndSelector) => {
-        const handler = $.isFunction(events[handler]) ? handler : this[events[handler]];
-        if($.isFunction(handler)) {
-          const matches = eventAndSelector.match(eventSelectorRegex);
-          const event = matches[0];
-          const selector = matches[1];
-          $el.on(event + '.delegate.' + this.uid, selector, handler);
+    $.each(this.getRefs(), (refKey, refVal) => {
+      const name = refKey;
+      const value = refVal.value;
+      const expression = refVal.expression;
+      const selector = refVal.selector;
+      const events = refVal.events || {};
+      const show = refVal.show;
+      const hide = refVal.hide;
+      const css = refVal.css || {};
+
+      const ref = value ? this.evaluate(value) : expression ? this.evaluate(expression) : selector ? this.$el.find(selector) : null;
+
+      if(!ref) {
+        return;
+      }
+
+      $.each(events, (event, handler) => {
+        ref.on(event + '.child.event.' + this.uid, $.isFunction(handler) ? handler : this[handler]);
+      });
+
+      $.each(css, (clazz, expression) => {
+        const result = this.evaluate(expression);
+        if(result) {
+          ref.addClass(clazz);
+        } else {
+          ref.removeClass(clazz);
         }
       });
-    }
+
+      if(show && this.evaluate(show)) {
+        ref.show();
+      }
+
+      if(hide && this.evaluate(hide)) {
+        ref.hide();
+      }
+
+      this[name] = ref;
+
+    });
   }
 
   unBindRefs() {
-    const refs = this.getRefs();
-    if(refs) {
-      Object.keys(refs).forEach((prop) => {
-        delete this[prop];
-      });
-    }
-  }
-
-  unBindEvents() {
-    this.$el.off('.delegate.' + this.uid);
+    const $ = this.$;
+    $.each(this.getRefs(), (refKey) => {
+      const ref = this[refKey];
+      if(ref instanceof $) {
+        ref.off('child.event.' + this.uid);
+      }
+    });
   }
 
   bind(route) {
+    this.route = route;
     this.bindRefs();
-    this.bindEvents();
-    if(this.onBind) {
+    if (this.onBind) {
       return this.onBind(route);
     }
     return Promise.resolve({});
@@ -67,8 +81,7 @@ class View {
 
   unbind() {
     this.unBindRefs();
-    this.unBindEvents();
-    if(this.onUnBind) {
+    if (this.onUnBind) {
       this.onUnBind();
     }
   }
