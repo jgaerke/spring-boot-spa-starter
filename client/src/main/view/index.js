@@ -1,5 +1,5 @@
 import View from './View';
-import LoadableView from './LoadableView';
+import LoadableView from './PartialView';
 import CompositeView from './CompositeView';
 import GlobalNavView from './GlobalNavView';
 import RegistrationView from './RegistrationView';

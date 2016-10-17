@@ -3,9 +3,7 @@ class Route {
     this.name = name;
     this.path = path;
     this.view = view;
-    this.rivets = rivets;
     this.$ = $;
-    this._ = _;
   }
 
   getPath() {
@@ -13,7 +11,7 @@ class Route {
   }
 
   handle(route) {
-    return this.view.bind(this._.assign({}, { name: this.name}, route));
+    return this.view.bind(Object.assign({}, { name: this.name}, route));
   }
 }
 

@@ -3,7 +3,6 @@ import View from './View';
 class CompositeView {
   constructor() {
     this.views = Array.prototype.slice.call(arguments);
-    this._ = _;
   }
 
   bind(route) {

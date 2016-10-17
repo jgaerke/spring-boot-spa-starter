@@ -1,4 +1,4 @@
-import LoadableView from './LoadableView';
+import LoadableView from './PartialView';
 
 class RegistrationView extends LoadableView {
   constructor() {

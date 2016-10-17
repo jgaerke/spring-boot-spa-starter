@@ -8,7 +8,7 @@ class LoadableView extends View {
     this.cache = cache;
   }
 
-  bind() {
+  load() {
     if (this.cache.get(this.templateUrl)) {
       this.$el.html(this.cache.get(this.templateUrl));
       return Promise.resolve({});
@@ -21,6 +21,12 @@ class LoadableView extends View {
         }
         return reject({html, responseText, jqXhr});
       });
+    });
+  }
+
+  bind(route) {
+    this.load().then(() => {
+      super.bind(route);
     });
   }
 }

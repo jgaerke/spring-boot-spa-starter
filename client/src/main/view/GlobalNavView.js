@@ -7,12 +7,26 @@ class GlobalNavView extends View {
     this.session = session;
   }
 
-  bind(route) {
-    const globalNavLogin = this.$el.find('#global-nav-login');
-    const globalNavLogout = this.$el.find('#global-nav-logout');
-    const globalNavRegistration = this.$el.find('#global-nav-registration');
+  getRefs() {
+    return {
+      'globalNavLogin': '#global-nav-login',
+      'globalNavLogout': '#global-nav-logout',
+      'globalNavRegistration': '#global-nav-registration'
+    };
+  }
 
-    if (!session.isAuthenticated()) {
+  getEvents() {
+    return {
+      'click #global-nav-registration': 'logout'
+    }
+  }
+
+  onBind(route) {
+    const globalNavLogin = this.globalNavLogin;
+    const globalNavLogout = this.globalNavLogout;
+    const globalNavRegistration = this.globalNavRegistration;
+
+    if (!this.session.isAuthenticated()) {
       globalNavLogin.show();
       globalNavLogout.hide();
       globalNavRegistration.show();
@@ -26,9 +40,8 @@ class GlobalNavView extends View {
     globalNavLogout.removeClass('active');
     globalNavRegistration.removeClass('active');
 
-    globalNavLogout.on('click', this.logout);
 
-    switch(route.name) {
+    switch (route.name) {
       case 'login':
         globalNavLogin.addClass('active');
         break;
@@ -36,8 +49,6 @@ class GlobalNavView extends View {
         globalNavRegistration.addClass('active');
         break;
     }
-
-
 
     return Promise.resolve(this);
   }

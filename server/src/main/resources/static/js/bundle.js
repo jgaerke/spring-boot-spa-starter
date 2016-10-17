@@ -52,11 +52,13 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
+	var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+	
 	var _View2 = __webpack_require__(1);
 	
 	var _View3 = _interopRequireDefault(_View2);
 	
-	var _middleware = __webpack_require__(2);
+	var _middleware = __webpack_require__(3);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -80,8 +82,8 @@
 	  }
 	
 	  _createClass(LoadableView, [{
-	    key: 'bind',
-	    value: function bind() {
+	    key: 'load',
+	    value: function load() {
 	      var _this2 = this;
 	
 	      if (this.cache.get(this.templateUrl)) {
@@ -96,6 +98,15 @@
 	          }
 	          return reject({ html: html, responseText: responseText, jqXhr: jqXhr });
 	        });
+	      });
+	    }
+	  }, {
+	    key: 'bind',
+	    value: function bind(route) {
+	      var _this3 = this;
+	
+	      this.load().then(function () {
+	        _get(LoadableView.prototype.__proto__ || Object.getPrototypeOf(LoadableView.prototype), 'bind', _this3).call(_this3, route);
 	      });
 	    }
 	  }]);
@@ -124,31 +135,120 @@
 	    _classCallCheck(this, View);
 	
 	    this.$ = $;
-	    this._ = _;
 	    this.el = el;
-	    this.$el = this.$(this.el);
+	    this.$el = this.$(el);
+	    this.eventSelectorRegex = /^(\S+)\s*(.*)$/;
+	    this.uid = View.uniqueId();
 	  }
 	
 	  _createClass(View, [{
+	    key: 'getRefs',
+	    value: function getRefs() {
+	      return {};
+	    }
+	  }, {
+	    key: 'getEvents',
+	    value: function getEvents() {
+	      return {};
+	    }
+	  }, {
+	    key: 'bindRefs',
+	    value: function bindRefs() {
+	      var _this = this;
+	
+	      var refs = this.getRefs();
+	      if (refs) {
+	        Object.keys(refs).forEach(function (prop) {
+	          _this[prop] = _this.$el.find(refs[prop]);
+	        });
+	      }
+	    }
+	  }, {
+	    key: 'bindEvents',
+	    value: function bindEvents() {
+	      var _this2 = this;
+	
+	      var events = this.getEvents();
+	      var $ = this.$;
+	      var $el = this.$el;
+	      var eventSelectorRegex = this.eventSelectorRegex;
+	
+	      if (events) {
+	        Object.keys(events).forEach(function (eventAndSelector) {
+	          var handler = $.isFunction(events[handler]) ? handler : _this2[events[handler]];
+	          if ($.isFunction(handler)) {
+	            var matches = eventAndSelector.match(eventSelectorRegex);
+	            var event = matches[0];
+	            var selector = matches[1];
+	            $el.on(event + '.delegate.' + _this2.uid, selector, handler);
+	          }
+	        });
+	      }
+	    }
+	  }, {
+	    key: 'unBindRefs',
+	    value: function unBindRefs() {
+	      var _this3 = this;
+	
+	      var refs = this.getRefs();
+	      if (refs) {
+	        Object.keys(refs).forEach(function (prop) {
+	          delete _this3[prop];
+	        });
+	      }
+	    }
+	  }, {
+	    key: 'unBindEvents',
+	    value: function unBindEvents() {
+	      this.$el.off('.delegate.' + this.uid);
+	    }
+	  }, {
 	    key: 'bind',
 	    value: function bind(route) {
-	      Promise.resolve(this);
+	      this.bindRefs();
+	      this.bindEvents();
+	      if (this.onBind) {
+	        return this.onBind(route);
+	      }
+	      return Promise.resolve({});
 	    }
 	  }, {
 	    key: 'unbind',
 	    value: function unbind() {
-	      console.log('unbind');
+	      this.unBindRefs();
+	      this.unBindEvents();
+	      if (this.onUnBind) {
+	        this.onUnBind();
+	      }
+	    }
+	  }, {
+	    key: 'rebind',
+	    value: function rebind() {
+	      this.unbind();
+	      return this.bind();
 	    }
 	  }]);
 	
 	  return View;
 	}();
 	
+	View.uniqueIdCounter = 0;
+	View.uniqueId = function (prefix) {
+	  var id = ++View.uniqueIdCounter + '';
+	  return prefix ? prefix + id : id;
+	};
+	
 	exports.default = View;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ },
 /* 2 */
+/***/ function(module, exports) {
+
+	module.e = jQuery;
+
+/***/ },
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -180,12 +280,6 @@
 	var broker = exports.broker = new _Broker2.default();
 	var cache = exports.cache = new _Cache2.default();
 	var router = exports.router = new _Router2.default();
-
-/***/ },
-/* 3 */
-/***/ function(module, exports) {
-
-	module.e = jQuery;
 
 /***/ },
 /* 4 */
@@ -227,7 +321,7 @@
 	
 	__webpack_require__(4);
 	
-	var _middleware = __webpack_require__(2);
+	var _middleware = __webpack_require__(3);
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
@@ -362,9 +456,7 @@
 	    this.name = name;
 	    this.path = path;
 	    this.view = view;
-	    this.rivets = rivets;
 	    this.$ = $;
-	    this._ = _;
 	  }
 	
 	  _createClass(Route, [{
@@ -375,7 +467,7 @@
 	  }, {
 	    key: "handle",
 	    value: function handle(route) {
-	      return this.view.bind(this._.assign({}, { name: this.name }, route));
+	      return this.view.bind(Object.assign({}, { name: this.name }, route));
 	    }
 	  }]);
 	
@@ -383,7 +475,7 @@
 	}();
 	
 	exports.default = Route;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ },
 /* 9 */
@@ -461,7 +553,7 @@
 	}();
 	
 	exports.default = Router;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(22), __webpack_require__(3)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(22), __webpack_require__(2)))
 
 /***/ },
 /* 10 */
@@ -546,7 +638,7 @@
 	}();
 	
 	exports.default = Session;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ },
 /* 11 */
@@ -609,7 +701,6 @@
 	    _classCallCheck(this, CompositeView);
 	
 	    this.views = Array.prototype.slice.call(arguments);
-	    this._ = _;
 	  }
 	
 	  _createClass(CompositeView, [{
@@ -653,7 +744,7 @@
 	
 	var _View3 = _interopRequireDefault(_View2);
 	
-	var _middleware = __webpack_require__(2);
+	var _middleware = __webpack_require__(3);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -676,13 +767,29 @@
 	  }
 	
 	  _createClass(GlobalNavView, [{
-	    key: 'bind',
-	    value: function bind(route) {
-	      var globalNavLogin = this.$el.find('#global-nav-login');
-	      var globalNavLogout = this.$el.find('#global-nav-logout');
-	      var globalNavRegistration = this.$el.find('#global-nav-registration');
+	    key: 'getRefs',
+	    value: function getRefs() {
+	      return {
+	        'globalNavLogin': '#global-nav-login',
+	        'globalNavLogout': '#global-nav-logout',
+	        'globalNavRegistration': '#global-nav-registration'
+	      };
+	    }
+	  }, {
+	    key: 'getEvents',
+	    value: function getEvents() {
+	      return {
+	        'click #global-nav-registration': 'logout'
+	      };
+	    }
+	  }, {
+	    key: 'onBind',
+	    value: function onBind(route) {
+	      var globalNavLogin = this.globalNavLogin;
+	      var globalNavLogout = this.globalNavLogout;
+	      var globalNavRegistration = this.globalNavRegistration;
 	
-	      if (!_middleware.session.isAuthenticated()) {
+	      if (!this.session.isAuthenticated()) {
 	        globalNavLogin.show();
 	        globalNavLogout.hide();
 	        globalNavRegistration.show();
@@ -695,8 +802,6 @@
 	      globalNavLogin.removeClass('active');
 	      globalNavLogout.removeClass('active');
 	      globalNavRegistration.removeClass('active');
-	
-	      globalNavLogout.on('click', this.logout);
 	
 	      switch (route.name) {
 	        case 'login':
@@ -731,9 +836,9 @@
 	  value: true
 	});
 	
-	var _LoadableView2 = __webpack_require__(0);
+	var _PartialView = __webpack_require__(0);
 	
-	var _LoadableView3 = _interopRequireDefault(_LoadableView2);
+	var _PartialView2 = _interopRequireDefault(_PartialView);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -753,7 +858,7 @@
 	  }
 	
 	  return IndexView;
-	}(_LoadableView3.default);
+	}(_PartialView2.default);
 	
 	exports.default = IndexView;
 
@@ -767,9 +872,9 @@
 	  value: true
 	});
 	
-	var _LoadableView2 = __webpack_require__(0);
+	var _PartialView = __webpack_require__(0);
 	
-	var _LoadableView3 = _interopRequireDefault(_LoadableView2);
+	var _PartialView2 = _interopRequireDefault(_PartialView);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -789,7 +894,7 @@
 	  }
 	
 	  return LoginView;
-	}(_LoadableView3.default);
+	}(_PartialView2.default);
 	
 	exports.default = LoginView;
 
@@ -803,9 +908,9 @@
 	  value: true
 	});
 	
-	var _LoadableView2 = __webpack_require__(0);
+	var _PartialView = __webpack_require__(0);
 	
-	var _LoadableView3 = _interopRequireDefault(_LoadableView2);
+	var _PartialView2 = _interopRequireDefault(_PartialView);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -825,7 +930,7 @@
 	  }
 	
 	  return RegistrationView;
-	}(_LoadableView3.default);
+	}(_PartialView2.default);
 	
 	exports.default = RegistrationView;
 
@@ -844,9 +949,9 @@
 	
 	var _View2 = _interopRequireDefault(_View);
 	
-	var _LoadableView = __webpack_require__(0);
+	var _PartialView = __webpack_require__(0);
 	
-	var _LoadableView2 = _interopRequireDefault(_LoadableView);
+	var _PartialView2 = _interopRequireDefault(_PartialView);
 	
 	var _CompositeView = __webpack_require__(13);
 	
@@ -871,7 +976,7 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	exports.View = _View2.default;
-	exports.LoadableView = _LoadableView2.default;
+	exports.LoadableView = _PartialView2.default;
 	exports.CompositeView = _CompositeView2.default;
 	exports.GlobalNavView = _GlobalNavView2.default;
 	exports.RegistrationView = _RegistrationView2.default;
