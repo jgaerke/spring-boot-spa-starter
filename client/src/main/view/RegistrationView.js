@@ -9,6 +9,7 @@ class RegistrationView extends View {
     this.http = Http.instance;
     this.broker=  Broker.instance;
     this.router = Router.instance;
+    this.register = this.register.bind(this);
   }
 
   getModel() {
