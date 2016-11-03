@@ -11,16 +11,15 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.StandardPasswordEncoder;
-import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.session.data.mongo.config.annotation.web.http.EnableMongoHttpSession;
 
 import static org.springframework.boot.autoconfigure.security.SecurityProperties.ACCESS_OVERRIDE_ORDER;
-import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.POST;
 
 
@@ -41,12 +40,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   public LoginFailureHandler loginFailureHandler;
   @Autowired
   public HttpLogoutSuccessHandler logoutSuccessHandler;
-  @Autowired
-  public SecurityConfigProperties securityConfigProperties;
 
   @Bean
   public PasswordEncoder passwordEncoder() {
-    return new StandardPasswordEncoder();
+    return new StandardPasswordEncoder("starter");
+//    return new BCryptPasswordEncoder();
   }
 
   @Bean
@@ -78,7 +76,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .logoutRequestMatcher(new AntPathRequestMatcher("/api/accounts/logout", POST.name()))
         .logoutSuccessHandler(logoutSuccessHandler)
         .invalidateHttpSession(true);
-    http.rememberMe().key(securityConfigProperties.getPersistentLoginKey());
+    http.rememberMe().rememberMeParameter("rememberMe");
 
 
     //authorization
@@ -87,7 +85,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/",
             "/assets/**",
             "/components/content",
-            "/app",
+            "/app**",
             "/app/",
             "/app/login/**",
             "/app/register",
@@ -105,7 +103,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .authenticated();
 
 
-    http.headers().frameOptions().disable();
+//    http.headers().frameOptions().disable();
 
     //session
     http.sessionManagement().maximumSessions(1);

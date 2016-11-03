@@ -2,17 +2,18 @@ import { Broker, TemplateLoader } from '../middleware';
 import Ractive from 'ractive';
 
 class View {
-  constructor(el, templateUrl) {
+  constructor(container, view, templateUrl) {
     this.$ = $;
     this._ = _;
-    this.el = el;
-    this.$el = this.$(el);
-    this.html = this.$el.html();
+    this.container = container;
+    this.$container = $(container);
+    this.view = view;
+    this.$view = $(view);
+    this.initialHtml = this.$view.html();
     this.templateUrl = templateUrl;
     this.model = null;
     this.broker = Broker.instance;
     this.templateLoader = TemplateLoader.instance;
-    this.route = null;
     this.ractive = null;
   }
 
@@ -22,20 +23,37 @@ class View {
   }
 
   getTemplate() {
+    const initialHtml = this.initialHtml;
+
     if (this.templateUrl) {
-      return this.templateLoader.load(this.$el, this.templateUrl);
-    } else {
-      return Promise.resolve({html: this.html});
+      return this.templateLoader.load(this.templateUrl).then((template)=> {
+        template.append = true;
+        return template;
+      }).catch((error) => {
+        console.log('template loading error', error);
+        return error;
+      });
     }
+    return Promise.resolve({html: initialHtml, append: false });
   }
 
   getModel() {
-    return Promise.resolve({});
+    return Promise.resolve({ route: this.route });
   }
 
   setup(template, model) {
+    const $ = this.$;
+    const view = this.view;
+    const $container = this.$container;
+
+    this.model = model;
+    if(template.append) {
+      $(template.html).appendTo($container);
+    }
+    this.$view = $(view);
+
     const ractive = new Ractive({
-      el: this.$el,
+      el: this.$view,
       template: template.html,
       data: model
     });
@@ -44,17 +62,19 @@ class View {
   }
 
   teardown() {
-    if (this.ractive) {
-      this.ractive.teardown();
+    const ractive = this.ractive;
+    const $container = this.$container;
+
+    if (ractive) {
+      ractive.teardown();
+      $container.empty();
     }
   }
 
   render() {
     return this.getTemplate().then((template)=> {
       return this.getModel().then((model) => {
-        this.model = model;
         return this.setup(template, model).then((ractive)=> {
-          this.ractive = ractive;
           return this;
         });
       });

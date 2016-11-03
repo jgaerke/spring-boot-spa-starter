@@ -1,10 +1,9 @@
 import View from './View';
-import { toPromise } from '../util';
 import { Session, Http, Broker, Router } from '../middleware';
 
 class RegistrationView extends View {
   constructor() {
-    super('#viewport', '/partials/account/registration.html');
+    super('#viewport', '#registration', '/partials/account/registration.html');
     this.session = Session.instance;
     this.http = Http.instance;
     this.broker=  Broker.instance;
@@ -14,10 +13,10 @@ class RegistrationView extends View {
 
   getModel() {
     return Promise.resolve({
-      email: '',
-      first: '',
-      last: '',
-      password: '',
+      email: null,
+      first: null,
+      last: null,
+      password: null,
       rememberMe: true,
       serverErrors: {
         emailTaken: false,
@@ -46,7 +45,7 @@ class RegistrationView extends View {
       accountInfoInvalid: false
     });
 
-    return toPromise(this.http.post('/api/accounts', this.model)).then((response) => {
+    return this.http.post('/api/accounts', this.model).then((response) => {
       console.log('success', response);
       this.broker.publish('user.authentication.change', { authenticated: true });
       this.router.navigate('/');

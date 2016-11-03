@@ -3,7 +3,7 @@ import { Session, Broker } from '../middleware';
 
 class GlobalNavView extends View {
   constructor() {
-    super('#globalnav');
+    super(null, '#global-nav');
     this.persistentAcrossRoutes = true;
     this.session = Session.instance;
     this.broker = Broker.instance;

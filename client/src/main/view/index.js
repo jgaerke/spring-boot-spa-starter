@@ -4,3 +4,6 @@ export {default as GlobalNavView} from './GlobalNavView';
 export {default as RegistrationView} from './RegistrationView';
 export {default as IndexView} from './IndexView';
 export {default as LoginView} from './LoginView';
+export {default as AccountNavView} from './AccountNavView';
+export {default as ProfileView} from './ProfileView';
+export {default as BillingView} from './BillingView';

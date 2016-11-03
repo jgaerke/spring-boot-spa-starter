@@ -28,7 +28,7 @@
 </head>
 <body class="cloak">
 
-<nav id="globalnav" class="navbar navbar-inverse navbar-fixed-top">
+<nav id="global-nav" class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle">
@@ -41,9 +41,10 @@
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
-                {{#if !authenticated }}<li id="global-nav-login" class="{{route.name == 'login' ? 'active' : 'inactive'}}"><a href="login">Login</a></li>{{/if}}
-                {{#if authenticated }}<li id="global-nav-logout"><a href="#" on-click="logout">Logout</a></li>{{/if}}
-                {{#if !authenticated }}<li id="global-nav-registration" class="{{route.name == 'registration' ? 'active' : 'inactive'}}"><a href="register">Create Account</a></li>{{/if}}
+                {{#if !authenticated }}<li class="{{route.name == 'login' ? 'active' : 'inactive'}}"><a href="login">Login</a></li>{{/if}}
+                {{#if authenticated }}<li class="{{['profile', 'billing'].indexOf(route.name) > -1 ? 'active' : 'inactive'}}"><a href="account/profile">Account</a></li>{{/if}}
+                {{#if authenticated }}<li><a href="#" on-click="logout">Logout</a></li>{{/if}}
+                {{#if !authenticated }}<li class="{{route.name == 'registration' ? 'active' : 'inactive'}}"><a href="register">Create Account</a></li>{{/if}}
             </ul>
         </div>
         <!--/.nav-collapse -->

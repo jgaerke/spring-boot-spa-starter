@@ -1,4 +1,4 @@
-import { Cache } from '../middleware';
+import { Cache, Http } from '../middleware';
 
 let singleton = Symbol();
 let singletonEnforcer = Symbol();
@@ -8,20 +8,20 @@ class Loader {
     if (enforcer !== singletonEnforcer) {
       throw "Cannot construct singleton"
     }
+    this.http = Http.instance;
     this.cache = Cache.instance;
   }
 
-  load($el, url) {
+  load(url) {
     if (this.cache.get(url)) {
       return Promise.resolve({ html: this.cache.get(url) });
     }
     return new Promise((resolve, reject) => {
-      $el.load(url, (html, responseText, jqXhr)=> {
-        if (jqXhr.status && jqXhr.status.toString().indexOf('2') == 0) {
-          this.cache.set(url, html);
-          resolve({html, responseText, jqXhr});
-        }
-        return reject({html, responseText, jqXhr});
+      this.http.get(url).then((html) => {
+        this.cache.set(url, html);
+        resolve({html});
+      }).catch((response) => {
+        reject({html: null, response});
       });
     });
   }

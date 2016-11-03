@@ -16,7 +16,7 @@ class Router {
 
   onViewRendered(view) {
     this.activeView = view;
-    //this.$(document.body).removeClass('cloak');
+    this.$(document.body).removeClass('cloak');
   }
 
   onRouteChange(route) {

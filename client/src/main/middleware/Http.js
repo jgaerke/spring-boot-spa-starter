@@ -1,3 +1,5 @@
+import { toPromise } from '../util';
+
 let singleton = Symbol();
 let singletonEnforcer = Symbol();
 
@@ -22,14 +24,13 @@ class Http {
       'X-Requested-With': 'XMLHttpRequest',
       'X-XSRF-TOKEN': this.cookies.get('XSRF-TOKEN')
     }, options.headers);
-    return this.$.ajax(options);
+    return toPromise(this.$.ajax(options));
   }
 
   get(url, headers) {
     return this.dispatch({
       url: url,
       type: 'GET',
-      dataType: 'json',
       headers: headers
     });
   }

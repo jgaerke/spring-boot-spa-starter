@@ -1,4 +1,4 @@
-import { toPromise } from '../util';
+import Http from './Http'
 
 let singleton = Symbol();
 let singletonEnforcer = Symbol();
@@ -10,6 +10,7 @@ class Session {
     }
     this.data = {authenticated: false};
     this.$ = $;
+    this.http = Http.instance;
     this.login = this.login.bind(this);
     this.logout = this.logout.bind(this);
     this.getData = this.getData.bind(this);
@@ -24,7 +25,7 @@ class Session {
     }
     const data = this.data;
 
-    return toPromise(this.$.post('/api/accounts/login', {email, password, rememberMe}))
+    return this.http.post('/api/accounts/login', {email, password, rememberMe})
         .then((response) => {
           console.log('login success', response);
           data.authenticated = true;
@@ -45,15 +46,15 @@ class Session {
       return Promise.resolve({ authenticated: false });
     }
 
-    return toPromise(this.$.post('/api/accounts/logout'))
+    return this.http.post('/api/accounts/logout')
         .then((response) => {
           console.log('logout success', response);
           data.authenticated = false;
-          return response;
+          return { authenticated: true };
         })
         .catch((response) => {
           console.log('logout failure', response);
-          return response;
+          return { authenticated: false };
         });
   }
 

@@ -18,7 +18,7 @@ import static java.util.UUID.randomUUID;
 public class Application {
   public static void main(String[] args) {
     ConfigurableApplicationContext ctx = SpringApplication.run(Application.class, args);
-    seedData(ctx);
+//    seedData(ctx);
   }
 
   private static void seedData(ConfigurableApplicationContext ctx) {

@@ -42,12 +42,132 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function($) {'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _middleware = __webpack_require__(2);
+	
+	var _ractive = __webpack_require__(27);
+	
+	var _ractive2 = _interopRequireDefault(_ractive);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var View = function () {
+	  function View(container, view, templateUrl) {
+	    _classCallCheck(this, View);
+	
+	    this.$ = $;
+	    this._ = _;
+	    this.container = container;
+	    this.$container = $(container);
+	    this.view = view;
+	    this.$view = $(view);
+	    this.initialHtml = this.$view.html();
+	    this.templateUrl = templateUrl;
+	    this.model = null;
+	    this.broker = _middleware.Broker.instance;
+	    this.templateLoader = _middleware.TemplateLoader.instance;
+	    this.ractive = null;
+	  }
+	
+	  _createClass(View, [{
+	    key: 'withRoute',
+	    value: function withRoute(route) {
+	      this.route = route;
+	      return this;
+	    }
+	  }, {
+	    key: 'getTemplate',
+	    value: function getTemplate() {
+	      var initialHtml = this.initialHtml;
+	
+	      if (this.templateUrl) {
+	        return this.templateLoader.load(this.templateUrl).then(function (template) {
+	          template.append = true;
+	          return template;
+	        }).catch(function (error) {
+	          console.log('template loading error', error);
+	          return error;
+	        });
+	      }
+	      return Promise.resolve({ html: initialHtml, append: false });
+	    }
+	  }, {
+	    key: 'getModel',
+	    value: function getModel() {
+	      return Promise.resolve({ route: this.route });
+	    }
+	  }, {
+	    key: 'setup',
+	    value: function setup(template, model) {
+	      var $ = this.$;
+	      var view = this.view;
+	      var $container = this.$container;
+	
+	      this.model = model;
+	      if (template.append) {
+	        $(template.html).appendTo($container);
+	      }
+	      this.$view = $(view);
+	
+	      var ractive = new _ractive2.default({
+	        el: this.$view,
+	        template: template.html,
+	        data: model
+	      });
+	      this.ractive = ractive;
+	      return Promise.resolve(ractive);
+	    }
+	  }, {
+	    key: 'teardown',
+	    value: function teardown() {
+	      var ractive = this.ractive;
+	      var $container = this.$container;
+	
+	      if (ractive) {
+	        ractive.teardown();
+	        $container.empty();
+	      }
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      var _this = this;
+	
+	      return this.getTemplate().then(function (template) {
+	        return _this.getModel().then(function (model) {
+	          return _this.setup(template, model).then(function (ractive) {
+	            return _this;
+	          });
+	        });
+	      });
+	    }
+	  }]);
+	
+	  return View;
+	}();
+	
+	exports.default = View;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
+
+/***/ },
+/* 1 */
 /***/ function(module, exports) {
 
 	module.e = jQuery;
 
 /***/ },
-/* 1 */
+/* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -56,7 +176,7 @@
 	  value: true
 	});
 	
-	var _Session = __webpack_require__(13);
+	var _Session = __webpack_require__(12);
 	
 	Object.defineProperty(exports, 'Session', {
 	  enumerable: true,
@@ -83,7 +203,7 @@
 	  }
 	});
 	
-	var _Router = __webpack_require__(12);
+	var _Router = __webpack_require__(11);
 	
 	Object.defineProperty(exports, 'Router', {
 	  enumerable: true,
@@ -92,7 +212,7 @@
 	  }
 	});
 	
-	var _Route = __webpack_require__(11);
+	var _Route = __webpack_require__(10);
 	
 	Object.defineProperty(exports, 'Route', {
 	  enumerable: true,
@@ -101,7 +221,7 @@
 	  }
 	});
 	
-	var _Http = __webpack_require__(10);
+	var _Http = __webpack_require__(3);
 	
 	Object.defineProperty(exports, 'Http', {
 	  enumerable: true,
@@ -110,7 +230,7 @@
 	  }
 	});
 	
-	var _TemplateLoader = __webpack_require__(14);
+	var _TemplateLoader = __webpack_require__(13);
 	
 	Object.defineProperty(exports, 'TemplateLoader', {
 	  enumerable: true,
@@ -122,10 +242,10 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ },
-/* 2 */
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function($) {'use strict';
+	/* WEBPACK VAR INJECTION */(function($, cookies) {'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
@@ -133,112 +253,103 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _middleware = __webpack_require__(1);
-	
-	var _ractive = __webpack_require__(24);
-	
-	var _ractive2 = _interopRequireDefault(_ractive);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	var _util = __webpack_require__(15);
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
-	var View = function () {
-	  function View(el, templateUrl) {
-	    _classCallCheck(this, View);
+	var singleton = Symbol();
+	var singletonEnforcer = Symbol();
 	
+	var Http = function () {
+	  function Http(enforcer) {
+	    _classCallCheck(this, Http);
+	
+	    if (enforcer !== singletonEnforcer) {
+	      throw "Cannot construct singleton";
+	    }
 	    this.$ = $;
-	    this._ = _;
-	    this.el = el;
-	    this.$el = this.$(el);
-	    this.html = this.$el.html();
-	    this.templateUrl = templateUrl;
-	    this.model = null;
-	    this.broker = _middleware.Broker.instance;
-	    this.templateLoader = _middleware.TemplateLoader.instance;
-	    this.route = null;
-	    this.ractive = null;
+	    this.cookies = cookies;
 	  }
 	
-	  _createClass(View, [{
-	    key: 'withRoute',
-	    value: function withRoute(route) {
-	      this.route = route;
-	      return this;
-	    }
-	  }, {
-	    key: 'getTemplate',
-	    value: function getTemplate() {
-	      if (this.templateUrl) {
-	        return this.templateLoader.load(this.$el, this.templateUrl);
-	      } else {
-	        return Promise.resolve({ html: this.html });
+	  _createClass(Http, [{
+	    key: 'dispatch',
+	    value: function dispatch(options) {
+	      if (options.contentType === undefined) {
+	        options.contentType = false;
 	      }
-	    }
-	  }, {
-	    key: 'getModel',
-	    value: function getModel() {
-	      return Promise.resolve({});
-	    }
-	  }, {
-	    key: 'setup',
-	    value: function setup(template, model) {
-	      var ractive = new _ractive2.default({
-	        el: this.$el,
-	        template: template.html,
-	        data: model
-	      });
-	      this.ractive = ractive;
-	      return Promise.resolve(ractive);
-	    }
-	  }, {
-	    key: 'teardown',
-	    value: function teardown() {
-	      if (this.ractive) {
-	        this.ractive.teardown();
+	      if (options.data && this.$.isPlainObject(options.data)) {
+	        options.data = JSON.stringify(options.data);
 	      }
+	      options.headers = this.$.extend({
+	        'Content-Type': 'application/json',
+	        'X-Requested-With': 'XMLHttpRequest',
+	        'X-XSRF-TOKEN': this.cookies.get('XSRF-TOKEN')
+	      }, options.headers);
+	      return (0, _util.toPromise)(this.$.ajax(options));
 	    }
 	  }, {
-	    key: 'render',
-	    value: function render() {
-	      var _this = this;
-	
-	      return this.getTemplate().then(function (template) {
-	        return _this.getModel().then(function (model) {
-	          _this.model = model;
-	          return _this.setup(template, model).then(function (ractive) {
-	            _this.ractive = ractive;
-	            return _this;
-	          });
-	        });
+	    key: 'get',
+	    value: function get(url, headers) {
+	      return this.dispatch({
+	        url: url,
+	        type: 'GET',
+	        headers: headers
 	      });
+	    }
+	  }, {
+	    key: 'post',
+	    value: function post(url, data, headers) {
+	      return this.dispatch({
+	        url: url,
+	        type: 'POST',
+	        data: data,
+	        headers: headers
+	      });
+	    }
+	  }, {
+	    key: 'put',
+	    value: function put(url, data, headers) {
+	      return this.dispatch({
+	        url: url,
+	        type: 'PUT',
+	        data: data,
+	        headers: headers
+	      });
+	    }
+	  }, {
+	    key: 'patch',
+	    value: function patch(url, data, headers) {
+	      return this.dispatch({
+	        url: url,
+	        type: 'PATCH',
+	        data: data,
+	        headers: headers
+	      });
+	    }
+	  }, {
+	    key: 'delete',
+	    value: function _delete(url, headers) {
+	      return this.dispatch({
+	        url: url,
+	        type: 'DELETE',
+	        headers: headers
+	      });
+	    }
+	  }], [{
+	    key: 'instance',
+	    get: function get() {
+	      if (!this[singleton]) {
+	        this[singleton] = new Http(singletonEnforcer);
+	      }
+	      return this[singleton];
 	    }
 	  }]);
 	
-	  return View;
+	  return Http;
 	}();
 	
-	exports.default = View;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
-
-/***/ },
-/* 3 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.toPromise = undefined;
-	
-	var _ToPromise = __webpack_require__(15);
-	
-	var _ToPromise2 = _interopRequireDefault(_ToPromise);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	exports.toPromise = _ToPromise2.default;
+	exports.default = Http;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1), __webpack_require__(26)))
 
 /***/ },
 /* 4 */
@@ -250,7 +361,7 @@
 	  value: true
 	});
 	
-	var _View = __webpack_require__(2);
+	var _View = __webpack_require__(0);
 	
 	Object.defineProperty(exports, 'View', {
 	  enumerable: true,
@@ -259,7 +370,7 @@
 	  }
 	});
 	
-	var _CompositeView = __webpack_require__(16);
+	var _CompositeView = __webpack_require__(18);
 	
 	Object.defineProperty(exports, 'CompositeView', {
 	  enumerable: true,
@@ -268,7 +379,7 @@
 	  }
 	});
 	
-	var _GlobalNavView = __webpack_require__(17);
+	var _GlobalNavView = __webpack_require__(19);
 	
 	Object.defineProperty(exports, 'GlobalNavView', {
 	  enumerable: true,
@@ -277,7 +388,7 @@
 	  }
 	});
 	
-	var _RegistrationView = __webpack_require__(20);
+	var _RegistrationView = __webpack_require__(23);
 	
 	Object.defineProperty(exports, 'RegistrationView', {
 	  enumerable: true,
@@ -286,7 +397,7 @@
 	  }
 	});
 	
-	var _IndexView = __webpack_require__(18);
+	var _IndexView = __webpack_require__(20);
 	
 	Object.defineProperty(exports, 'IndexView', {
 	  enumerable: true,
@@ -295,12 +406,39 @@
 	  }
 	});
 	
-	var _LoginView = __webpack_require__(19);
+	var _LoginView = __webpack_require__(21);
 	
 	Object.defineProperty(exports, 'LoginView', {
 	  enumerable: true,
 	  get: function get() {
 	    return _interopRequireDefault(_LoginView).default;
+	  }
+	});
+	
+	var _AccountNavView = __webpack_require__(16);
+	
+	Object.defineProperty(exports, 'AccountNavView', {
+	  enumerable: true,
+	  get: function get() {
+	    return _interopRequireDefault(_AccountNavView).default;
+	  }
+	});
+	
+	var _ProfileView = __webpack_require__(22);
+	
+	Object.defineProperty(exports, 'ProfileView', {
+	  enumerable: true,
+	  get: function get() {
+	    return _interopRequireDefault(_ProfileView).default;
+	  }
+	});
+	
+	var _BillingView = __webpack_require__(17);
+	
+	Object.defineProperty(exports, 'BillingView', {
+	  enumerable: true,
+	  get: function get() {
+	    return _interopRequireDefault(_BillingView).default;
 	  }
 	});
 
@@ -716,7 +854,7 @@
 	
 	}(jQuery);
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ },
 /* 6 */
@@ -725,10 +863,10 @@
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 	
 	// load the styles
-	var content = __webpack_require__(21);
+	var content = __webpack_require__(24);
 	if(typeof content === 'string') content = [[module.i, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(25)(content, {});
+	var update = __webpack_require__(28)(content, {});
 	if(content.locals) module.e = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -758,7 +896,7 @@
 	
 	__webpack_require__(6);
 	
-	var _middleware = __webpack_require__(1);
+	var _middleware = __webpack_require__(2);
 	
 	var _view = __webpack_require__(4);
 	
@@ -770,7 +908,7 @@
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
-	var routes = [new _middleware.Route('index', '/', new _view.CompositeView(new _view.GlobalNavView(), new _view.IndexView())), new _middleware.Route('login', '/login', new _view.CompositeView(new _view.GlobalNavView(), new _view.LoginView())), new _middleware.Route('registration', '/register', new _view.CompositeView(new _view.GlobalNavView(), new _view.RegistrationView()))];
+	var routes = [new _middleware.Route('index', '/', new _view.CompositeView(new _view.GlobalNavView(), new _view.IndexView())), new _middleware.Route('login', '/login', new _view.CompositeView(new _view.GlobalNavView(), new _view.LoginView())), new _middleware.Route('registration', '/register', new _view.CompositeView(new _view.GlobalNavView(), new _view.RegistrationView())), new _middleware.Route('profile', '/account/profile', new _view.CompositeView(new _view.GlobalNavView(), new _view.AccountNavView(), new _view.ProfileView())), new _middleware.Route('billing', '/account/billing', new _view.CompositeView(new _view.GlobalNavView(), new _view.AccountNavView(), new _view.BillingView()))];
 	
 	var App = function () {
 	  function App(authenticated) {
@@ -868,7 +1006,7 @@
 	}();
 	
 	exports.default = Broker;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ },
 /* 9 */
@@ -926,115 +1064,6 @@
 /* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function($, cookies) {'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	var singleton = Symbol();
-	var singletonEnforcer = Symbol();
-	
-	var Http = function () {
-	  function Http(enforcer) {
-	    _classCallCheck(this, Http);
-	
-	    if (enforcer !== singletonEnforcer) {
-	      throw "Cannot construct singleton";
-	    }
-	    this.$ = $;
-	    this.cookies = cookies;
-	  }
-	
-	  _createClass(Http, [{
-	    key: 'dispatch',
-	    value: function dispatch(options) {
-	      if (options.contentType === undefined) {
-	        options.contentType = false;
-	      }
-	      if (options.data && this.$.isPlainObject(options.data)) {
-	        options.data = JSON.stringify(options.data);
-	      }
-	      options.headers = this.$.extend({
-	        'Content-Type': 'application/json',
-	        'X-Requested-With': 'XMLHttpRequest',
-	        'X-XSRF-TOKEN': this.cookies.get('XSRF-TOKEN')
-	      }, options.headers);
-	      return this.$.ajax(options);
-	    }
-	  }, {
-	    key: 'get',
-	    value: function get(url, headers) {
-	      return this.dispatch({
-	        url: url,
-	        type: 'GET',
-	        dataType: 'json',
-	        headers: headers
-	      });
-	    }
-	  }, {
-	    key: 'post',
-	    value: function post(url, data, headers) {
-	      return this.dispatch({
-	        url: url,
-	        type: 'POST',
-	        data: data,
-	        headers: headers
-	      });
-	    }
-	  }, {
-	    key: 'put',
-	    value: function put(url, data, headers) {
-	      return this.dispatch({
-	        url: url,
-	        type: 'PUT',
-	        data: data,
-	        headers: headers
-	      });
-	    }
-	  }, {
-	    key: 'patch',
-	    value: function patch(url, data, headers) {
-	      return this.dispatch({
-	        url: url,
-	        type: 'PATCH',
-	        data: data,
-	        headers: headers
-	      });
-	    }
-	  }, {
-	    key: 'delete',
-	    value: function _delete(url, headers) {
-	      return this.dispatch({
-	        url: url,
-	        type: 'DELETE',
-	        headers: headers
-	      });
-	    }
-	  }], [{
-	    key: 'instance',
-	    get: function get() {
-	      if (!this[singleton]) {
-	        this[singleton] = new Http(singletonEnforcer);
-	      }
-	      return this[singleton];
-	    }
-	  }]);
-	
-	  return Http;
-	}();
-	
-	exports.default = Http;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(23)))
-
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
 	/* WEBPACK VAR INJECTION */(function($) {"use strict";
 	
 	Object.defineProperty(exports, "__esModule", {
@@ -1071,10 +1100,10 @@
 	}();
 	
 	exports.default = Route;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ },
-/* 12 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(page, $) {'use strict';
@@ -1109,7 +1138,7 @@
 	    key: 'onViewRendered',
 	    value: function onViewRendered(view) {
 	      this.activeView = view;
-	      //this.$(document.body).removeClass('cloak');
+	      this.$(document.body).removeClass('cloak');
 	    }
 	  }, {
 	    key: 'onRouteChange',
@@ -1159,10 +1188,10 @@
 	}();
 	
 	exports.default = Router;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(26), __webpack_require__(0)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(29), __webpack_require__(1)))
 
 /***/ },
-/* 13 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function($) {'use strict';
@@ -1173,7 +1202,11 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _util = __webpack_require__(3);
+	var _Http = __webpack_require__(3);
+	
+	var _Http2 = _interopRequireDefault(_Http);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
@@ -1189,6 +1222,7 @@
 	    }
 	    this.data = { authenticated: false };
 	    this.$ = $;
+	    this.http = _Http2.default.instance;
 	    this.login = this.login.bind(this);
 	    this.logout = this.logout.bind(this);
 	    this.getData = this.getData.bind(this);
@@ -1205,7 +1239,7 @@
 	      }
 	      var data = this.data;
 	
-	      return (0, _util.toPromise)(this.$.post('/api/accounts/login', { email: email, password: password, rememberMe: rememberMe })).then(function (response) {
+	      return this.http.post('/api/accounts/login', { email: email, password: password, rememberMe: rememberMe }).then(function (response) {
 	        console.log('login success', response);
 	        data.authenticated = true;
 	        return response;
@@ -1225,13 +1259,13 @@
 	        return Promise.resolve({ authenticated: false });
 	      }
 	
-	      return (0, _util.toPromise)(this.$.post('/api/accounts/logout')).then(function (response) {
+	      return this.http.post('/api/accounts/logout').then(function (response) {
 	        console.log('logout success', response);
 	        data.authenticated = false;
-	        return response;
+	        return { authenticated: true };
 	      }).catch(function (response) {
 	        console.log('logout failure', response);
-	        return response;
+	        return { authenticated: false };
 	      });
 	    }
 	  }, {
@@ -1268,13 +1302,13 @@
 	}();
 	
 	exports.default = Session;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ },
-/* 14 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
 	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
@@ -1282,7 +1316,7 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _middleware = __webpack_require__(1);
+	var _middleware = __webpack_require__(2);
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
@@ -1296,29 +1330,29 @@
 	    if (enforcer !== singletonEnforcer) {
 	      throw "Cannot construct singleton";
 	    }
+	    this.http = _middleware.Http.instance;
 	    this.cache = _middleware.Cache.instance;
 	  }
 	
 	  _createClass(Loader, [{
-	    key: 'load',
-	    value: function load($el, url) {
+	    key: "load",
+	    value: function load(url) {
 	      var _this = this;
 	
 	      if (this.cache.get(url)) {
 	        return Promise.resolve({ html: this.cache.get(url) });
 	      }
 	      return new Promise(function (resolve, reject) {
-	        $el.load(url, function (html, responseText, jqXhr) {
-	          if (jqXhr.status && jqXhr.status.toString().indexOf('2') == 0) {
-	            _this.cache.set(url, html);
-	            resolve({ html: html, responseText: responseText, jqXhr: jqXhr });
-	          }
-	          return reject({ html: html, responseText: responseText, jqXhr: jqXhr });
+	        _this.http.get(url).then(function (html) {
+	          _this.cache.set(url, html);
+	          resolve({ html: html });
+	        }).catch(function (response) {
+	          reject({ html: null, response: response });
 	        });
 	      });
 	    }
 	  }], [{
-	    key: 'instance',
+	    key: "instance",
 	    get: function get() {
 	      if (!this[singleton]) {
 	        this[singleton] = new Loader(singletonEnforcer);
@@ -1333,7 +1367,7 @@
 	exports.default = Loader;
 
 /***/ },
-/* 15 */
+/* 14 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1350,6 +1384,25 @@
 	exports.default = toPromise;
 
 /***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.toPromise = undefined;
+	
+	var _ToPromise = __webpack_require__(14);
+	
+	var _ToPromise2 = _interopRequireDefault(_ToPromise);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	exports.toPromise = _ToPromise2.default;
+
+/***/ },
 /* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -1359,9 +1412,83 @@
 	  value: true
 	});
 	
+	var _View2 = __webpack_require__(0);
+	
+	var _View3 = _interopRequireDefault(_View2);
+	
+	var _middleware = __webpack_require__(2);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var AccountNavView = function (_View) {
+	  _inherits(AccountNavView, _View);
+	
+	  function AccountNavView() {
+	    _classCallCheck(this, AccountNavView);
+	
+	    return _possibleConstructorReturn(this, (AccountNavView.__proto__ || Object.getPrototypeOf(AccountNavView)).call(this, '#viewport', '#account-nav', '/partials/account/account-nav.html'));
+	  }
+	
+	  return AccountNavView;
+	}(_View3.default);
+	
+	exports.default = AccountNavView;
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _View2 = __webpack_require__(0);
+	
+	var _View3 = _interopRequireDefault(_View2);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var BillingView = function (_View) {
+	  _inherits(BillingView, _View);
+	
+	  function BillingView() {
+	    _classCallCheck(this, BillingView);
+	
+	    return _possibleConstructorReturn(this, (BillingView.__proto__ || Object.getPrototypeOf(BillingView)).call(this, '#viewport', '#billing', '/partials/account/billing.html'));
+	  }
+	
+	  return BillingView;
+	}(_View3.default);
+	
+	exports.default = BillingView;
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function($) {'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _View = __webpack_require__(2);
+	var _View = __webpack_require__(0);
 	
 	var _View2 = _interopRequireDefault(_View);
 	
@@ -1373,6 +1500,8 @@
 	  function CompositeView() {
 	    _classCallCheck(this, CompositeView);
 	
+	    this.$ = $;
+	    this._ = _;
 	    this.views = Array.prototype.slice.call(arguments);
 	  }
 	
@@ -1387,23 +1516,37 @@
 	  }, {
 	    key: 'render',
 	    value: function render() {
-	      var _this = this;
+	      var views = this.views;
+	      var self = this;
 	
-	      return Promise.all(this.views.map(function (view) {
-	        return view.render();
-	      })).then(function () {
-	        return _this;
+	      return Promise.all(views.map(function (view) {
+	        return view.getTemplate();
+	      })).then(function (templates) {
+	        return Promise.all(views.map(function (view) {
+	          return view.getModel();
+	        })).then(function (models) {
+	          views.forEach(function (view, idx) {
+	            view.setup(templates[idx], models[idx]);
+	          });
+	        }).then(function () {
+	          return self;
+	        });
 	      });
 	    }
+	
+	    //render() {
+	    //  return Promise.all(this.views.map((view) => view.render())).then(()=> this);
+	    //}
+	
 	  }, {
 	    key: 'teardown',
 	    value: function teardown() {
-	      var _this2 = this;
+	      var _this = this;
 	
 	      return Promise.all(this.views.map(function (view) {
 	        return view.teardown();
 	      })).then(function () {
-	        return _this2;
+	        return _this;
 	      });
 	    }
 	  }]);
@@ -1412,9 +1555,10 @@
 	}();
 	
 	exports.default = CompositeView;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ },
-/* 17 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1427,11 +1571,11 @@
 	
 	var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 	
-	var _View2 = __webpack_require__(2);
+	var _View2 = __webpack_require__(0);
 	
 	var _View3 = _interopRequireDefault(_View2);
 	
-	var _middleware = __webpack_require__(1);
+	var _middleware = __webpack_require__(2);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -1447,7 +1591,7 @@
 	  function GlobalNavView() {
 	    _classCallCheck(this, GlobalNavView);
 	
-	    var _this = _possibleConstructorReturn(this, (GlobalNavView.__proto__ || Object.getPrototypeOf(GlobalNavView)).call(this, '#globalnav'));
+	    var _this = _possibleConstructorReturn(this, (GlobalNavView.__proto__ || Object.getPrototypeOf(GlobalNavView)).call(this, null, '#global-nav'));
 	
 	    _this.persistentAcrossRoutes = true;
 	    _this.session = _middleware.Session.instance;
@@ -1505,7 +1649,7 @@
 	exports.default = GlobalNavView;
 
 /***/ },
-/* 18 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1514,7 +1658,7 @@
 	  value: true
 	});
 	
-	var _View2 = __webpack_require__(2);
+	var _View2 = __webpack_require__(0);
 	
 	var _View3 = _interopRequireDefault(_View2);
 	
@@ -1532,7 +1676,7 @@
 	  function IndexView() {
 	    _classCallCheck(this, IndexView);
 	
-	    return _possibleConstructorReturn(this, (IndexView.__proto__ || Object.getPrototypeOf(IndexView)).call(this, '#viewport', '/partials/index.html'));
+	    return _possibleConstructorReturn(this, (IndexView.__proto__ || Object.getPrototypeOf(IndexView)).call(this, '#viewport', '#index', '/partials/index.html'));
 	  }
 	
 	  return IndexView;
@@ -1541,7 +1685,7 @@
 	exports.default = IndexView;
 
 /***/ },
-/* 19 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1554,13 +1698,11 @@
 	
 	var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 	
-	var _View2 = __webpack_require__(2);
+	var _View2 = __webpack_require__(0);
 	
 	var _View3 = _interopRequireDefault(_View2);
 	
-	var _util = __webpack_require__(3);
-	
-	var _middleware = __webpack_require__(1);
+	var _middleware = __webpack_require__(2);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -1576,7 +1718,7 @@
 	  function LoginView() {
 	    _classCallCheck(this, LoginView);
 	
-	    var _this = _possibleConstructorReturn(this, (LoginView.__proto__ || Object.getPrototypeOf(LoginView)).call(this, '#viewport', '/partials/account/login.html'));
+	    var _this = _possibleConstructorReturn(this, (LoginView.__proto__ || Object.getPrototypeOf(LoginView)).call(this, '#viewport', '#login', '/partials/account/login.html'));
 	
 	    _this.session = _middleware.Session.instance;
 	    _this.http = _middleware.Http.instance;
@@ -1594,7 +1736,8 @@
 	        password: '',
 	        rememberMe: true,
 	        serverErrors: {
-	          loginInfoInvalid: false
+	          loginInfoInvalid: false,
+	          credentialsInvalid: false
 	        }
 	      });
 	    }
@@ -1621,17 +1764,22 @@
 	    value: function login(e) {
 	      var _this3 = this;
 	
-	      console.log('login clicked', this.model);
 	      if (e.isDefaultPrevented()) {
 	        return;
 	      }
 	      e.preventDefault();
 	
 	      this.ractive.set('serverErrors', {
-	        loginInfoInvalid: false
+	        loginInfoInvalid: false,
+	        credentialsInvalid: false
 	      });
 	
-	      return (0, _util.toPromise)(this.http.post('/api/accounts/login', this.getEncodedCredentials(this.model), { 'Content-Type': 'application/x-www-form-urlencoded' })).then(function (response) {
+	      var _ = this._;
+	      var requestBody = _.omit(this.model, ['serverErrors']);
+	
+	      console.log('login clicked', requestBody);
+	
+	      return this.http.post('/api/accounts/login', this.getEncodedCredentials(requestBody), { 'Content-Type': 'application/x-www-form-urlencoded' }).then(function (response) {
 	        console.log('success', response);
 	        _this3.broker.publish('user.authentication.change', { authenticated: true });
 	        _this3.router.navigate('/');
@@ -1639,6 +1787,7 @@
 	        console.log('error', response);
 	        if (response.status == 400) {
 	          _this3.ractive.set('serverErrors.loginInfoInvalid', true);
+	          return;
 	        }
 	        if (response.status == 401) {
 	          _this3.ractive.set('serverErrors.credentialsInvalid', true);
@@ -1653,7 +1802,43 @@
 	exports.default = LoginView;
 
 /***/ },
-/* 20 */
+/* 22 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _View2 = __webpack_require__(0);
+	
+	var _View3 = _interopRequireDefault(_View2);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var ProfileView = function (_View) {
+	  _inherits(ProfileView, _View);
+	
+	  function ProfileView() {
+	    _classCallCheck(this, ProfileView);
+	
+	    return _possibleConstructorReturn(this, (ProfileView.__proto__ || Object.getPrototypeOf(ProfileView)).call(this, '#viewport', '#profile', '/partials/account/profile.html'));
+	  }
+	
+	  return ProfileView;
+	}(_View3.default);
+	
+	exports.default = ProfileView;
+
+/***/ },
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1666,13 +1851,11 @@
 	
 	var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 	
-	var _View2 = __webpack_require__(2);
+	var _View2 = __webpack_require__(0);
 	
 	var _View3 = _interopRequireDefault(_View2);
 	
-	var _util = __webpack_require__(3);
-	
-	var _middleware = __webpack_require__(1);
+	var _middleware = __webpack_require__(2);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -1688,7 +1871,7 @@
 	  function RegistrationView() {
 	    _classCallCheck(this, RegistrationView);
 	
-	    var _this = _possibleConstructorReturn(this, (RegistrationView.__proto__ || Object.getPrototypeOf(RegistrationView)).call(this, '#viewport', '/partials/account/registration.html'));
+	    var _this = _possibleConstructorReturn(this, (RegistrationView.__proto__ || Object.getPrototypeOf(RegistrationView)).call(this, '#viewport', '#registration', '/partials/account/registration.html'));
 	
 	    _this.session = _middleware.Session.instance;
 	    _this.http = _middleware.Http.instance;
@@ -1702,10 +1885,10 @@
 	    key: 'getModel',
 	    value: function getModel() {
 	      return Promise.resolve({
-	        email: '',
-	        first: '',
-	        last: '',
-	        password: '',
+	        email: null,
+	        first: null,
+	        last: null,
+	        password: null,
 	        rememberMe: true,
 	        serverErrors: {
 	          emailTaken: false,
@@ -1741,7 +1924,7 @@
 	        accountInfoInvalid: false
 	      });
 	
-	      return (0, _util.toPromise)(this.http.post('/api/accounts', this.model)).then(function (response) {
+	      return this.http.post('/api/accounts', this.model).then(function (response) {
 	        console.log('success', response);
 	        _this3.broker.publish('user.authentication.change', { authenticated: true });
 	        _this3.router.navigate('/');
@@ -1763,21 +1946,21 @@
 	exports.default = RegistrationView;
 
 /***/ },
-/* 21 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.e = __webpack_require__(22)();
+	exports = module.e = __webpack_require__(25)();
 	// imports
 	
 	
 	// module
-	exports.push([module.i, "body {\n    padding-top: 75px;\n}\n\n[cloak] { display: none !important; }", ""]);
+	exports.push([module.i, "body {\n    padding-top: 75px;\n}\n\n.cloak { display: none !important; }", ""]);
 	
 	// exports
 
 
 /***/ },
-/* 22 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -1833,7 +2016,7 @@
 
 
 /***/ },
-/* 23 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -1995,7 +2178,7 @@
 
 
 /***/ },
-/* 24 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/*
@@ -19029,7 +19212,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 25 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -19281,7 +19464,7 @@
 
 
 /***/ },
-/* 26 */
+/* 29 */
 /***/ function(module, exports) {
 
 	module.e = page;

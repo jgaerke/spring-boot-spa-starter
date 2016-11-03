@@ -1,10 +1,9 @@
 import View from './View';
-import { toPromise } from '../util';
 import { Session, Http, Broker, Router } from '../middleware';
 
 class LoginView extends View {
   constructor() {
-    super('#viewport', '/partials/account/login.html');
+    super('#viewport', '#login', '/partials/account/login.html');
     this.session = Session.instance;
     this.http = Http.instance;
     this.broker = Broker.instance;
@@ -19,6 +18,7 @@ class LoginView extends View {
       rememberMe: true,
       serverErrors: {
         loginInfoInvalid: false,
+        credentialsInvalid: false
       }
     });
   }
@@ -38,7 +38,6 @@ class LoginView extends View {
   }
 
   login(e) {
-    console.log('login clicked', this.model);
     if (e.isDefaultPrevented()) {
       return;
     }
@@ -46,14 +45,20 @@ class LoginView extends View {
 
 
     this.ractive.set('serverErrors', {
-      loginInfoInvalid: false
+      loginInfoInvalid: false,
+      credentialsInvalid: false
     });
 
-    return toPromise(this.http.post(
+    const _ = this._;
+    const requestBody = _.omit(this.model, ['serverErrors']);
+
+    console.log('login clicked', requestBody);
+
+    return this.http.post(
         '/api/accounts/login',
-        this.getEncodedCredentials(this.model),
+        this.getEncodedCredentials(requestBody),
         {'Content-Type': 'application/x-www-form-urlencoded'}
-    )).then((response) => {
+    ).then((response) => {
       console.log('success', response);
       this.broker.publish('user.authentication.change', {authenticated: true});
       this.router.navigate('/');
@@ -61,6 +66,7 @@ class LoginView extends View {
       console.log('error', response);
       if (response.status == 400) {
         this.ractive.set('serverErrors.loginInfoInvalid', true);
+        return;
       }
       if (response.status == 401) {
         this.ractive.set('serverErrors.credentialsInvalid', true);
