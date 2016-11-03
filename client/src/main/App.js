@@ -1,17 +1,29 @@
 import './style/Index.css';
-import { router } from './middleware';
+import { Router, Route, Session } from './middleware';
+import { CompositeView, GlobalNavView, RegistrationView, IndexView, LoginView } from './view';
+import bootStrapValidator from 'bootstrap-validator';
+
+const routes = [
+  new Route('index', '/', new CompositeView(new GlobalNavView(), new IndexView())),
+  new Route('login', '/login', new CompositeView(new GlobalNavView(), new LoginView())),
+  new Route('registration', '/register', new CompositeView(new GlobalNavView(), new RegistrationView()))
+];
 
 class App {
-  constructor() {
+  constructor(authenticated) {
+    this.authenticated = authenticated;
     this.started = false;
-    this.router = router;
+    this.routes = routes;
+    this.router = Router.instance;
+    this.session = Session.instance;
   }
 
   start() {
     if(this.started) {
       return false;
     }
-    this.router.start();
+    this.session.set('authenticated', this.authenticated);
+    this.router.start(this.routes);
     this.started = true;
   }
 };

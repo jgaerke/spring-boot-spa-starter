@@ -5,14 +5,17 @@ class CompositeView {
     this.views = Array.prototype.slice.call(arguments);
   }
 
-  bind(route) {
-    return Promise.all(this.views.map(view => view.bind(route))).then(() => {
-      return this;
-    });
+  withRoute(route) {
+    this.views.forEach((view) => view.withRoute(route));
+    return this;
   }
 
-  unbind() {
-    return this.views.forEach((view) => view.unbind());
+  render() {
+    return Promise.all(this.views.map((view) => view.render())).then(()=> this);
+  }
+
+  teardown() {
+    return Promise.all(this.views.map((view) => view.teardown())).then(()=> this);
   }
 }
 

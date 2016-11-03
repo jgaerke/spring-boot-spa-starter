@@ -41,9 +41,9 @@
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
-                <li id="global-nav-login"><a href="login">Login</a></li>
-                <li id="global-nav-logout"><a href="javascript:void(0);">Logout</a></li>
-                <li id="global-nav-registration"><a href="register">Create Account</a></li>
+                {{#if !authenticated }}<li id="global-nav-login" class="{{route.name == 'login' ? 'active' : 'inactive'}}"><a href="login">Login</a></li>{{/if}}
+                {{#if authenticated }}<li id="global-nav-logout"><a href="#" on-click="logout">Logout</a></li>{{/if}}
+                {{#if !authenticated }}<li id="global-nav-registration" class="{{route.name == 'registration' ? 'active' : 'inactive'}}"><a href="register">Create Account</a></li>{{/if}}
             </ul>
         </div>
         <!--/.nav-collapse -->

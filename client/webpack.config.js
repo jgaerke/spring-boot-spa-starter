@@ -23,7 +23,8 @@ var config = {
       jQuery: 'jquery',
       'window.jQuery': 'jquery',
       'page': 'page',
-      'lodash': '_'
+      'lodash': '_',
+      'cookies': 'js-cookie'
     })
   ],
   module: {

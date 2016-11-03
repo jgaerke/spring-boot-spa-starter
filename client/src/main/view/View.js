@@ -1,101 +1,66 @@
+import { Broker, TemplateLoader } from '../middleware';
+import Ractive from 'ractive';
+
 class View {
-  constructor(el) {
+  constructor(el, templateUrl) {
     this.$ = $;
+    this._ = _;
     this.el = el;
     this.$el = this.$(el);
-    this.uid = View.uniqueId();
+    this.html = this.$el.html();
+    this.templateUrl = templateUrl;
+    this.model = null;
+    this.broker = Broker.instance;
+    this.templateLoader = TemplateLoader.instance;
+    this.route = null;
+    this.ractive = null;
   }
 
-  evaluate(expression) {
-    const fn = new Function('return ' + expression + ';');
-    return fn.call(this);
-  }
-
-  getRefs() {
-    return {};
-  }
-
-  bindRefs() {
-    const $ = this.$;
-
-    $.each(this.getRefs(), (refKey, refVal) => {
-      const name = refKey;
-      const value = refVal.value;
-      const expression = refVal.expression;
-      const selector = refVal.selector;
-      const events = refVal.events || {};
-      const show = refVal.show;
-      const hide = refVal.hide;
-      const css = refVal.css || {};
-
-      const ref = value ? this.evaluate(value) : expression ? this.evaluate(expression) : selector ? this.$el.find(selector) : null;
-
-      if(!ref) {
-        return;
-      }
-
-      $.each(events, (event, handler) => {
-        ref.on(event + '.child.event.' + this.uid, $.isFunction(handler) ? handler : this[handler]);
-      });
-
-      $.each(css, (clazz, expression) => {
-        const result = this.evaluate(expression);
-        if(result) {
-          ref.addClass(clazz);
-        } else {
-          ref.removeClass(clazz);
-        }
-      });
-
-      if(show && this.evaluate(show)) {
-        ref.show();
-      }
-
-      if(hide && this.evaluate(hide)) {
-        ref.hide();
-      }
-
-      this[name] = ref;
-
-    });
-  }
-
-  unBindRefs() {
-    const $ = this.$;
-    $.each(this.getRefs(), (refKey) => {
-      const ref = this[refKey];
-      if(ref instanceof $) {
-        ref.off('child.event.' + this.uid);
-      }
-    });
-  }
-
-  bind(route) {
+  withRoute(route) {
     this.route = route;
-    this.bindRefs();
-    if (this.onBind) {
-      return this.onBind(route);
+    return this;
+  }
+
+  getTemplate() {
+    if (this.templateUrl) {
+      return this.templateLoader.load(this.$el, this.templateUrl);
+    } else {
+      return Promise.resolve({html: this.html});
     }
+  }
+
+  getModel() {
     return Promise.resolve({});
   }
 
-  unbind() {
-    this.unBindRefs();
-    if (this.onUnBind) {
-      this.onUnBind();
+  setup(template, model) {
+    const ractive = new Ractive({
+      el: this.$el,
+      template: template.html,
+      data: model
+    });
+    this.ractive = ractive;
+    return Promise.resolve(ractive);
+  }
+
+  teardown() {
+    if (this.ractive) {
+      this.ractive.teardown();
     }
   }
 
-  rebind() {
-    this.unbind();
-    return this.bind();
+  render() {
+    return this.getTemplate().then((template)=> {
+      return this.getModel().then((model) => {
+        this.model = model;
+        return this.setup(template, model).then((ractive)=> {
+          this.ractive = ractive;
+          return this;
+        });
+      });
+    });
   }
-}
 
-View.uniqueIdCounter = 0;
-View.uniqueId = (prefix)=> {
-  const id = ++View.uniqueIdCounter + '';
-  return prefix ? prefix + id : id;
 }
 
 export default View;

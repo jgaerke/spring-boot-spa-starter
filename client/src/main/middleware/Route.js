@@ -11,7 +11,7 @@ class Route {
   }
 
   handle(route) {
-    return this.view.bind(Object.assign({}, { name: this.name}, route));
+    return this.view.withRoute((Object.assign({}, { name: this.name}, route))).render();
   }
 }
 

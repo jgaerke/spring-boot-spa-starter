@@ -1,9 +1,21 @@
 import { toPromise } from '../util';
 
+let singleton = Symbol();
+let singletonEnforcer = Symbol();
+
 class Session {
-  constructor() {
+  constructor(enforcer) {
+    if (enforcer !== singletonEnforcer) {
+      throw "Cannot construct singleton"
+    }
     this.data = {authenticated: false};
     this.$ = $;
+    this.login = this.login.bind(this);
+    this.logout = this.logout.bind(this);
+    this.getData = this.getData.bind(this);
+    this.get = this.get.bind(this);
+    this.set = this.set.bind(this);
+    this.isAuthenticated = this.isAuthenticated.bind(this);
   }
 
   login(email, password, rememberMe) {
@@ -26,9 +38,13 @@ class Session {
   }
 
   logout() {
-    if (!this.authenticated) {
-      return Promise.resolve({});
+    const data = this.data;
+
+    if (!data.authenticated) {
+      data.authenticated = false;
+      return Promise.resolve({ authenticated: false });
     }
+
     return toPromise(this.$.post('/api/accounts/logout'))
         .then((response) => {
           console.log('logout success', response);
@@ -55,6 +71,13 @@ class Session {
 
   isAuthenticated() {
     return this.data['authenticated'];
+  }
+
+  static get instance() {
+    if (!this[singleton]) {
+      this[singleton] = new Session(singletonEnforcer);
+    }
+    return this[singleton];
   }
 }
 
