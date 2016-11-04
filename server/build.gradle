@@ -57,6 +57,7 @@ configurations {
 }
 
 dependencies {
+  compile fileTree(dir: 'libs', include: ['*.jar'])
   compile('org.springframework.boot:spring-boot-devtools')
   compile('org.springframework.boot:spring-boot-starter-web')
   compile('org.springframework.boot:spring-boot-starter-thymeleaf')
@@ -73,8 +74,6 @@ dependencies {
   compile('org.apache.httpcomponents:httpclient:4.5.2')
   compile('commons-lang:commons-lang:2.6')
   compile('org.projectlombok:lombok:1.16.10')
-  compile('com.squareup.retrofit2:retrofit:2.1.0')
-  compile('com.squareup.retrofit2:converter-jackson:2.1.0')
 
   testCompile('org.springframework.boot:spring-boot-starter-test')
   testCompile('com.jayway.restassured:rest-assured:2.4.1')

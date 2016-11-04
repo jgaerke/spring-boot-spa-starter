@@ -12,9 +12,10 @@ import lombok.experimental.Wither;
 @EqualsAndHashCode
 @ToString
 @Wither
-public class MailMessage {
+public class Message {
   private String from;
   private String to;
   private String subject;
-  private String text;
+  private String contentType;
+  private String content;
 }

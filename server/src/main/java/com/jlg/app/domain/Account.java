@@ -2,7 +2,6 @@ package com.jlg.app.domain;
 
 import com.jlg.app.validation.group.*;
 import lombok.*;
-import lombok.experimental.NonFinal;
 import lombok.experimental.Wither;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -17,12 +16,28 @@ import java.util.Map;
 
 @AllArgsConstructor
 @Value
-@NonFinal
 @Builder(toBuilder = true)
 @EqualsAndHashCode
 @ToString
 @Wither
 public class Account {
+
+  public Account() {
+    this.email = null;
+    this.id = null;
+    this.password = null;
+    this.first = null;
+    this.last = null;
+    this.plan = null;
+    this.paymentInfo = null;
+    this.trialExpirationDate = null;
+    this.passwordResetToken = null;
+    this.locked = null;
+    this.expired = null;
+    this.credentialsExpired = null;
+    this.disabled = null;
+    this.authorities = null;
+  }
 
   @Id
   private String id;

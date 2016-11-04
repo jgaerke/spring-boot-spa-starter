@@ -8,16 +8,18 @@ import {
     LoginView,
     AccountNavView,
     ProfileView,
-    BillingView
+    BillingView,
+    PasswordRecoveryView
 } from './view';
 import bootStrapValidator from 'bootstrap-validator';
 
 const routes = [
-  new Route('index', '/', new CompositeView(new GlobalNavView(), new IndexView())),
   new Route('login', '/login', new CompositeView(new GlobalNavView(), new LoginView())),
   new Route('registration', '/register', new CompositeView(new GlobalNavView(), new RegistrationView())),
   new Route('profile', '/account/profile', new CompositeView(new GlobalNavView(), new AccountNavView(), new ProfileView())),
-  new Route('billing', '/account/billing', new CompositeView(new GlobalNavView(), new AccountNavView(), new BillingView()))
+  new Route('billing', '/account/billing', new CompositeView(new GlobalNavView(), new AccountNavView(), new BillingView())),
+  new Route('password-recovery', '/account/password/recovery', new CompositeView(new GlobalNavView(), new PasswordRecoveryView()),
+  new Route('index', '*', new CompositeView(new GlobalNavView(), new IndexView())))
 ];
 
 class App {

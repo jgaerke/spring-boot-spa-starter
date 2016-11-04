@@ -3,17 +3,17 @@
     <section id="registration-errors" class="row">
         <div class="col-md-offset-4 col-md-3">
             {{#if serverErrors.emailTaken}}
-            <div id="email-taken-error" class="alert alert-danger " role="alert">Email taken</div>
+            <div class="alert alert-danger " role="alert">Email taken</div>
             {{/if}}
             {{#if serverErrors.accountInfoInvalid}}
-            <div id="account-info-error" class="alert alert-danger" role="alert">Invalid account info</div>
+            <div class="alert alert-danger" role="alert">Invalid account info</div>
             {{/if}}
         </div>
     </section>
     {{/if}}
     <section class="row">
         <div class="col-xs-offset-0 col-sm-offset-0 col-md-offset-4 col-md-3">
-            <form id="registration-form" name="registration" novalidate="novalidate" role="form">
+            <form id="registration-form" name="registration-form" novalidate="novalidate" role="form">
                 <div class="form-group">
                     <label class="control-label" for="email">Email</label>
                     <input id="email" name="email" class="form-control" type="email"

@@ -1,3 +1,6 @@
+#Send Grid Env
+sendgrid.env
+
 # Created by .ignore support plugin (hsz.mobi)
 ### Gradle template
 .gradle

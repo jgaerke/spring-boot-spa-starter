@@ -13,8 +13,8 @@ class LoginView extends View {
 
   getModel() {
     return Promise.resolve({
-      email: '',
-      password: '',
+      email: null,
+      password: null,
       rememberMe: true,
       serverErrors: {
         loginInfoInvalid: false,

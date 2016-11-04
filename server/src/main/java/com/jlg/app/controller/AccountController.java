@@ -4,6 +4,7 @@ import com.jlg.app.domain.Account;
 import com.jlg.app.exception.EmailNotFoundException;
 import com.jlg.app.exception.NotAuthenticatedException;
 import com.jlg.app.service.AccountService;
+import com.jlg.app.service.AccountServiceImpl;
 import com.jlg.app.validation.group.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -33,7 +34,7 @@ public class AccountController {
   private final UserDetailsService userDetailsService;
 
   @Autowired
-  public AccountController(AccountService accountService, UserDetailsService userDetailsService) {
+  public AccountController(AccountServiceImpl accountService, UserDetailsService userDetailsService) {
     this.accountService = accountService;
     this.userDetailsService = userDetailsService;
   }

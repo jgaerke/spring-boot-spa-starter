@@ -7,3 +7,4 @@ export {default as LoginView} from './LoginView';
 export {default as AccountNavView} from './AccountNavView';
 export {default as ProfileView} from './ProfileView';
 export {default as BillingView} from './BillingView';
+export {default as PasswordRecoveryView} from './PasswordRecoveryView';

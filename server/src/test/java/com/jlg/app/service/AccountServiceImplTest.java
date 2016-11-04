@@ -30,7 +30,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AccountServiceTest {
+public class AccountServiceImplTest {
 
   @Mock
   AccountRepository accountRepository;
@@ -42,12 +42,12 @@ public class AccountServiceTest {
   UserDetailsService userDetailsService;
 
   @Mock
-  MailService mailService;
+  EmailService emailService;
 
   @Mock
   Environment environment;
   @InjectMocks
-  AccountService accountService;
+  AccountServiceImpl accountService;
   @Mock
   private Principal principal;
   @Mock

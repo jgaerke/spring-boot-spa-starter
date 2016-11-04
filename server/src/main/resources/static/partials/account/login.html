@@ -1,5 +1,5 @@
 <div id="login">
-    {{#if serverErrors.loginInfoInvalid || serverErrors.credentialsInvalid}}
+    {{#if serverErrors.unexpectedError}}
     <section id="login-errors" class="row">
         <div class="col-md-offset-4 col-md-3">
             {{#if serverErrors.loginInfoInvalid}}
@@ -13,7 +13,7 @@
     {{/if}}
     <section class="row">
         <div class="col-xs-offset-0 col-sm-offset-0 col-md-offset-4 col-md-3">
-            <form id="login-form" name="login" novalidate="novalidate" role="form">
+            <form id="login-form" name="login-form" novalidate="novalidate" role="form">
                 <div class="form-group">
                     <label class="control-label" for="email">Email</label>
                     <input id="email" name="email" class="form-control" type="email"
@@ -34,6 +34,9 @@
                 <div class="checkbox">
                     <label><input type="checkbox" name="rememberMe" checked="{{rememberMe}}"/> Remember
                         me</label>
+                </div>
+                <div>
+                    <a href="account/password/recovery">Reset your password</a>
                 </div>
                 <button type="submit" class="btn btn-primary">Login</button>
             </form>

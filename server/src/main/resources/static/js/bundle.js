@@ -52,9 +52,9 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _middleware = __webpack_require__(2);
+	var _middleware = __webpack_require__(1);
 	
-	var _ractive = __webpack_require__(27);
+	var _ractive = __webpack_require__(28);
 	
 	var _ractive2 = _interopRequireDefault(_ractive);
 	
@@ -158,16 +158,10 @@
 	}();
 	
 	exports.default = View;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ },
 /* 1 */
-/***/ function(module, exports) {
-
-	module.e = jQuery;
-
-/***/ },
-/* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -240,6 +234,12 @@
 	});
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/***/ },
+/* 2 */
+/***/ function(module, exports) {
+
+	module.e = jQuery;
 
 /***/ },
 /* 3 */
@@ -349,7 +349,7 @@
 	}();
 	
 	exports.default = Http;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1), __webpack_require__(26)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2), __webpack_require__(27)))
 
 /***/ },
 /* 4 */
@@ -388,7 +388,7 @@
 	  }
 	});
 	
-	var _RegistrationView = __webpack_require__(23);
+	var _RegistrationView = __webpack_require__(24);
 	
 	Object.defineProperty(exports, 'RegistrationView', {
 	  enumerable: true,
@@ -424,7 +424,7 @@
 	  }
 	});
 	
-	var _ProfileView = __webpack_require__(22);
+	var _ProfileView = __webpack_require__(23);
 	
 	Object.defineProperty(exports, 'ProfileView', {
 	  enumerable: true,
@@ -439,6 +439,15 @@
 	  enumerable: true,
 	  get: function get() {
 	    return _interopRequireDefault(_BillingView).default;
+	  }
+	});
+	
+	var _PasswordRecoveryView = __webpack_require__(22);
+	
+	Object.defineProperty(exports, 'PasswordRecoveryView', {
+	  enumerable: true,
+	  get: function get() {
+	    return _interopRequireDefault(_PasswordRecoveryView).default;
 	  }
 	});
 
@@ -854,7 +863,7 @@
 	
 	}(jQuery);
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ },
 /* 6 */
@@ -863,10 +872,10 @@
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 	
 	// load the styles
-	var content = __webpack_require__(24);
+	var content = __webpack_require__(25);
 	if(typeof content === 'string') content = [[module.i, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(28)(content, {});
+	var update = __webpack_require__(29)(content, {});
 	if(content.locals) module.e = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -896,7 +905,7 @@
 	
 	__webpack_require__(6);
 	
-	var _middleware = __webpack_require__(2);
+	var _middleware = __webpack_require__(1);
 	
 	var _view = __webpack_require__(4);
 	
@@ -908,7 +917,7 @@
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
-	var routes = [new _middleware.Route('index', '/', new _view.CompositeView(new _view.GlobalNavView(), new _view.IndexView())), new _middleware.Route('login', '/login', new _view.CompositeView(new _view.GlobalNavView(), new _view.LoginView())), new _middleware.Route('registration', '/register', new _view.CompositeView(new _view.GlobalNavView(), new _view.RegistrationView())), new _middleware.Route('profile', '/account/profile', new _view.CompositeView(new _view.GlobalNavView(), new _view.AccountNavView(), new _view.ProfileView())), new _middleware.Route('billing', '/account/billing', new _view.CompositeView(new _view.GlobalNavView(), new _view.AccountNavView(), new _view.BillingView()))];
+	var routes = [new _middleware.Route('login', '/login', new _view.CompositeView(new _view.GlobalNavView(), new _view.LoginView())), new _middleware.Route('registration', '/register', new _view.CompositeView(new _view.GlobalNavView(), new _view.RegistrationView())), new _middleware.Route('profile', '/account/profile', new _view.CompositeView(new _view.GlobalNavView(), new _view.AccountNavView(), new _view.ProfileView())), new _middleware.Route('billing', '/account/billing', new _view.CompositeView(new _view.GlobalNavView(), new _view.AccountNavView(), new _view.BillingView())), new _middleware.Route('password-recovery', '/account/password/recovery', new _view.CompositeView(new _view.GlobalNavView(), new _view.PasswordRecoveryView()), new _middleware.Route('index', '*', new _view.CompositeView(new _view.GlobalNavView(), new _view.IndexView())))];
 	
 	var App = function () {
 	  function App(authenticated) {
@@ -1006,7 +1015,7 @@
 	}();
 	
 	exports.default = Broker;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ },
 /* 9 */
@@ -1100,7 +1109,7 @@
 	}();
 	
 	exports.default = Route;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ },
 /* 11 */
@@ -1188,7 +1197,7 @@
 	}();
 	
 	exports.default = Router;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(29), __webpack_require__(1)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(30), __webpack_require__(2)))
 
 /***/ },
 /* 12 */
@@ -1302,7 +1311,7 @@
 	}();
 	
 	exports.default = Session;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ },
 /* 13 */
@@ -1316,7 +1325,7 @@
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _middleware = __webpack_require__(2);
+	var _middleware = __webpack_require__(1);
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
@@ -1416,7 +1425,7 @@
 	
 	var _View3 = _interopRequireDefault(_View2);
 	
-	var _middleware = __webpack_require__(2);
+	var _middleware = __webpack_require__(1);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -1555,7 +1564,7 @@
 	}();
 	
 	exports.default = CompositeView;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ },
 /* 19 */
@@ -1575,7 +1584,7 @@
 	
 	var _View3 = _interopRequireDefault(_View2);
 	
-	var _middleware = __webpack_require__(2);
+	var _middleware = __webpack_require__(1);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -1702,7 +1711,7 @@
 	
 	var _View3 = _interopRequireDefault(_View2);
 	
-	var _middleware = __webpack_require__(2);
+	var _middleware = __webpack_require__(1);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -1732,8 +1741,8 @@
 	    key: 'getModel',
 	    value: function getModel() {
 	      return Promise.resolve({
-	        email: '',
-	        password: '',
+	        email: null,
+	        password: null,
 	        rememberMe: true,
 	        serverErrors: {
 	          loginInfoInvalid: false,
@@ -1811,6 +1820,102 @@
 	  value: true
 	});
 	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+	
+	var _View2 = __webpack_require__(0);
+	
+	var _View3 = _interopRequireDefault(_View2);
+	
+	var _middleware = __webpack_require__(1);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var PasswordRecoveryView = function (_View) {
+	  _inherits(PasswordRecoveryView, _View);
+	
+	  function PasswordRecoveryView() {
+	    _classCallCheck(this, PasswordRecoveryView);
+	
+	    var _this = _possibleConstructorReturn(this, (PasswordRecoveryView.__proto__ || Object.getPrototypeOf(PasswordRecoveryView)).call(this, '#viewport', '#password-recovery', '/partials/account/password-recovery.html'));
+	
+	    _this.http = _middleware.Http.instance;
+	    _this.recover = _this.recover.bind(_this);
+	    return _this;
+	  }
+	
+	  _createClass(PasswordRecoveryView, [{
+	    key: 'getModel',
+	    value: function getModel() {
+	      return Promise.resolve({
+	        email: null,
+	        sent: false,
+	        serverErrors: {
+	          unexpectedError: false
+	        }
+	      });
+	    }
+	  }, {
+	    key: 'setup',
+	    value: function setup(template, model) {
+	      var _this2 = this;
+	
+	      return _get(PasswordRecoveryView.prototype.__proto__ || Object.getPrototypeOf(PasswordRecoveryView.prototype), 'setup', this).call(this, template, model).then(function (ractive) {
+	        _this2.$('#password-recovery-form').validator().on('submit', _this2.recover);
+	        return ractive;
+	      });
+	    }
+	  }, {
+	    key: 'recover',
+	    value: function recover(e) {
+	      var _this3 = this;
+	
+	      if (e.isDefaultPrevented()) {
+	        return;
+	      }
+	      e.preventDefault();
+	
+	      this.ractive.set('serverErrors', {
+	        unexpectedError: false
+	      });
+	
+	      var _ = this._;
+	      var requestBody = _.omit(this.model, ['serverErrors']);
+	
+	      console.log('recover clicked', requestBody);
+	
+	      return this.http.post('/api/accounts/password/recover', requestBody).then(function (response) {
+	        console.log('success', response);
+	        _this3.ractive.set('sent', true);
+	      }).catch(function (response) {
+	        console.log('error', response);
+	        _this3.ractive.set('serverErrors.unexpectedError', true);
+	      });
+	    }
+	  }]);
+	
+	  return PasswordRecoveryView;
+	}(_View3.default);
+	
+	exports.default = PasswordRecoveryView;
+
+/***/ },
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
 	var _View2 = __webpack_require__(0);
 	
 	var _View3 = _interopRequireDefault(_View2);
@@ -1838,7 +1943,7 @@
 	exports.default = ProfileView;
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1855,7 +1960,7 @@
 	
 	var _View3 = _interopRequireDefault(_View2);
 	
-	var _middleware = __webpack_require__(2);
+	var _middleware = __webpack_require__(1);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -1946,10 +2051,10 @@
 	exports.default = RegistrationView;
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.e = __webpack_require__(25)();
+	exports = module.e = __webpack_require__(26)();
 	// imports
 	
 	
@@ -1960,7 +2065,7 @@
 
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -2016,7 +2121,7 @@
 
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -2178,7 +2283,7 @@
 
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/*
@@ -19212,7 +19317,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -19464,7 +19569,7 @@
 
 
 /***/ },
-/* 29 */
+/* 30 */
 /***/ function(module, exports) {
 
 	module.e = page;

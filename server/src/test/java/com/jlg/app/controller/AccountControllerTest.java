@@ -1,7 +1,7 @@
 package com.jlg.app.controller;
 
 import com.jlg.app.domain.Account;
-import com.jlg.app.service.AccountService;
+import com.jlg.app.service.AccountServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 public class AccountControllerTest {
 
   @Mock
-  AccountService accountService;
+  AccountServiceImpl accountService;
 
   @Mock
   UserDetailsService userDetailsService;
