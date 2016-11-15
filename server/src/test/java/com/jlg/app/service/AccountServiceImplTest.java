@@ -14,7 +14,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import retrofit2.Call;
 
 import java.security.Principal;
 
@@ -50,8 +49,6 @@ public class AccountServiceImplTest {
   AccountServiceImpl accountService;
   @Mock
   private Principal principal;
-  @Mock
-  private Call<Void> call;
 
   @Test
   public void should_create_account() throws Exception {

@@ -5,6 +5,7 @@ import com.jlg.app.repository.AccountRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.StandardPasswordEncoder;
 
@@ -15,6 +16,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.UUID.randomUUID;
 
 @SpringBootApplication
+@EnableScheduling
 public class Application {
   public static void main(String[] args) {
     ConfigurableApplicationContext ctx = SpringApplication.run(Application.class, args);
