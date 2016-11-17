@@ -29,7 +29,7 @@ public class Account {
   @NotEmpty(groups = {AccountCreation.class, AccountUpdate.class, PasswordRecovery.class})
   @Email(groups = {AccountCreation.class, AccountUpdate.class, PasswordRecovery.class})
   private String email;
-  @NotEmpty(groups = {AccountCreation.class, AccountUpdate.class, PasswordReset.class, PasswordChange.class})
+  @NotEmpty(groups = {AccountCreation.class, PasswordReset.class, PasswordChange.class})
   private String password;
   @Size(max = 255)
   private String first;

@@ -3,3 +3,7 @@ body {
 }
 
 .cloak { display: none !important; }
+
+.row {
+    margin-bottom: 10px;
+}

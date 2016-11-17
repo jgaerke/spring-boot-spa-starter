@@ -35,11 +35,15 @@ public class AccountServiceImpl implements AccountService {
 
   @Override
   public Account create(Account account) {
+    ifEmailTakenThrowException(account);
+    return accountRepository.save(account
+        .withPassword(passwordEncoder.encode(account.getPassword())));
+  }
+
+  private void ifEmailTakenThrowException(Account account) {
     if (accountRepository.findOneByEmail(account.getEmail()).isPresent()) {
       throw new AccountEmailConflictException();
     }
-    return accountRepository.save(account
-        .withPassword(passwordEncoder.encode(account.getPassword())));
   }
 
   @Override
@@ -48,7 +52,13 @@ public class AccountServiceImpl implements AccountService {
     if (!existing.isPresent()) {
       throw new EmailNotFoundException();
     }
-    return accountRepository.save(account);
+    if (!account.getEmail().equals(existingEmail)) {
+      ifEmailTakenThrowException(account);
+    }
+    return accountRepository.save(existing.get()
+        .withEmail(account.getEmail()))
+        .withFirst(account.getFirst())
+        .withLast(account.getLast());
   }
 
   @Override
@@ -91,7 +101,7 @@ public class AccountServiceImpl implements AccountService {
         .contentType("text/plain")
         .content(format(
             "Please click the following link to reset your password: %s" +
-                "http://localhost:8080/app/reset-password/%s",
+                "http://localhost:8080/app/account/password/reset/%s",
             getProperty("line.separator"),
             passwordResetToken
         )).build()

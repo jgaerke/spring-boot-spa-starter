@@ -1,22 +1,17 @@
-import View from './View';
-import { Session, Http, Broker, Router } from '../middleware';
+import View from './../View';
 
 class RegistrationView extends View {
   constructor() {
     super('#viewport', '#registration', '/partials/account/registration.html');
-    this.session = Session.instance;
-    this.http = Http.instance;
-    this.broker=  Broker.instance;
-    this.router = Router.instance;
     this.register = this.register.bind(this);
   }
 
   getModel() {
     return Promise.resolve({
-      email: null,
-      first: null,
-      last: null,
-      password: null,
+      email: '',
+      first: '',
+      last: '',
+      password: '',
       rememberMe: true,
       serverErrors: {
         emailTaken: false,
@@ -47,7 +42,7 @@ class RegistrationView extends View {
 
     return this.http.post('/api/accounts', this.model).then((response) => {
       console.log('success', response);
-      this.broker.publish('user.authentication.change', { authenticated: true });
+      this.broker.trigger('onAuthenticationChange', { authenticated: true });
       this.router.navigate('/');
     }).catch((response) => {
       console.log('error', response);

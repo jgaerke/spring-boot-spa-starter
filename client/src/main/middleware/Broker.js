@@ -9,24 +9,24 @@ class Broker {
     }
     this.$ = $;
 
-    this.subscribe = this.subscribe.bind(this);
-    this.unsubscribe = this.unsubscribe.bind(this);
-    this.publish = this.publish.bind(this);
+    this.on = this.on.bind(this);
+    this.off = this.off.bind(this);
+    this.trigger = this.trigger.bind(this);
     this.hub = $({});
   }
 
 
-  subscribe() {
+  on() {
     this.hub.on.apply(this.hub, arguments);
     return Promise.resolve(this);
   }
 
-  unsubscribe() {
+  off() {
     this.hub.off.apply(this.hub, arguments);
     return Promise.resolve(this);
   }
 
-  publish() {
+  trigger() {
     this.hub.trigger.apply(this.hub, arguments);
     return Promise.resolve(this);
   }

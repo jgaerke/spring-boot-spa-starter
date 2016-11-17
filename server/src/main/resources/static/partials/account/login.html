@@ -1,12 +1,12 @@
 <div id="login">
-    {{#if serverErrors.unexpectedError}}
+    {{#if serverErrors.unexpectedError || serverErrors.credentialsInvalid}}
     <section id="login-errors" class="row">
         <div class="col-md-offset-4 col-md-3">
             {{#if serverErrors.loginInfoInvalid}}
-            <div id="email-taken-error" class="alert alert-danger " role="alert">Login info invalid</div>
+            <div class="alert alert-danger " role="alert">Login info invalid</div>
             {{/if}}
             {{#if serverErrors.credentialsInvalid}}
-            <div id="account-info-error" class="alert alert-danger" role="alert">Credentials invalid</div>
+            <div class="alert alert-danger" role="alert">Credentials invalid</div>
             {{/if}}
         </div>
     </section>

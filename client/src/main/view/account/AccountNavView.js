@@ -1,5 +1,4 @@
-import View from './View';
-import { Session, Broker } from '../middleware';
+import View from './../View';
 
 class AccountNavView extends View {
   constructor() {

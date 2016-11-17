@@ -6,8 +6,7 @@ import lombok.experimental.Wither;
 
 
 @AllArgsConstructor
-@Value
-@NonFinal
+@Getter
 @Builder(toBuilder = true)
 @EqualsAndHashCode
 @ToString

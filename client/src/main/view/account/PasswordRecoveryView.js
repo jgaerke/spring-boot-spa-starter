@@ -1,19 +1,17 @@
-import View from './View';
-import { Http } from '../middleware';
+import View from './../View';
 
 class PasswordRecoveryView extends View {
   constructor() {
     super('#viewport', '#password-recovery', '/partials/account/password-recovery.html');
-    this.http = Http.instance;
     this.recover = this.recover.bind(this);
   }
 
   getModel() {
     return Promise.resolve({
       email: null,
-      sent: false,
       serverErrors: {
         unexpectedError: false,
+        emailNotFound: false
       }
     });
   }
@@ -33,7 +31,8 @@ class PasswordRecoveryView extends View {
 
 
     this.ractive.set('serverErrors', {
-      unexpectedError: false
+      unexpectedError: false,
+      emailNotFound: false
     });
 
     const _ = this._;
@@ -43,10 +42,15 @@ class PasswordRecoveryView extends View {
 
     return this.http.post('/api/accounts/password/recover', requestBody).then((response) => {
       console.log('success', response);
-      this.ractive.set('sent', true);
+      this.router.navigate('/account/password/recovery/confirmation');
     }).catch((response) => {
-      console.log('error', response);
-      this.ractive.set('serverErrors.unexpectedError', true);
+      if (response.status.toString().indexOf('5') > -1) {
+        this.ractive.set('serverErrors.unexpectedError', true);
+        return;
+      }
+      if (response.status == 404) {
+        this.ractive.set('serverErrors.emailNotFound', true);
+      }
     });
   }
 }

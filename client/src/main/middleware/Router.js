@@ -19,11 +19,14 @@ class Router {
     this.$(document.body).removeClass('cloak');
   }
 
-  onRouteChange(route) {
+  onRouteChange(route, authenticated) {
     return (routeState)=> {
       this.$(document.body).addClass('cloak');
       if (this.activeView) {
         this.activeView.teardown();
+      }
+      if(route.isAuthenticated() && !authenticated) {
+        return this.navigate('/login');
       }
       route.handle(routeState).then(this.onViewRendered);
     };
@@ -33,14 +36,14 @@ class Router {
     this.page(path);
   }
 
-  start(routes) {
+  start(routes, authenticated) {
     if (this.started) {
       return;
     }
 
     this.page.base('/app');
     routes.forEach((route)=> {
-      this.page(route.getPath(), this.onRouteChange(route));
+      this.page(route.getPath(), this.onRouteChange(route, authenticated));
     });
     this.page.start();
     this.started = true;

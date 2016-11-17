@@ -1,9 +1,14 @@
 class Route {
-  constructor(name, path, view) {
+  constructor(name, path, view, authenticated = false) {
     this.name = name;
     this.path = path;
     this.view = view;
+    this.authenticated = authenticated;
     this.$ = $;
+  }
+
+  isAuthenticated() {
+    return this.authenticated;
   }
 
   getPath() {
@@ -11,7 +16,7 @@ class Route {
   }
 
   handle(route) {
-    return this.view.withRoute((Object.assign({}, { name: this.name}, route))).render();
+    return this.view.withRoute((Object.assign({}, {name: this.name}, route))).render();
   }
 }
 

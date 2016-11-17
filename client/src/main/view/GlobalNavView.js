@@ -1,12 +1,8 @@
 import View from './View';
-import { Session, Broker } from '../middleware';
 
 class GlobalNavView extends View {
   constructor() {
     super(null, '#global-nav');
-    this.persistentAcrossRoutes = true;
-    this.session = Session.instance;
-    this.broker = Broker.instance;
     this.logout = this.logout.bind(this);
     this.onUserAuthChange = this.onUserAuthChange.bind(this);
   }
@@ -20,7 +16,7 @@ class GlobalNavView extends View {
 
   setup(template, model) {
     return super.setup(template, model).then((ractive)=> {
-      this.broker.subscribe('user.authentication.change', this.onUserAuthChange);
+      this.broker.on('onAuthenticationChange', this.onUserAuthChange);
       this.ractive.on('logout', this.logout)
       return ractive;
     });
@@ -33,13 +29,13 @@ class GlobalNavView extends View {
 
   logout(e) {
     this.session.logout().then(() => {
-      this.broker.publish('user.authentication.change', { authenticated: false });
+      this.broker.trigger('onAuthenticationChange', { authenticated: false });
     });
   }
 
   teardown() {
     super.teardown();
-    this.broker.unsubscribe('user.authentication.change', this.onUserAuthChange);
+    this.broker.off('onAuthenticationChange', this.onUserAuthChange);
   }
 }
 

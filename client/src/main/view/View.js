@@ -1,4 +1,4 @@
-import { Broker, TemplateLoader } from '../middleware';
+import { Broker, TemplateLoader, Router, Session, Http, Cache } from '../middleware';
 import Ractive from 'ractive';
 
 class View {
@@ -14,6 +14,10 @@ class View {
     this.model = null;
     this.broker = Broker.instance;
     this.templateLoader = TemplateLoader.instance;
+    this.router = Router.instance;
+    this.session = Session.instance;
+    this.http = Http.instance;
+    this.cache = Cache.instance;
     this.ractive = null;
   }
 
@@ -24,9 +28,11 @@ class View {
 
   getTemplate() {
     const initialHtml = this.initialHtml;
+    const templateUrl = this.templateUrl;
+    const self = this;
 
     if (this.templateUrl) {
-      return this.templateLoader.load(this.templateUrl).then((template)=> {
+      return this.templateLoader.load(templateUrl).then((template)=> {
         template.append = true;
         return template;
       }).catch((error) => {
@@ -34,11 +40,12 @@ class View {
         return error;
       });
     }
-    return Promise.resolve({html: initialHtml, append: false });
+
+    return Promise.resolve({html: initialHtml, append: false});
   }
 
   getModel() {
-    return Promise.resolve({ route: this.route });
+    return Promise.resolve({route: this.route});
   }
 
   setup(template, model) {
@@ -47,7 +54,7 @@ class View {
     const $container = this.$container;
 
     this.model = model;
-    if(template.append) {
+    if (template.append) {
       $(template.html).appendTo($container);
     }
     this.$view = $(view);
@@ -64,7 +71,6 @@ class View {
   teardown() {
     const ractive = this.ractive;
     const $container = this.$container;
-
     if (ractive) {
       ractive.teardown();
       $container.empty();
@@ -72,15 +78,20 @@ class View {
   }
 
   render() {
+    const self = this;
+
     return this.getTemplate().then((template)=> {
       return this.getModel().then((model) => {
         return this.setup(template, model).then((ractive)=> {
-          return this;
+          return new Promise((resolve, reject) => {
+            ractive.on('render', ()=> {
+              resolve(self);
+            });
+          });
         });
       });
     });
   }
-
 }
 
 export default View;

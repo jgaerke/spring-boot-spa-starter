@@ -1,7 +1,6 @@
 package com.jlg.app.service;
 
 import com.jlg.app.command.Command;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.ParameterizedType;
@@ -12,12 +11,12 @@ import static java.util.stream.Collectors.toList;
 @Service
 public class CommandServiceImpl implements CommandService {
 
-  private final List<Command<?>> commands;
+//  private final List<Command<?>> commands;
 
-  @Autowired
-  public CommandServiceImpl(List<Command<?>> commands) {
-    this.commands = commands;
-  }
+//  @Autowired
+//  public CommandServiceImpl(List<Command<?>> commands) {
+//    this.commands = commands;
+//  }
 
   @Override
   public void execute(List<?> inputs) {

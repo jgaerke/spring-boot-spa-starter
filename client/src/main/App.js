@@ -9,17 +9,21 @@ import {
     AccountNavView,
     ProfileView,
     BillingView,
-    PasswordRecoveryView
+    PasswordRecoveryView,
+    PasswordRecoveryConfirmationView,
+    PasswordResetView
 } from './view';
 import bootStrapValidator from 'bootstrap-validator';
 
 const routes = [
   new Route('login', '/login', new CompositeView(new GlobalNavView(), new LoginView())),
   new Route('registration', '/register', new CompositeView(new GlobalNavView(), new RegistrationView())),
-  new Route('profile', '/account/profile', new CompositeView(new GlobalNavView(), new AccountNavView(), new ProfileView())),
-  new Route('billing', '/account/billing', new CompositeView(new GlobalNavView(), new AccountNavView(), new BillingView())),
-  new Route('password-recovery', '/account/password/recovery', new CompositeView(new GlobalNavView(), new PasswordRecoveryView()),
-  new Route('index', '*', new CompositeView(new GlobalNavView(), new IndexView())))
+  new Route('profile', '/account/profile', new CompositeView(new GlobalNavView(), new AccountNavView(), new ProfileView()), true),
+  new Route('billing', '/account/billing', new CompositeView(new GlobalNavView(), new AccountNavView(), new BillingView()), true),
+  new Route('password-recovery', '/account/password/recovery', new CompositeView(new GlobalNavView(), new PasswordRecoveryView())),
+  new Route('password-recovery-confirmation', '/account/password/recovery/confirmation', new CompositeView(new GlobalNavView(), new PasswordRecoveryConfirmationView())),
+  new Route('password-reset', '/account/password/reset/:passwordResetToken', new CompositeView(new GlobalNavView(), new PasswordResetView())),
+  new Route('index', '*', new CompositeView(new GlobalNavView(), new IndexView()))
 ];
 
 class App {
@@ -29,6 +33,10 @@ class App {
     this.routes = routes;
     this.router = Router.instance;
     this.session = Session.instance;
+
+
+    console.log('referrer', document.referrer);
+
   }
 
   start() {
@@ -36,11 +44,10 @@ class App {
       return false;
     }
     this.session.set('authenticated', this.authenticated);
-    this.router.start(this.routes);
+    this.router.start(this.routes, authenticated);
     this.started = true;
   }
 }
-;
 
 window.App = App;
 

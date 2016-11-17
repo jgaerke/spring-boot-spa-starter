@@ -1,20 +1,15 @@
-import View from './View';
-import { Session, Http, Broker, Router } from '../middleware';
+import View from './../View';
 
 class LoginView extends View {
   constructor() {
     super('#viewport', '#login', '/partials/account/login.html');
-    this.session = Session.instance;
-    this.http = Http.instance;
-    this.broker = Broker.instance;
-    this.router = Router.instance;
     this.login = this.login.bind(this);
   }
 
   getModel() {
     return Promise.resolve({
-      email: null,
-      password: null,
+      email: '',
+      password: '',
       rememberMe: true,
       serverErrors: {
         loginInfoInvalid: false,
@@ -60,7 +55,7 @@ class LoginView extends View {
         {'Content-Type': 'application/x-www-form-urlencoded'}
     ).then((response) => {
       console.log('success', response);
-      this.broker.publish('user.authentication.change', {authenticated: true});
+      this.broker.trigger('onAuthenticationChange', {authenticated: true});
       this.router.navigate('/');
     }).catch((response) => {
       console.log('error', response);
